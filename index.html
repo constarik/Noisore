@@ -39,6 +39,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 .cell.h4{background:#88784e;color:#fff;border:2px solid #9a8456;}.cell.h3{background:#92865c;color:#fff;border:2px solid #a49264;}
 .cell.h2{background:#a89878;color:#1a1a2e;border:2px solid #b8a888;}.cell.h1{background:#c0b090;color:#1a1a2e;border:2px solid #d0c0a0;}
 .cell.h0{background:#1a1a2e;color:transparent;border:2px solid #2a2a4a;}
+.cell .power-tag{position:absolute;bottom:1px;right:2px;font-size:10px;font-weight:700;line-height:1;z-index:5;text-shadow:0 0 3px rgba(0,0,0,0.9);}
 .cell.water-hit{animation:waterHit 0.25s ease;}
 @keyframes waterHit{0%{box-shadow:inset 0 0 0 0 rgba(245,158,11,0.5);}50%{box-shadow:inset 0 0 15px 5px rgba(245,158,11,0.5);}100%{box-shadow:inset 0 0 0 0 rgba(245,158,11,0);}}
 .cell.washed{animation:washAway 0.35s ease;}
@@ -91,23 +92,23 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
     </div>
     <div class="payout-area" id="payout-area"></div>
     <div class="info-bar">
-        <div>6x5 · stone 1-10 · drop 1-10</div>
-        <div>1 drop = 1 USDT · 95% to pool</div>
+        <div>6x5 - stone 1-10 - drop 1-10</div>
+        <div>1 drop = 1 USDT - 95% to pool</div>
     </div>
 </div>
 <div class="channel-flash" id="channel-flash"></div>
 <script>
-const COLS=6,ROWS=5,MAX_H=10,MAX_DROP=10,DROP_COST=1,POOL_RATE=0.95,ANIM_DELAY=200;
-const BOTS=[{name:'Axel',color:'#4ad'},{name:'Kira',color:'#d4a'}];
-let grid=[],pool=0,balance=100,dropNum=0,roundNum=1,animating=false,currentDrop=0;
+var COLS=6,ROWS=5,MAX_H=10,MAX_DROP=10,DROP_COST=1,POOL_RATE=0.95,ANIM_DELAY=200;
+var BOTS=[{name:'Axel',color:'#4ad'},{name:'Kira',color:'#d4a'}];
+var grid=[],pool=0,balance=100,dropNum=0,roundNum=1,animating=false,currentDrop=0;
 
 function randH(){return 1+Math.floor(Math.random()*MAX_H);}
 function randDrop(){return 1+Math.floor(Math.random()*MAX_DROP);}
-function initGrid(){grid=[];for(let r=0;r<ROWS;r++){grid[r]=[];for(let c=0;c<COLS;c++)grid[r][c]=randH();}}
+function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
 
 function newRound(){
     document.getElementById('win-overlay').classList.remove('show');
-    initGrid();pool=0;dropNum=0;roundNum++;
+    clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;
     updateUI();renderGrid();rollDrop();setColBtnsDisabled(false);
 }
 
@@ -117,9 +118,9 @@ function initGame(){
 }
 
 function renderGrid(){
-    const el=document.getElementById('grid');el.innerHTML='';
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
-        const cell=document.createElement('div');
+    var el=document.getElementById('grid');el.innerHTML='';
+    for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){
+        var cell=document.createElement('div');
         cell.className='cell h'+grid[r][c];cell.id='cell-'+r+'-'+c;
         cell.textContent=grid[r][c]>0?grid[r][c]:'';
         el.appendChild(cell);
@@ -127,15 +128,29 @@ function renderGrid(){
 }
 
 function updateCell(r,c){
-    const cell=document.getElementById('cell-'+r+'-'+c);
+    var cell=document.getElementById('cell-'+r+'-'+c);
     cell.className='cell h'+grid[r][c];
     cell.textContent=grid[r][c]>0?grid[r][c]:'';
 }
 
+function showPowerTag(r,c,remaining,color){
+    var cell=document.getElementById('cell-'+r+'-'+c);
+    var old=cell.querySelector('.power-tag');if(old)old.remove();
+    if(remaining>=0){
+        var tag=document.createElement('span');tag.className='power-tag';
+        tag.style.color=color;tag.textContent=remaining;
+        cell.appendChild(tag);
+    }
+}
+
+function clearPowerTags(){
+    document.querySelectorAll('.power-tag').forEach(function(el){el.remove();});
+}
+
 function renderColBtns(){
-    const el=document.getElementById('col-btns');el.innerHTML='';
-    for(let c=0;c<COLS;c++){
-        const btn=document.createElement('div');btn.className='col-btn';
+    var el=document.getElementById('col-btns');el.innerHTML='';
+    for(var c=0;c<COLS;c++){
+        var btn=document.createElement('div');btn.className='col-btn';
         btn.textContent='\uD83D\uDCA7';btn.onclick=(function(col){return function(){playDrop(col);};})(c);
         el.appendChild(btn);
     }
@@ -150,7 +165,7 @@ function updateUI(){
 
 function rollDrop(){
     currentDrop=randDrop();
-    const el=document.getElementById('drop-power');
+    var el=document.getElementById('drop-power');
     el.textContent=currentDrop;el.className='drop-power-value dp'+currentDrop;
     document.getElementById('drop-who').innerHTML='YOUR<br>DROP';
     document.getElementById('drop-who').style.color='#71717a';
@@ -161,9 +176,9 @@ function rollDrop(){
 function showDropInfo(who,color,power,remaining,spent){
     document.getElementById('drop-who').innerHTML=who;
     document.getElementById('drop-who').style.color=color;
-    const dpEl=document.getElementById('drop-power');
+    var dpEl=document.getElementById('drop-power');
     dpEl.textContent=power;dpEl.className='drop-power-value dp'+power;
-    const remEl=document.getElementById('drop-remaining');
+    var remEl=document.getElementById('drop-remaining');
     if(spent>0) remEl.innerHTML='\u2212'+spent+' \u2192 <span class="rem">'+remaining+'</span>';
     else remEl.innerHTML='<span class="rem">'+remaining+'</span>';
 }
@@ -186,19 +201,6 @@ function chooseNext(row,col){
     return nz[nz.length-1].c;
 }
 
-function hasChannel(){
-    for(var c=0;c<COLS;c++){if(grid[0][c]===0&&dfs(0,c,{}))return true;}
-    return false;
-}
-
-function dfs(row,col,vis){
-    var k=row+'-'+col;if(vis[k])return false;vis[k]=true;
-    if(grid[row][col]!==0)return false;
-    if(row===ROWS-1)return true;
-    for(var dc=-1;dc<=1;dc++){var nc=col+dc;if(nc>=0&&nc<COLS&&dfs(row+1,nc,vis))return true;}
-    return false;
-}
-
 function findChannelCells(){
     var ch={};
     for(var c=0;c<COLS;c++){if(grid[0][c]===0){var path=[];if(dfsCollect(0,c,{},path)){for(var i=0;i<path.length;i++)ch[path[i]]=true;}}}
@@ -218,12 +220,14 @@ function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
 
 async function animateDrop(col,dropPower,who,color){
     var power=dropPower,c=col,washed=0;
+    clearPowerTags();
     showDropInfo(who,color,dropPower,power,0);
     for(var row=0;row<ROWS&&power>0;row++){
         var cell=document.getElementById('cell-'+row+'-'+c);
         cell.classList.remove('water-hit');void cell.offsetWidth;cell.classList.add('water-hit');
         if(grid[row][c]===0){
             showDropInfo(who,color,dropPower,power,0);
+            showPowerTag(row,c,power,color);
             await sleep(ANIM_DELAY/2);
             if(row<ROWS-1)c=chooseNext(row,c);
             continue;
@@ -233,9 +237,11 @@ async function animateDrop(col,dropPower,who,color){
             power-=stoneH;grid[row][c]=0;washed++;
             updateCell(row,c);cell.classList.add('washed');
             showDropInfo(who,color,dropPower,power,stoneH);
+            showPowerTag(row,c,power,color);
         } else {
             grid[row][c]-=power;
             showDropInfo(who,color,dropPower,0,power);
+            showPowerTag(row,c,0,color);
             power=0;
             updateCell(row,c);
         }
@@ -270,21 +276,17 @@ async function playDrop(startCol){
         document.getElementById('payout-area').innerHTML='<span style="color:#f55">insufficient balance</span>';
         animating=false;setColBtnsDisabled(false);return;
     }
-    balance-=DROP_COST;pool+=DROP_COST*POOL_RATE;dropNum++;updateUI();
-    var washed=await animateDrop(startCol,currentDrop,'YOU','#f59e0b');
-    if(washed>0)document.getElementById('payout-area').innerHTML='<span style="color:#f59e0b">'+washed+' stone'+(washed>1?'s':'')+' eroded</span>';
-    else document.getElementById('payout-area').innerHTML='<span style="color:#555">no erosion</span>';
-    if(await checkWin('YOU','#f59e0b'))return;
-
-    // Bot turns
-    for(var b=0;b<BOTS.length;b++){
-        await sleep(400);
-        var bot=BOTS[b];var dp=randDrop();var col=Math.floor(Math.random()*COLS);
+    var players=[{name:'YOU',color:'#f59e0b',col:startCol,dp:currentDrop,isPlayer:true}];
+    for(var b=0;b<BOTS.length;b++)players.push({name:BOTS[b].name,color:BOTS[b].color,col:Math.floor(Math.random()*COLS),dp:randDrop(),isPlayer:false});
+    for(var i=players.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=players[i];players[i]=players[j];players[j]=tmp;}
+    for(var t=0;t<players.length;t++){
+        var p=players[t];
+        if(p.isPlayer)balance-=DROP_COST;
         pool+=DROP_COST*POOL_RATE;dropNum++;updateUI();
-        await animateDrop(col,dp,bot.name,bot.color);
-        if(await checkWin(bot.name,bot.color))return;
+        await animateDrop(p.col,p.dp,p.name,p.color);
+        if(await checkWin(p.name,p.color))return;
+        if(t<players.length-1)await sleep(400);
     }
-
     rollDrop();animating=false;setColBtnsDisabled(false);
 }
 

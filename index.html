@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NOISORE v0.6</title>
+<title>NOISORE v0.7</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -73,7 +73,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 <body>
 <div id="game-container">
     <h1>NOISORE</h1>
-    <div class="version">v0.6</div>
+    <div class="version">v0.7</div>
     <div class="stats">
         <div>BALANCE <span class="val" id="balance">100.00</span></div>
         <div>DROPS <span class="val" id="drop-num">0</span></div>
@@ -314,17 +314,19 @@ async function checkWin(winner,winColor){
     if(keys.length===0)return false;
     for(var i=0;i<keys.length;i++){
         var parts=keys[i].split('-');
-        document.getElementById('cell-'+parts[0]+'-'+parts[1]).classList.add('channel-glow');
+        var cell=document.getElementById('cell-'+parts[0]+'-'+parts[1]);
+        cell.style.background=winColor;
+        cell.style.border='3px solid '+winColor;
+        cell.style.boxShadow='0 0 16px '+winColor;
+        cell.textContent='';
     }
     var flash=document.getElementById('channel-flash');flash.classList.add('show');
     await sleep(1500);flash.classList.remove('show');
     if(winner==='YOU')balance+=pool;
-    document.getElementById('win-amount').textContent=pool.toFixed(2);
-    var whoEl=document.getElementById('win-who');
-    whoEl.textContent=winner+(winner==='YOU'?' WIN':' WINS');
-    whoEl.style.color=winColor;
-    document.getElementById('win-overlay').classList.add('show');
-    updateUI();animating=false;setColBtnsDisabled(true);
+    updateUI();
+    var label=winner+(winner==='YOU'?' WIN':' WINS');
+    document.getElementById('payout-area').innerHTML='<div style="margin-top:4px"><span style="font-family:Archivo Black,sans-serif;font-size:18px;color:'+winColor+'">'+label+'</span><br><span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">'+pool.toFixed(2)+' USDT</span><br><button onclick="newRound()" style="margin-top:10px;background:'+winColor+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT ROUND</button></div>';
+    animating=false;setColBtnsDisabled(true);
     return true;
 }
 

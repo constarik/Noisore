@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>РУССЛО — Мультиплеерная skill-игра</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;700&display=swap');
+
+:root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --accent: #3b82f6;
+    --accent2: #f59e0b;
+    --text: #e4e4e7;
+    --muted: #a1a1aa;
+    --border: #1e1e2e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+.hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 60px 0;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -300px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(59,130,246,0.3);
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+    animation: fadeIn 0.8s ease both;
+}
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 7vw, 72px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    animation: fadeIn 0.8s ease 0.1s both;
+}
+
+h1 span {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    font-size: 19px;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 560px;
+    margin-bottom: 40px;
+    animation: fadeIn 0.8s ease 0.2s both;
+}
+
+.hero-stats {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    animation: fadeIn 0.8s ease 0.3s both;
+}
+
+.stat { display: flex; flex-direction: column; }
+
+.stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent2);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+section {
+    padding: 80px 0;
+    border-top: 1px solid var(--border);
+}
+
+h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    letter-spacing: -1px;
+}
+
+h2 .num {
+    color: var(--accent);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+p { color: #d4d4d8; font-size: 16px; margin-bottom: 16px; max-width: 600px; }
+p strong { color: var(--text); font-weight: 500; }
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.3s;
+}
+
+.card:hover { border-color: rgba(59,130,246,0.3); }
+.card-icon { font-size: 28px; margin-bottom: 12px; }
+.card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.card p { font-size: 14px; margin-bottom: 0; color: var(--muted); }
+
+.flow { display: flex; flex-direction: column; gap: 24px; margin-top: 32px; }
+
+.flow-step { display: flex; gap: 20px; align-items: flex-start; }
+
+.flow-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 40px;
+    line-height: 1;
+    padding-top: 4px;
+}
+
+.flow-text h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.flow-text p { font-size: 14px; margin-bottom: 0; }
+
+.cta-section { text-align: center; padding: 100px 0; }
+.cta-section h2 { font-size: 44px; margin-bottom: 16px; }
+.cta-section p { max-width: 100%; text-align: center; margin: 0 auto 40px; }
+
+.cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent), #2563eb);
+    color: #fff;
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59,130,246,0.3);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+.proof-bar {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.proof-item { display: flex; align-items: center; gap: 10px; }
+.proof-check { color: #22c55e; font-size: 18px; }
+.proof-item span { font-size: 14px; color: var(--muted); }
+
+footer {
+    padding: 40px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .hero-stats { gap: 24px; }
+    .stat-value { font-size: 28px; }
+    section { padding: 60px 0; }
+    .cta-section h2 { font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="hero">
+        <div class="tag">Мультиплеер · Скилл · Provably Fair</div>
+        <h1>Вода камень<br>точит.<br><span>Мастерство не прольёшь.</span></h1>
+        <p class="subtitle">
+            РУССЛО — мультиплеерная аркада где стратегия 
+            побеждает случай до 3:1. Общий грид, банк победителю. 
+            Покер на камнях. Подтверждено 50,000 симуляциями.
+        </p>
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-value">до 73%</div>
+                <div class="stat-label">Winrate против рандома (1v1)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">2–12</div>
+                <div class="stat-label">Игроков за столом</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">16–37</div>
+                <div class="stat-label">Капель до джекпота</div>
+            </div>
+        </div>
+    </div>
+
+    <section>
+        <h2><span class="num">01 — ИГРА</span>Как это работает</h2>
+        <p>
+            Общая сетка из камней. Каждая ячейка — прочность от 1 до 10. 
+            Ты получаешь каплю со случайной силой (1–10) — <strong>ты видишь силу до выбора колонки</strong>. 
+            Выбираешь столбец. Капля пробивает камни, теряя силу на каждом.
+        </p>
+        <p>
+            Все бьют по одному гриду. Ты видишь что подточили другие.
+            <strong>Пробил русло сверху донизу — забираешь весь банк.</strong>
+            Грид обновляется, новый раунд.
+        </p>
+        <p>
+            Тяжёлая капля в подготовленную колонку = прорыв. 
+            Лёгкая капля в свежий камень = деньги на ветер. 
+            <strong>Именно это решение имеет значение.</strong>
+        </p>
+
+        <div class="cards">
+            <div class="card">
+                <div class="card-icon">💧</div>
+                <h3>Видишь до выбора</h3>
+                <p>Сила капли известна до выбора колонки. Информация создаёт стратегию.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🏆</div>
+                <h3>Русло = Джекпот</h3>
+                <p>Пробил путь сверху вниз — забираешь весь призовой пул. Один победитель за раунд.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🚪</div>
+                <h3>Фолд в любой момент</h3>
+                <p>Уходи после первой капли. Твоя ставка остаётся в пуле. Остаёшься = риск. Уходишь = подарок другим.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2><span class="num">02 — ДОКАЗАТЕЛЬСТВО</span>Скилл реален</h2>
+        <p>
+            50,000 игр на сетке 6×5. 
+            <strong>Стратег выигрывает банк до 73% раз</strong> против случайного выбора — 
+            преимущество 3:1. Не шум. Не везение. Проверено.
+        </p>
+        <p>
+            За столом из 3 игроков, стратег забирает <strong>52% банков</strong> 
+            вместо честных 33%. 
+            <strong>Твой выбор колонки определяет кто заберёт деньги.</strong>
+        </p>
+
+        <div class="proof-bar">
+            <div class="proof-item">
+                <span class="proof-check">✓</span>
+                <span>50,000 игр Monte Carlo</span>
+            </div>
+            <div class="proof-item">
+                <span class="proof-check">✓</span>
+                <span>До 73% winrate 1v1</span>
+            </div>
+            <div class="proof-item">
+                <span class="proof-check">✓</span>
+                <span>52% банков за столом на 3</span>
+            </div>
+            <div class="proof-item">
+                <span class="proof-check">✓</span>
+                <span><a href="https://medium.com/@constr" target="_blank" style="color:#22c55e;text-decoration:none;">Registrar Protocol</a> (χ²/dof = 0.976)</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2><span class="num">03 — МОДЕЛЬ</span>Адаптивный мультиплеер</h2>
+
+        <div class="flow">
+            <div class="flow-step">
+                <div class="flow-num">1</div>
+                <div class="flow-text">
+                    <h3>Купи каплю</h3>
+                    <p>Игрок платит X за каплю. 95% идёт в призовой пул, 5% рейк. В демо — оплата за каплю.</p>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">2</div>
+                <div class="flow-text">
+                    <h3>Грид масштабируется</h3>
+                    <p>1–4 игрока → сетка 6×5 (~16 капель до русла). 5–8 → 6×6 (~24). 9–12 → 6×8 (~37). Больше игроков = глубже грид = жирнее пул.</p>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">3</div>
+                <div class="flow-text">
+                    <h3>Русло = забираешь банк</h3>
+                    <p>Первый кто пробил путь сверху вниз — забирает весь пул. Грид обновляется, новый цикл.</p>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">4</div>
+                <div class="flow-text">
+                    <h3>Два пути к победе</h3>
+                    <p>Пробей русло — забери банк. Или пересиди всех. Все сфолдили? Последний за столом забирает пот. Русло не нужно. Чистая покерная логика на каменном столе.</p>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">5</div>
+                <div class="flow-text">
+                    <h3>Фолд или бой</h3>
+                    <p>Уходи после первой капли — ставка остаётся в пуле. Глубина грида не уменьшается. Читай стол: дешевле долбить или ждать пока другие уйдут?</p>
+                </div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">6</div>
+                <div class="flow-text">
+                    <h3>Две модели оплаты (опционально)</h3>
+                    <p>За каплю: покер-стиль, платишь за каждый ход, фолд когда хочешь. За раунд: турнирный стиль, фиксированный buy-in, капли бесплатные. Один грид, одна механика, разный темп.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cards" style="margin-top:32px;">
+            <div class="card">
+                <h3 style="color:#f59e0b;">6×5 · 1–4 игрока</h3>
+                <p>Медиана 16 капель до русла. Стратег забирает 52% банков вместо честных 33%. Быстрые раунды.</p>
+            </div>
+            <div class="card">
+                <h3 style="color:#f59e0b;">6×6 · 5–8 игроков</h3>
+                <p>Медиана 24 капли. Стратег забирает 30% вместо честных 20%. Глубже грид, жирнее пул.</p>
+            </div>
+            <div class="card">
+                <h3 style="color:#f59e0b;">6×8 · 9–12 игроков</h3>
+                <p>Медиана 37 капель. Стратег забирает 11% вместо честных 8%. Марафонские раунды, огромные пулы.</p>
+            </div>
+        </div>
+        <p style="margin-top:16px;font-size:13px;color:#555;">Все цифры: 50,000 игр Monte Carlo, камни 1–10, капли 1–10. Скилл = стратегия «слабейшая колонка» против рандома.</p>
+    </section>
+
+    <section>
+        <h2><span class="num">04 — ЧТО ГОТОВО</span>Построено, не нарисовано</h2>
+        <p>
+            Это не белая бумага. Движок существует, работает в браузере, 
+            играть можно прямо сейчас.
+        </p>
+
+        <div class="cards">
+            <div class="card">
+                <div class="card-icon">🎮</div>
+                <h3>Рабочее демо</h3>
+                <p>Пул-модель с ботами-противниками, система баланса, определение русла. Играбельно.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">📊</div>
+                <h3>Математика проверена</h3>
+                <p>50,000 симуляций Monte Carlo. Скилл-преимущество квантифицировано. Экономика пула смоделирована для 1–12 игроков.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔐</div>
+                <h3>Registrar Protocol</h3>
+                <p>Provably fair движок. 1М-сессий тест на детерминизм пройден (χ²/dof = 0.976). <a href="https://medium.com/@constr" target="_blank" style="color:var(--accent);">Опубликовано на Medium</a>.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🧮</div>
+                <h3>15 лет в slot math</h3>
+                <p>Далеко за сотню production-тайтлов. Ветеран iGaming, а не первый проект.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2><span class="num">05 — ИГРАТЬ</span>Попробуй демо</h2>
+        <p>
+            Прототип с пулом и двумя ботами-противниками. Оплата за каплю, общий грид, 
+            определение русла, система баланса. Играй сейчас.
+        </p>
+        <div style="margin-top:32px;">
+            <a href="https://noisore.uncloned.work" class="btn btn-primary" target="_blank" style="font-size:18px;padding:18px 48px;">
+                ▶ Играть в Noisore
+            </a>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h2>Ищу партнёра<br>для настоящей игры</h2>
+        <p>
+            Движок построен. Математика доказана. Мультиплеерная модель спроектирована. 
+            Нужен партнёр с аудиторией и амбициями.
+        </p>
+        <div class="cta-buttons">
+            <a href="/cdn-cgi/l/email-protection#85e6eaebf6f1f7a3a6b3b1bee2e8e4ece9abe6eae8" class="btn btn-primary">
+                constr&#64;gmail.com
+            </a>
+            <a href="https://t.me/constrik" class="btn btn-secondary" target="_blank">
+                @constrik в Telegram
+            </a>
+        </div>
+    </section>
+
+</div>
+
+<footer>
+    <div class="container">
+        <a href="https://uncloned.work" target="_blank">UNCLONED MATH</a> — Оригинальная Игровая Математика · 
+        <a href="https://me

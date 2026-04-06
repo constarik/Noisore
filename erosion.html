@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>EROSION v1.2</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#f0ebe3;color:#2a2520;font-family:'JetBrains Mono',monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow:hidden;}
+#game-container{width:400px;padding:16px;position:relative;}
+h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#2574b5;text-align:center;letter-spacing:4px;margin-bottom:2px;}
+.version{text-align:center;font-size:10px;color:#998;margin-bottom:10px;}
+.stats{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:#776;}
+.stats .val{color:#2a2520;font-weight:700;}
+.drop-power-area{text-align:center;margin-bottom:8px;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.drop-power-label{font-size:12px;color:#776;}
+.drop-power-value{font-family:'Archivo Black',sans-serif;font-size:32px;color:#2574b5;line-height:1;min-width:44px;text-align:center;}
+.drop-power-value.power-1{color:#b0a090;}.drop-power-value.power-2{color:#8aaa70;}.drop-power-value.power-3{color:#50a0d0;}.drop-power-value.power-4{color:#c07020;}.drop-power-value.power-5{color:#d03030;}.drop-power-value.power-6{color:#d02060;}.drop-power-value.power-7{color:#a020d0;}.drop-power-value.power-8{color:#6030e0;}.drop-power-value.power-9{color:#2040f0;}.drop-power-value.power-10{color:#e01010;font-size:36px;text-shadow:0 0 12px rgba(224,16,16,0.4);}
+.drop-power-drops{display:flex;gap:4px;align-items:center;}
+.mini-drop{width:10px;height:14px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:#2574b5;}
+.mini-drop.bonus{background:#d4822a;}
+.col-selectors{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:4px;padding:0 2px;}
+.col-btn{background:#d0e8f8;border:2px solid #8fc4e8;border-radius:6px 6px 0 0;color:#2574b5;font-size:18px;font-weight:700;padding:8px 0;cursor:pointer;transition:all 0.15s;text-align:center;}
+.col-btn:hover{background:#a8d4f0;border-color:#2574b5;transform:translateY(-2px);box-shadow:0 4px 12px rgba(37,116,181,0.2);}
+.col-btn:active{transform:translateY(0);}.col-btn.disabled{opacity:0.3;pointer-events:none;}
+.grid-wrap{padding:3px;background:#d8d0c4;border-radius:6px;}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;}
+.cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;transition:all 0.15s;position:relative;overflow:hidden;}
+.cell.h5{background:#8b7355;color:#fff;border:2px solid #7a6348;}.cell.h4{background:#a08868;color:#fff;border:2px solid #8f7858;}.cell.h3{background:#b89e7a;color:#fff;border:2px solid #a88e6a;}.cell.h2{background:#ccb494;color:#4a3a28;border:2px solid #bca484;}.cell.h1{background:#e0ccaa;color:#6a5438;border:2px solid #d0bc9a;}.cell.h0{background:#e8f4fc;color:transparent;border:2px solid #c8dce8;}
+.cell .orig-badge{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 20px 20px 0;border-color:transparent rgba(0,0,0,0.15) transparent transparent;}
+.cell .orig-num{position:absolute;top:1px;right:2px;font-size:9px;font-weight:700;color:rgba(255,255,255,0.85);line-height:1;z-index:1;}
+.cell.h0 .orig-badge{border-color:transparent rgba(37,116,181,0.2) transparent transparent;}.cell.h0 .orig-num{color:rgba(37,116,181,0.5);}
+.cell.drop-stopped::after{content:'\2715';position:absolute;font-size:10px;bottom:1px;left:2px;color:rgba(200,50,50,0.6);}
+.cell.water-hit{animation:waterHit 0.25s ease;}
+@keyframes waterHit{0%{box-shadow:inset 0 0 0 0 rgba(37,116,181,0.5);}50%{box-shadow:inset 0 0 15px 5px rgba(37,116,181,0.5);}100%{box-shadow:inset 0 0 0 0 rgba(37,116,181,0);}}
+.cell.washed{animation:washAway 0.35s ease;}
+@keyframes washAway{0%{transform:scale(1);opacity:1;}50%{transform:scale(1.15);opacity:0.6;background:#6abaed;}100%{transform:scale(1);opacity:1;}}
+.cell.refill{animation:refillDrop 0.3s ease;}
+@keyframes refillDrop{0%{transform:translateY(-20px);opacity:0;}100%{transform:translateY(0);opacity:1;}}
+.cell.channel-glow{background:#e87a20 !important;border:3px solid #ff9900 !important;box-shadow:0 0 16px rgba(255,153,0,0.8) !important;animation:chPulse 0.4s ease infinite alternate !important;overflow:visible !important;z-index:10;}
+.cell.channel-glow .main-num{display:none;}
+@keyframes chPulse{0%{box-shadow:0 0 12px rgba(255,153,0,0.6);}100%{box-shadow:0 0 24px rgba(255,153,0,1.0);}}
+.payout-area{min-height:44px;margin-top:10px;text-align:center;}
+.payout-show{font-family:'Archivo Black',sans-serif;font-size:24px;color:#2574b5;animation:payPop 0.5s ease;}
+.payout-show.zero{font-size:16px;color:#bba;}
+@keyframes payPop{0%{transform:scale(0.5);opacity:0;}60%{transform:scale(1.2);}100%{transform:scale(1);opacity:1;}}
+.payout-formula{font-size:11px;color:#998;margin-top:2px;}
+.info-bar{display:flex;justify-content:space-between;margin-top:12px;font-size:11px;color:#998;border-top:1px solid #d8d0c4;padding-top:8px;}
+.channel-flash{position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center,rgba(232,122,32,0.15) 0%,transparent 70%);pointer-events:none;opacity:0;transition:opacity 0.5s;z-index:100;}
+.channel-flash.show{opacity:1;}
+.new-game-btn{display:block;margin:12px auto 0;background:#d0e8f8;border:2px solid #2574b5;color:#2574b5;font-family:'Archivo Black',sans-serif;font-size:13px;padding:8px 24px;border-radius:8px;cursor:pointer;transition:all 0.15s;letter-spacing:2px;}
+.new-game-btn:hover{background:#a8d4f0;transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<div id="game-container">
+    <h1>EROSION</h1>
+    <div class="version">v1.2 — hidden bonus</div>
+    <div class="stats">
+        <div>SCORE <span class="val" id="score">0</span></div>
+        <div>SPIN <span class="val" id="spin-num">0</span></div>
+        <div>DROPS <span class="val" id="drops-count">1</span></div>
+    </div>
+    <div class="drop-power-area" id="drop-power-area">
+        <div class="drop-power-label">DROP<br>POWER</div>
+        <div class="drop-power-value" id="drop-power">—</div>
+        <div class="drop-power-drops" id="drop-drops"></div>
+    </div>
+    <div class="col-selectors" id="col-btns"></div>
+    <div class="grid-wrap"><div class="grid" id="grid"></div></div>
+    <div class="payout-area" id="payout-area"></div>
+    <button class="new-game-btn" id="new-game-btn" onclick="initGame()">NEW GRID</button>
+    <div class="info-bar">
+        <div>6×5 · stone 1–5 · drop 1–10</div>
+        <div>payout = (Σ)² · channel ×2</div>
+    </div>
+</div>
+<div class="channel-flash" id="channel-flash"></div>
+<script>
+const COLS=6,ROWS=5;const STONE_WEIGHTS=[0,30,25,20,15,10];const MAX_DROP=10;const ANIM_DELAY=180;
+let grid=[],origGrid=[];let score=0,spinNum=0;let bonusDrops=0;let animating=false;let currentDropPower=0;let dropsQueue=[];
+function randHardness(){const t=STONE_WEIGHTS.slice(1).reduce((a,b)=>a+b,0);let r=Math.random()*t;for(let h=1;h<=5;h++){r-=STONE_WEIGHTS[h];if(r<=0)return h;}return 5;}
+function randDrop(){return 1+Math.floor(Math.random()*MAX_DROP);}
+function initGame(){grid=[];origGrid=[];for(let r=0;r<ROWS;r++){grid[r]=[];origGrid[r]=[];for(let c=0;c<COLS;c++){const h=randHardness();grid[r][c]=h;origGrid[r][c]=h;}}score=0;spinNum=0;bonusDrops=0;animating=false;updateUI();renderGrid();renderColBtns();rollNewDrops();}
+function renderGrid(){const el=document.getElementById('grid');el.innerHTML='';for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){el.appendChild(makeCell(r,c));}}}
+function makeCell(r,c){const cell=document.createElement('div');cell.className=`cell h${grid[r][c]}`;cell.id=`cell-${r}-${c}`;const mn=document.createElement('span');mn.className='main-num';mn.textContent=grid[r][c]>0?grid[r][c]:'';cell.appendChild(mn);const badge=document.createElement('div');badge.className='orig-badge';cell.appendChild(badge);const on=document.createElement('div');on.className='orig-num';on.textContent=origGrid[r][c];cell.appendChild(on);return cell;}
+function updateCell(r,c){const cell=document.getElementById(`cell-${r}-${c}`);const hadGlow=cell.classList.contains('channel-glow');cell.className=`cell h${grid[r][c]}`;if(hadGlow)cell.classList.add('channel-glow');cell.innerHTML='';const mn=document.createElement('span');mn.className='main-num';mn.textContent=grid[r][c]>0?grid[r][c]:'';cell.appendChild(mn);const badge=document.createElement('div');badge.className='orig-badge';cell.appendChild(badge);const on=document.createElement('div');on.className='orig-num';on.textContent=origGrid[r][c];cell.appendChild(on);}
+function renderColBtns(){const el=document.getElementById('col-btns');el.innerHTML='';for(let c=0;c<COLS;c++){const btn=document.createElement('div');btn.className='col-btn';btn.textContent='\uD83D\uDCA7';btn.onclick=()=>playDrop(c);el.appendChild(btn);}}
+function updateUI(){document.getElementById('score').textContent=score;document.getElementById('spin-num').textContent=spinNum;document.getElementById('drops-count').textContent=1+bonusDrops;}
+function rollNewDrops(){const total=1+bonusDrops;dropsQueue=[];for(let i=0;i<total;i++)dropsQueue.push(randDrop());showDropPower(0);document.getElementById('payout-area').innerHTML='<span style="color:#bba">choose a column \u2191</span>';}
+function showDropPower(activeIndex){const pw=dropsQueue[activeIndex]||0;const el=document.getElementById('drop-power');if(activeIndex===0){el.textContent=pw>0?pw:'\u2014';el.className='drop-power-value'+(pw>0?` power-${pw}`:'');}else{el.textContent=pw;el.className='drop-power-value power-'+pw;}const dd=document.getElementById('drop-drops');dd.innerHTML='';for(let i=0;i<dropsQueue.length;i++){const d=document.createElement('div');d.className='mini-drop'+(i>=1?' bonus':'');if(i<activeIndex){d.style.opacity='0.15';}else if(i===activeIndex){d.style.opacity='1';d.style.boxShadow='0 0 6px #2574b5';}else{d.style.opacity='0.4';d.title='?';}dd.appendChild(d);}}
+function setColBtnsDisabled(dis){document.querySelectorAll('.col-btn').forEach(b=>{if(dis)b.classList.add('disabled');else b.classList.remove('disabled');});}
+function chooseNext(row,col){const cands=[];for(let dc=-1;dc<=1;dc++){const nc=col+dc;if(nc>=0&&nc<COLS)cands.push({c:nc,h:grid[row+1][nc]});}const nz=cands.filter(x=>x.h>0);if(nz.length===0)return cands[Math.floor(Math.random()*cands.length)].c;const w=nz.map(x=>1/x.h);const tw=w.reduce((a,b)=>a+b,0);let r=Math.random()*tw;for(let i=0;i<nz.length;i++){r-=w[i];if(r<=0)return nz[i].c;}return nz[nz.length-1].c;}
+async function playDrop(startCol){if(animating)return;animating=true;setColBtnsDisabled(true);spinNum++;let allWashed=[];let allChannelCells=new Set();let channelFound=false;let newBonusDrops=0;for(let d=0;d<dropsQueue.length;d++){const dropPower=dropsQueue[d];showDropPower(d);if(d>0)await sleep(400);let power=dropPower;let col=startCol;let washedThisDrop=[];for(let row=0;row<ROWS&&power>0;row++){const cell=document.getElementById(`cell-${row}-${col}`);cell.classList.remove('water-hit');void cell.offsetWidth;cell.classList.add('water-hit');if(grid[row][col]===0){await sleep(ANIM_DELAY/2);if(row<ROWS-1)col=chooseNext(row,col);continue;}const stoneH=grid[row][col];const origH=origGrid[row][col];if(power>=stoneH){power-=stoneH;grid[row][col]=0;washedThisDrop.push(origH);allWashed.push(origH);updateCell(row,col);cell.classList.add('washed');}else{grid[row][col]-=power;power=0;updateCell(row,col);cell.classList.add('drop-stopped');}await sleep(ANIM_DELAY);if(power>0&&row<ROWS-1){col=chooseNext(row,col);}}const newCh=findChannelCells();for(const key of newCh){if(!allChannelCells.has(key)){allChannelCells.add(key);const[r,c]=key.split('-').map(Number);document.getElementById(`cell-${r}-${c}`).classList.add('channel-glow');channelFound=true;}}if(d<dropsQueue.length-1)await sleep(200);}if(allWashed.length>0){const sum=allWashed.reduce((a,b)=>a+b,0);let payout=sum*sum;if(channelFound)payout*=2;score+=payout;showPayout(payout,allWashed,channelFound);}else{showPayout(0,[],false);}if(channelFound){newBonusDrops++;flashChannel();await sleep(2000);for(const key of allChannelCells){const[r,c]=key.split('-').map(Number);document.getElementById(`cell-${r}-${c}`).classList.remove('channel-glow');}await refillCells(allChannelCells);}document.querySelectorAll('.drop-stopped').forEach(el=>el.classList.remove('drop-stopped'));bonusDrops=newBonusDrops;updateUI();rollNewDrops();animating=false;setColBtnsDisabled(false);}
+function findChannelCells(){const ch=new Set();for(let c=0;c<COLS;c++){if(grid[0][c]===0){const path=[];if(dfsCollect(0,c,new Set(),path))for(const key of path)ch.add(key);}}return ch;}
+function dfsCollect(row,col,visited,path){const key=`${row}-${col}`;if(visited.has(key))return false;visited.add(key);if(grid[row][col]!==0)return false;path.push(key);if(row===ROWS-1)return true;let found=false;for(let dc=-1;dc<=1;dc++){const nc=col+dc;if(nc>=0&&nc<COLS){const before=path.length;if(dfsCollect(row+1,nc,visited,path))found=true;else path.length=before;}}if(!found)path.pop();return found;}
+async function refillCells(cellSet){for(const key of cellSet){const[r,c]=key.split('-').map(Number);const h=randHardness();grid[r][c]=h;origGrid[r][c]=h;const cell=document.getElementById(`cell-${r}-${c}`);cell.classList.add('refill');updateCell(r,c);await sleep(60);}}
+function showPayout(payout,washed,isCh){const el=document.getElementById('payout-area');if(payout===0){el.innerHTML='<div class="payout-show zero">no erosion</div>';}else{const sum=washed.reduce((a,b)=>a+b,0);const base=sum*sum;const f=isCh?`(${washed.join('+')})² × 2 = ${base} × 2 = ${payout}`:`(${washed.join('+')})² = ${sum}² = ${payout}`;el.innerHTML=`<div class="payout-show">+${payout}</div><div class="payout-formula">${f}</div>`;}}
+function flashChannel(){const el=document.getElementById('channel-flash');el.classList.add('show');document.getElementById('payout-area').innerHTML+='<div style="color:#d4822a;font-size:13px;margin-top:4px">\u26A1 CHANNEL \u2192 +1 bonus drop</div>';setTimeout(()=>el.classList.remove('show'),1500);}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+initGame();
+</script>
+</body>
+</html>

@@ -64,6 +64,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
     <div class="info-bar"><div>6x5 - stone 1-10 - drop 1-10</div><div>1 drop = 1 USDT - 95% to pool</div></div>
 </div>
 <div class="channel-flash" id="channel-flash"></div>
+<script src="engine.js"></script>
 <script>
 var COLS=6,ROWS=5,MAX_H=10,MAX_DROP=10,DROP_COST=1,POOL_RATE=0.95,ANIM_DELAY=200;
 var BOTS=[{name:'Axel',color:'#4ad',smart:false},{name:'Kira',color:'#d4a',smart:true}];
@@ -77,7 +78,6 @@ var TAG_POS=[
     {bottom:'30%',left:'2px'},{bottom:'30%',right:'2px'}
 ];
 function randH(){return 1+Math.floor(Math.random()*MAX_H);}
-function randDrop(){return 1+Math.floor(Math.random()*MAX_DROP);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
 function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;updateUI();renderGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
@@ -102,11 +102,6 @@ function setPlayerDone(idx){document.getElementById('p-row-'+idx).classList.remo
 function rollDrop(){currentDrop=randDrop();var el=document.getElementById('drop-power');el.textContent=currentDrop;el.className='drop-power-value dp'+currentDrop;document.getElementById('drop-who').innerHTML='YOUR<br>DROP';document.getElementById('drop-who').style.color='#71717a';document.getElementById('drop-remaining').innerHTML='';document.getElementById('payout-area').innerHTML='<span style="color:#f59e0b">choose a column \u2191</span>';}
 function showDropInfo(who,color,power,remaining,spent){document.getElementById('drop-who').innerHTML=who;document.getElementById('drop-who').style.color=color;var dpEl=document.getElementById('drop-power');dpEl.textContent=power;dpEl.className='drop-power-value dp'+power;var remEl=document.getElementById('drop-remaining');if(spent>0)remEl.innerHTML='\u2212'+spent+' \u2192 <span class="rem">'+remaining+'</span>';else remEl.innerHTML='<span class="rem">'+remaining+'</span>';}
 function setColBtnsDisabled(d){document.querySelectorAll('.col-btn').forEach(function(b){if(d)b.classList.add('disabled');else b.classList.remove('disabled');});}
-function pickLight(){var b=0,bs=Infinity;for(var c=0;c<COLS;c++){var s=0;for(var r=0;r<ROWS;r++)s+=grid[r][c];if(s<bs){bs=s;b=c;}}return b;}
-function chooseNext(row,col){var cands=[];for(var dc=-1;dc<=1;dc++){var nc=col+dc;if(nc>=0&&nc<COLS)cands.push({c:nc,h:grid[row+1][nc]});}var nz=cands.filter(function(x){return x.h>0;});if(nz.length===0)return cands[Math.floor(Math.random()*cands.length)].c;var w=nz.map(function(x){return 1/x.h;});var tw=w.reduce(function(a,b){return a+b;},0);var r=Math.random()*tw;for(var i=0;i<nz.length;i++){r-=w[i];if(r<=0)return nz[i].c;}return nz[nz.length-1].c;}
-function findChannelCells(){var ch={};for(var c=0;c<COLS;c++){if(grid[0][c]===0){var path=[];if(dfsCollect(0,c,{},path)){for(var i=0;i<path.length;i++)ch[path[i]]=true;}}}return ch;}
-function dfsCollect(row,col,vis,path){var k=row+'-'+col;if(vis[k])return false;vis[k]=true;if(grid[row][col]!==0)return false;path.push(k);if(row===ROWS-1)return true;var found=false;for(var dc=-1;dc<=1;dc++){var nc=col+dc;if(nc>=0&&nc<COLS){var before=path.length;if(dfsCollect(row+1,nc,vis,path))found=true;else path.length=before;}}if(!found)path.pop();return found;}
-function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
 async function animateDrop(col,dropPower,who,color,playerIdx){
     var power=dropPower,c=col,washed=0;
     showDropInfo(who,color,dropPower,power,0);setPlayerActive(playerIdx);setPlayerDrop(playerIdx,dropPower);

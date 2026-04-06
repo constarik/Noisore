@@ -1,5 +1,12 @@
 // EROSION ENGINE v1.0 — shared core for Erosion/Noisore/WetBet
 // Requires globals: ROWS, COLS, MAX_DROP, grid
+var ENGINE_VERSION = 1;
+
+function requireEngine(minVersion) {
+    if (ENGINE_VERSION < minVersion) {
+        throw new Error('Engine v' + ENGINE_VERSION + ' loaded, but v' + minVersion + '+ required. Update engine.js.');
+    }
+}
 
 // --- WATER FLOW ---
 function chooseNext(row, col) {

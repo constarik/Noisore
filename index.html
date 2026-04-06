@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NOISORE v1.6</title>
+<title>NOISORE v1.7</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -54,7 +54,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 .channel-flash.show{opacity:1;}
 </style></head><body>
 <div id="game-container">
-    <h1>NOISORE</h1><div class="version">v1.6</div>
+    <h1>NOISORE</h1><div class="version">v1.7</div>
     <div class="stats"><div>BALANCE <span class="val" id="balance">100.00</span></div><div>DROPS <span class="val" id="drop-num">0</span></div><div>ROUND <span class="val" id="round-num">1</span></div></div>
     <div class="pool-area"><div class="pool-left"><div class="pool-label">Prize Pool</div><div class="pool-value" id="pool-value">0.00</div><div class="pool-unit">USDT</div></div><div class="players-list" id="players-list"></div></div>
     <div class="drop-info"><div class="drop-who" id="drop-who">YOUR<br>DROP</div><div class="drop-power-value" id="drop-power">&mdash;</div><div class="drop-remaining" id="drop-remaining"></div></div>
@@ -66,6 +66,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 <div class="channel-flash" id="channel-flash"></div>
 <script src="engine.js"></script>
 <script>
+requireEngine(1);
 var COLS=6,ROWS=5,MAX_H=10,MAX_DROP=10,DROP_COST=1,POOL_RATE=0.95,ANIM_DELAY=200;
 var BOTS=[{name:'Axel',color:'#4ad',smart:false},{name:'Kira',color:'#d4a',smart:true}];
 var grid=[],pool=0,balance=100,dropNum=0,roundNum=1,animating=false,currentDrop=0,turnPlayers=[];

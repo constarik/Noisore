@@ -81,6 +81,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#2574b5;text-alig
 <div class="channel-flash" id="channel-flash"></div>
 <script src="engine.js"></script>
 <script>
+requireEngine(1);
 const COLS=6,ROWS=5;const STONE_WEIGHTS=[0,30,25,20,15,10];const MAX_DROP=10;const ANIM_DELAY=180;
 let grid=[],origGrid=[];let score=0,spinNum=0;let bonusDrops=0;let animating=false;let currentDropPower=0;let dropsQueue=[];
 function randHardness(){const t=STONE_WEIGHTS.slice(1).reduce((a,b)=>a+b,0);let r=Math.random()*t;for(let h=1;h<=5;h++){r-=STONE_WEIGHTS[h];if(r<=0)return h;}return 5;}

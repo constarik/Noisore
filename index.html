@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NOISORE v3.2</title>
+<title>NOISORE v3.3</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -74,7 +74,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v3.2</div>
+    <h1>NOISORE</h1><div class="version">v3.3</div>
 
     <!-- === LOBBY === -->
     <div id="lobby">
@@ -286,7 +286,16 @@ async function playDrop(startCol){
         pool+=DROP_COST*POOL_RATE;dropNum++;updateUI();
         await animateDrop(startCol,currentDrop,'YOU','#f59e0b',0);
         if(await checkWin('YOU','#f59e0b'))return;
-        if(ROTATE){rotateGridCW();if(hasChannel()){fillRowIfChannel();}clearPowerTags();renderGrid();await showRotation();}
+        if(ROTATE){
+        document.getElementById('rotate-ind').textContent='\u21bb rotating in 5s...';
+        document.getElementById('rotate-ind').classList.add('show');
+        await sleep(5000);
+        rotateGridCW();if(hasChannel()){fillRowIfChannel();}
+        clearPowerTags();renderGrid();
+        document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';
+        await sleep(800);
+        document.getElementById('rotate-ind').classList.remove('show');
+    }
         rollDrop();animating=false;setColBtnsDisabled(false);
         return;
     }
@@ -303,7 +312,16 @@ async function playDrop(startCol){
         if(await checkWin(p.name,p.color))return;
         if(t<players.length-1)await sleep(400);
     }
-    if(ROTATE){rotateGridCW();if(hasChannel()){fillRowIfChannel();}clearPowerTags();renderGrid();await showRotation();}
+    if(ROTATE){
+        document.getElementById('rotate-ind').textContent='\u21bb rotating in 5s...';
+        document.getElementById('rotate-ind').classList.add('show');
+        await sleep(5000);
+        rotateGridCW();if(hasChannel()){fillRowIfChannel();}
+        clearPowerTags();renderGrid();
+        document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';
+        await sleep(800);
+        document.getElementById('rotate-ind').classList.remove('show');
+    }
     rollDrop();animating=false;setColBtnsDisabled(false);
 }
 </script>

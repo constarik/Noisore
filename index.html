@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NOISORE v3.3</title>
+<title>NOISORE v3.4</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -74,7 +74,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v3.3</div>
+    <h1>NOISORE</h1><div class="version">v3.4</div>
 
     <!-- === LOBBY === -->
     <div id="lobby">
@@ -276,6 +276,12 @@ async function showRotation(){
     var ind=document.getElementById('rotate-ind');ind.classList.add('show');
     await sleep(600);ind.classList.remove('show');
 }
+function waitForRotate(){
+    return new Promise(function(resolve){
+        var timer=setTimeout(function(){document.getElementById('grid').onclick=null;resolve();},5000);
+        document.getElementById('grid').onclick=function(){clearTimeout(timer);document.getElementById('grid').onclick=null;resolve();};
+    });
+}
 async function playDrop(startCol){
     if(animating)return;animating=true;setColBtnsDisabled(true);
     if(DROP_COST>0&&balance<DROP_COST){document.getElementById('payout-area').innerHTML='<span style="color:#f66">insufficient balance</span>';animating=false;setColBtnsDisabled(false);return;}
@@ -287,9 +293,9 @@ async function playDrop(startCol){
         await animateDrop(startCol,currentDrop,'YOU','#f59e0b',0);
         if(await checkWin('YOU','#f59e0b'))return;
         if(ROTATE){
-        document.getElementById('rotate-ind').textContent='\u21bb rotating in 5s...';
+        document.getElementById('rotate-ind').textContent='\u21bb 5s or click grid';
         document.getElementById('rotate-ind').classList.add('show');
-        await sleep(5000);
+        await waitForRotate();
         rotateGridCW();if(hasChannel()){fillRowIfChannel();}
         clearPowerTags();renderGrid();
         document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';
@@ -313,9 +319,9 @@ async function playDrop(startCol){
         if(t<players.length-1)await sleep(400);
     }
     if(ROTATE){
-        document.getElementById('rotate-ind').textContent='\u21bb rotating in 5s...';
+        document.getElementById('rotate-ind').textContent='\u21bb 5s or click grid';
         document.getElementById('rotate-ind').classList.add('show');
-        await sleep(5000);
+        await waitForRotate();
         rotateGridCW();if(hasChannel()){fillRowIfChannel();}
         clearPowerTags();renderGrid();
         document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';

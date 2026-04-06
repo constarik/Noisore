@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NOISORE v3.6</title>
+<title>NOISORE v3.7</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -74,7 +74,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v3.6</div>
+    <h1>NOISORE</h1><div class="version">v3.7</div>
 
     <!-- === LOBBY === -->
     <div id="lobby">
@@ -223,7 +223,7 @@ var TAG_POS=[
 ];
 function randH(){return 1+Math.floor(Math.random()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
-function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;updateUI();renderGrid();rollDrop();setColBtnsDisabled(false);}
+function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
 function renderGrid(){var el=document.getElementById('grid');el.innerHTML='';for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var cell=document.createElement('div');cell.className='cell h'+grid[r][c];cell.id='cell-'+r+'-'+c;cell.textContent=grid[r][c]>0?grid[r][c]:'';el.appendChild(cell);}}
 function updateCell(r,c){var cell=document.getElementById('cell-'+r+'-'+c);var tags=cell.querySelectorAll('.power-tag');cell.className='cell h'+grid[r][c];cell.textContent=grid[r][c]>0?grid[r][c]:'';for(var i=0;i<tags.length;i++)cell.appendChild(tags[i]);}

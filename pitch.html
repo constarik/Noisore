@@ -3,591 +3,320 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOISORE — Skill-Based Multiplayer Game</title>
+<title>NOISORE — Skill-Based Multiplayer Arcade</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;700&display=swap');
-
-:root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --accent: #3b82f6;
-    --accent2: #f59e0b;
-    --text: #e4e4e7;
-    --muted: #b0b0b8;
-    --border: #1e1e2e;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    line-height: 1.6;
-    overflow-x: hidden;
-}
-
-/* Grain overlay */
-body::after {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-}
-
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 24px;
-}
-
-/* Hero */
-.hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: relative;
-    padding: 60px 0;
-}
-
-.hero::before {
-    content: '';
-    position: absolute;
-    top: -200px; right: -300px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
-    pointer-events: none;
-}
-
-.tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--accent);
-    border: 1px solid rgba(59,130,246,0.3);
-    padding: 6px 14px;
-    border-radius: 100px;
-    margin-bottom: 32px;
-    animation: fadeIn 0.8s ease both;
-}
-
-h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(48px, 8vw, 80px);
-    font-weight: 900;
-    line-height: 1.0;
-    letter-spacing: -2px;
-    margin-bottom: 24px;
-    animation: fadeIn 0.8s ease 0.1s both;
-}
-
-h1 span {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.subtitle {
-    font-size: 20px;
-    color: var(--muted);
-    font-weight: 300;
-    max-width: 540px;
-    margin-bottom: 40px;
-    animation: fadeIn 0.8s ease 0.2s both;
-}
-
-.hero-stats {
-    display: flex;
-    gap: 40px;
-    flex-wrap: wrap;
-    animation: fadeIn 0.8s ease 0.3s both;
-}
-
-.stat {
-    display: flex;
-    flex-direction: column;
-}
-
-.stat-value {
-    font-family: 'Playfair Display', serif;
-    font-size: 36px;
-    font-weight: 700;
-    color: var(--accent2);
-}
-
-.stat-label {
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-top: 2px;
-}
-
-/* Sections */
-section {
-    padding: 80px 0;
-    border-top: 1px solid var(--border);
-}
-
-h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 36px;
-    font-weight: 700;
-    margin-bottom: 32px;
-    letter-spacing: -1px;
-}
-
-h2 .num {
-    color: var(--accent);
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    letter-spacing: 2px;
-    display: block;
-    margin-bottom: 8px;
-}
-
-p {
-    color: #d4d4d8;
-    font-size: 16px;
-    margin-bottom: 16px;
-    max-width: 600px;
-}
-
-p strong {
-    color: var(--text);
-    font-weight: 500;
-}
-
-/* Cards */
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-top: 32px;
-}
-
-.card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    transition: border-color 0.3s;
-}
-
-.card:hover {
-    border-color: rgba(59,130,246,0.3);
-}
-
-.card-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-}
-
-.card h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.card p {
-    font-size: 14px;
-    margin-bottom: 0;
-    color: var(--muted);
-}
-
-/* Flow */
-.flow {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    margin-top: 32px;
-}
-
-.flow-step {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-}
-
-.flow-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--accent);
-    min-width: 40px;
-    line-height: 1;
-    padding-top: 4px;
-}
-
-.flow-text h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 4px;
-}
-
-.flow-text p {
-    font-size: 14px;
-    margin-bottom: 0;
-}
-
-/* CTA */
-.cta-section {
-    text-align: center;
-    padding: 100px 0;
-}
-
-.cta-section h2 {
-    font-size: 44px;
-    margin-bottom: 16px;
-}
-
-.cta-section p {
-    max-width: 100%;
-    text-align: center;
-    margin: 0 auto 40px;
-}
-
-.cta-buttons {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 32px;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--accent), #2563eb);
-    color: #fff;
-    border: none;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(59,130,246,0.3);
-}
-
-.btn-secondary {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-}
-
-.btn-secondary:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-/* Demo embed */
-.demo-frame {
-    width: 100%;
-    height: 700px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-top: 32px;
-    background: #f0ebe3;
-}
-
-/* Proof bar */
-.proof-bar {
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
-    margin-top: 32px;
-    padding: 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-}
-
-.proof-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.proof-check {
-    color: #22c55e;
-    font-size: 18px;
-}
-
-.proof-item span {
-    font-size: 14px;
-    color: var(--muted);
-}
-
-/* Footer */
-footer {
-    padding: 40px 0;
-    border-top: 1px solid var(--border);
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-}
-
-footer a {
-    color: var(--accent);
-    text-decoration: none;
-}
-
-footer a:hover { text-decoration: underline; }
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 600px) {
-    .hero-stats { gap: 24px; }
-    .stat-value { font-size: 28px; }
-    section { padding: 60px 0; }
-    .cta-section h2 { font-size: 32px; }
-    .demo-frame { height: 500px; }
-}
+:root{--bg:#0a0a0f;--surface:#12121a;--accent:#3b82f6;--accent2:#f59e0b;--text:#e4e4e7;--muted:#b0b0b8;--border:#1e1e2e;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.6;overflow-x:hidden;}
+body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;}
+.container{max-width:800px;margin:0 auto;padding:0 24px;}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;position:relative;padding:60px 0;}
+.hero::before{content:'';position:absolute;top:-200px;right:-300px;width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.08) 0%,transparent 70%);pointer-events:none;}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);border:1px solid rgba(59,130,246,0.3);padding:6px 14px;border-radius:100px;margin-bottom:32px;animation:fadeIn 0.8s ease both;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(48px,8vw,80px);font-weight:900;line-height:1.0;letter-spacing:-2px;margin-bottom:24px;animation:fadeIn 0.8s ease 0.1s both;}
+h1 span{background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{font-size:20px;color:var(--muted);font-weight:300;max-width:540px;margin-bottom:40px;animation:fadeIn 0.8s ease 0.2s both;}
+.hero-stats{display:flex;gap:40px;flex-wrap:wrap;animation:fadeIn 0.8s ease 0.3s both;}
+.stat{display:flex;flex-direction:column;}
+.stat-value{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--accent2);}
+.stat-label{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+section{padding:80px 0;border-top:1px solid var(--border);}
+h2{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;margin-bottom:32px;letter-spacing:-1px;}
+h2 .num{color:var(--accent);font-size:14px;font-family:'DM Sans',sans-serif;letter-spacing:2px;display:block;margin-bottom:8px;}
+p{color:#d4d4d8;font-size:16px;margin-bottom:16px;max-width:600px;}
+p strong{color:var(--text);font-weight:500;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:32px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;transition:border-color 0.3s;}
+.card:hover{border-color:rgba(59,130,246,0.3);}
+.card-icon{font-size:28px;margin-bottom:12px;}
+.card h3{font-size:16px;font-weight:700;margin-bottom:8px;}
+.card p{font-size:14px;margin-bottom:0;color:var(--muted);}
+.flow{display:flex;flex-direction:column;gap:24px;margin-top:32px;}
+.flow-step{display:flex;gap:20px;align-items:flex-start;}
+.flow-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--accent);min-width:40px;line-height:1;padding-top:4px;}
+.flow-text h3{font-size:16px;font-weight:700;margin-bottom:4px;}
+.flow-text p{font-size:14px;margin-bottom:0;}
+.cta-section{text-align:center;padding:100px 0;}
+.cta-section h2{font-size:44px;margin-bottom:16px;}
+.cta-section p{max-width:100%;text-align:center;margin:0 auto 40px;}
+.cta-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;text-decoration:none;transition:all 0.2s;cursor:pointer;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;border:none;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(59,130,246,0.3);}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.proof-bar{display:flex;gap:32px;flex-wrap:wrap;margin-top:32px;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:12px;}
+.proof-item{display:flex;align-items:center;gap:10px;}
+.proof-check{color:#22c55e;font-size:18px;}
+.proof-item span{font-size:14px;color:var(--muted);}
+footer{padding:40px 0;border-top:1px solid var(--border);text-align:center;color:var(--muted);font-size:13px;}
+footer a{color:var(--accent);text-decoration:none;}
+footer a:hover{text-decoration:underline;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:600px){.hero-stats{gap:24px;}.stat-value{font-size:28px;}section{padding:60px 0;}.cta-section h2{font-size:32px;}}
 </style>
 </head>
 <body>
-
 <div class="container">
 
-    <div class="hero">
-        <div class="tag">Multiplayer · Skill-Based · Provably Fair</div>
-        <h1>Water beats<br>stone.<br><span>Skill beats luck.</span></h1>
-        <p class="subtitle">
-            NOISORE — multiplayer skill-based arcade where strategy 
-            wins up to 3:1 over random. Shared grid, winner-takes-pool. 
-            Poker meets Plinko. Proven by 50,000 simulations.
-        </p>
-        <div class="hero-stats">
-            <div class="stat">
-                <div class="stat-value">up to 73%</div>
-                <div class="stat-label">Win rate vs random (1v1)</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">2–12</div>
-                <div class="stat-label">Players per table</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">16–37</div>
-                <div class="stat-label">Drops to jackpot</div>
-            </div>
+<div class="hero">
+    <div class="tag">Multiplayer · Skill-Based · Provably Fair</div>
+    <h1>Water beats<br>stone.<br><span>Skill beats luck.</span></h1>
+    <p class="subtitle">
+        NOISORE — multiplayer skill-based arcade where strategy 
+        wins up to 3:1 over random. Shared grid, winner-takes-pool, 
+        grid rotation. Poker meets physics. Proven by 50,000 simulations.
+    </p>
+    <div class="hero-stats">
+        <div class="stat">
+            <div class="stat-value">up to 77%</div>
+            <div class="stat-label">Win rate vs random (8×8 rotate)</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">2–12</div>
+            <div class="stat-label">Players per table</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">4 products</div>
+            <div class="stat-label">One engine</div>
+        </div>
+    </div>
+</div>
+
+<section>
+    <h2><span class="num">01 — THE GAME</span>How it works</h2>
+    <p>
+        A shared grid of stone. Each cell has hardness 1–10. 
+        You get a water drop with random power (1–10) — <strong>you see it before choosing</strong>. 
+        Pick a column. The drop burns through stones, losing power with each one.
+    </p>
+    <p>
+        Everyone hits the same grid. You see what others have weakened.
+        <strong>Carve a channel top-to-bottom — you take the entire pool.</strong>
+        Grid refills, new round starts.
+    </p>
+    <p>
+        Heavy drop on a prepared column = breakthrough. 
+        Light drop on fresh rock = wasted money. 
+        <strong>This is the decision that matters.</strong>
+    </p>
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">💧</div>
+            <h3>See Before You Choose</h3>
+            <p>Drop power revealed before column selection. Information creates strategy.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">↻</div>
+            <h3>Grid Rotation</h3>
+            <p>After each cycle, the grid rotates 90°. Your vertical canyon becomes horizontal. Adapt or lose.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🚪</div>
+            <h3>Fold Anytime</h3>
+            <p>Leave after your first drop. Your stake feeds the pool. Staying = risk. Leaving = gift to others.</p>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">02 — THE PROOF</span>Skill is real</h2>
+    <p>
+        50,000 head-to-head simulations across grid sizes and rotation modes. 
+        <strong>Strategic player wins up to 77% of pools</strong> against random on 8×8 with rotation —  
+        a 3:1 advantage. Not noise. Not luck. Verified.
+    </p>
+    <p>
+        Five bot strategies tested: DEEP (path simulation, 75.8%), LIGHT (weakest column, 72.9%), 
+        SNIPER (steal canyons, 72.7%), GREEDY (min blockers, 72.1%), POWER (force allocation, 64.8%). 
+        <strong>All beat random. DEEP beats them all.</strong>
+    </p>
+
+    <div class="cards">
+        <div class="card">
+            <h3 style="color:#f59e0b;">6×6 no rotation</h3>
+            <p>1v1: 70.4% win rate. Median 22 drops. Classic mode.</p>
+        </div>
+        <div class="card">
+            <h3 style="color:#f59e0b;">6×6 with rotation</h3>
+            <p>1v1: 72.0% win rate. Median 14 drops. Faster, more skill.</p>
+        </div>
+        <div class="card">
+            <h3 style="color:#f59e0b;">8×8 with rotation</h3>
+            <p>1v1: 77.2% win rate. Median 23 drops. Maximum skill edge.</p>
         </div>
     </div>
 
-    <section>
-        <h2><span class="num">01 — THE GAME</span>How it works</h2>
-        <p>
-            A shared grid of stone. Each cell has hardness 1–10. 
-            You get a water drop with random power (1–10) — <strong>you see it before choosing</strong>. 
-            Pick a column. The drop burns through stones, losing power with each one.
-        </p>
-        <p>
-            Everyone hits the same grid. You see what others have weakened.
-            <strong>Carve a channel top-to-bottom — you take the entire pool.</strong>
-            Grid refills, new round starts.
-        </p>
-        <p>
-            Heavy drop on a prepared column = breakthrough. 
-            Light drop on fresh rock = wasted money. 
-            <strong>This is the decision that matters.</strong>
-        </p>
+    <div class="proof-bar">
+        <div class="proof-item">
+            <span class="proof-check">✓</span>
+            <span>50,000-game Monte Carlo</span>
+        </div>
+        <div class="proof-item">
+            <span class="proof-check">✓</span>
+            <span>Up to 77% win rate (8×8 rotation)</span>
+        </div>
+        <div class="proof-item">
+            <span class="proof-check">✓</span>
+            <span>5 bot strategies ranked</span>
+        </div>
+        <div class="proof-item">
+            <span class="proof-check">✓</span>
+            <span><a href="https://medium.com/@constr" target="_blank" style="color:#22c55e;text-decoration:none;">Registrar Protocol</a> (χ²/dof = 0.976)</span>
+        </div>
+    </div>
+</section>
 
-        <div class="cards">
-            <div class="card">
-                <div class="card-icon">💧</div>
-                <h3>See Before You Choose</h3>
-                <p>Drop power revealed before column selection. Information creates strategy.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">🏆</div>
-                <h3>Channel = Jackpot</h3>
-                <p>Carve a path from top to bottom — take the entire prize pool. One winner per round.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">🚪</div>
-                <h3>Fold Anytime</h3>
-                <p>Leave after your first drop. Your stake feeds the pool. Staying = risk. Leaving = gift to others.</p>
+<section>
+    <h2><span class="num">03 — FOUR PRODUCTS</span>One engine</h2>
+
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">🎯</div>
+            <h3>EROSION</h3>
+            <p>Single-player scoring. Free. Learn the mechanics, practice strategy. No money, no pressure.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">⚔️</div>
+            <h3>NOISORE Free</h3>
+            <p>PvP with bots. Free. Training ground before real stakes. Lobby: grid, rotation, opponents.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">💰</div>
+            <h3>NOISORE Real</h3>
+            <p>PvP live players. USDT stakes. No bots — only human opponents. 5% rake.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🏇</div>
+            <h3>WET BET</h3>
+            <p>Spectator betting on bot strategies. DEEP vs LIGHT vs SNIPER. You pick the winner. Bot racing.</p>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">04 — ROTATION</span>Rule E</h2>
+    <p>
+        Square grid (6×6 or 8×8). After each cycle (all players made one move), 
+        <strong>the grid rotates 90° clockwise</strong>. Predictable — not random. 
+        Information, not chaos.
+    </p>
+    <p>
+        Your vertical canyon is now horizontal. The column you invested in? 
+        It's a row. <strong>Rotation increases skill edge</strong> — 77% on 8×8 with rotation 
+        vs 71% without.
+    </p>
+    <p>
+        <strong>Rule E:</strong> if rotation creates a channel, a random row fills with fresh stones. 
+        No free wins. You must erode through.
+    </p>
+</section>
+
+<section>
+    <h2><span class="num">05 — THE MODEL</span>Payment</h2>
+    <div class="flow">
+        <div class="flow-step">
+            <div class="flow-num">1</div>
+            <div class="flow-text">
+                <h3>Per drop (poker-style)</h3>
+                <p>Pay X USDT per drop. 95% → pool, 5% → rake. Fold anytime. Last man standing takes the pot.</p>
             </div>
         </div>
-    </section>
-
-    <section>
-        <h2><span class="num">02 — THE PROOF</span>Skill is real</h2>
-        <p>
-            50,000 head-to-head simulations on 6×5 grid. 
-            <strong>Strategic player wins the pool up to 73% of the time</strong> against random — 
-            a 3:1 advantage. Not noise. Not luck. Verified.
-        </p>
-        <p>
-            At a 3-player table, the skilled player takes <strong>52% of pools</strong> 
-            instead of the fair 33% — a 55% edge above chance. 
-            <strong>Your column choice determines who takes the money.</strong>
-        </p>
-
-        <div class="proof-bar">
-            <div class="proof-item">
-                <span class="proof-check">✓</span>
-                <span>50,000-game Monte Carlo simulation</span>
-            </div>
-            <div class="proof-item">
-                <span class="proof-check">✓</span>
-                <span>Up to 73% win rate vs random (1v1)</span>
-            </div>
-            <div class="proof-item">
-                <span class="proof-check">✓</span>
-                <span>55% edge at 3-player table</span>
-            </div>
-            <div class="proof-item">
-                <span class="proof-check">✓</span>
-                <span><a href="https://medium.com/@constr" target="_blank" style="color:#22c55e;text-decoration:none;">Registrar Protocol</a> (χ²/dof = 0.976)</span>
+        <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-text">
+                <h3>Per round (tournament)</h3>
+                <p>Fixed buy-in, unlimited drops. Same grid, same mechanics. Optional lobby setting.</p>
             </div>
         </div>
-    </section>
-
-    <section>
-        <h2><span class="num">03 — THE MODEL</span>Adaptive multiplayer pool</h2>
-
-        <div class="flow">
-            <div class="flow-step">
-                <div class="flow-num">1</div>
-                <div class="flow-text">
-                    <h3>Buy a drop</h3>
-                    <p>Player pays X tokens per drop. 95% feeds the prize pool, 5% rake. Demo uses per-drop model.</p>
-                </div>
-            </div>
-            <div class="flow-step">
-                <div class="flow-num">2</div>
-                <div class="flow-text">
-                    <h3>Grid scales to table size</h3>
-                    <p>1–4 players → 6×5 grid (~16 drops to channel). 5–8 → 6×6 (~24 drops). 9–12 → 6×8 (~37 drops). More players = deeper grid = fatter pool.</p>
-                </div>
-            </div>
-            <div class="flow-step">
-                <div class="flow-num">3</div>
-                <div class="flow-text">
-                    <h3>Channel = take the pool</h3>
-                    <p>First player to carve a full top-to-bottom path wins the entire prize pool. Grid refills, new cycle.</p>
-                </div>
-            </div>
-            <div class="flow-step">
-                <div class="flow-num">4</div>
-                <div class="flow-text">
-                    <h3>Two ways to win</h3>
-                    <p>Carve the channel — take the pool. Or outlast everyone. All opponents fold? Last player standing takes the pot. No channel needed. Pure poker logic on a stone grid.</p>
-                </div>
-            </div>
-            <div class="flow-step">
-                <div class="flow-num">5</div>
-                <div class="flow-text">
-                    <h3>Fold or fight</h3>
-                    <p>Leave after your first drop — your stake stays in the pool. Grid depth doesn't shrink. Read the table: is it cheaper to keep drilling or to wait for others to quit?</p>
-                </div>
-            </div>
-            <div class="flow-step">
-                <div class="flow-num">6</div>
-                <div class="flow-text">
-                    <h3>Two payment models (optional)</h3>
-                    <p>Per drop: poker-style, pay each move, fold anytime. Per round: tournament-style, fixed buy-in, unlimited drops. Same grid, same mechanics, different tempo.</p>
-                </div>
+        <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div class="flow-text">
+                <h3>Lobby configurable</h3>
+                <p>Grid: 6×6 / 8×8. Rotation: on/off. Stake: 0.10 / 0.50 / 1.00 / 5.00 USDT. Players: 2–12.</p>
             </div>
         </div>
-
-        <div class="cards" style="margin-top:32px;">
-            <div class="card">
-                <h3 style="color:#f59e0b;">6×5 · 1–4 players</h3>
-                <p>Median 16 drops to channel. Skilled player wins 52% of pools instead of fair 33%. Fast rounds, casual stakes.</p>
-            </div>
-            <div class="card">
-                <h3 style="color:#f59e0b;">6×6 · 5–8 players</h3>
-                <p>Median 24 drops. Skilled player wins 30% instead of fair 20%. Deeper grid, fatter pool, more competition.</p>
-            </div>
-            <div class="card">
-                <h3 style="color:#f59e0b;">6×8 · 9–12 players</h3>
-                <p>Median 37 drops. Skilled player wins 11% instead of fair 8%. Marathon rounds, massive pools.</p>
+        <div class="flow-step">
+            <div class="flow-num">4</div>
+            <div class="flow-text">
+                <h3>Telegram integration</h3>
+                <p>TON Connect top-up in 10 seconds. Internal balance, off-chain play. Blockchain only on deposit/withdraw.</p>
             </div>
         </div>
-        <p style="margin-top:16px;font-size:13px;color:#4ad;">All numbers: 50,000-run Monte Carlo, stones 1–10, drops 1–10. Skill = weakest-column strategy vs random.</p>
-    </section>
+    </div>
+</section>
 
-    <section>
-        <h2><span class="num">04 — WHAT'S READY</span>Built, not pitched</h2>
-        <p>
-            This is not a whitepaper. The game engine exists, runs in browser, 
-            and you can play it right now.
-        </p>
-
-        <div class="cards">
-            <div class="card">
-                <div class="card-icon">🎮</div>
-                <h3>Working demo</h3>
-                <p>Pool-based gameplay with bot opponents, balance system, channel detection. Playable now.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">📊</div>
-                <h3>Math verified</h3>
-                <p>50,000-run Monte Carlo. Skill edge quantified. Pool economics simulated for 1–12 players.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">🔐</div>
-                <h3>Registrar Protocol</h3>
-                <p>Provably fair engine. 1M-session determinism test passed (χ²/dof = 0.976). <a href="https://medium.com/@constr" target="_blank" style="color:var(--accent);">Published on Medium</a>.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">🧮</div>
-                <h3>15 years in slot math</h3>
-                <p>Well over a hundred production titles shipped. iGaming veteran, not a first-time builder.</p>
-            </div>
+<section>
+    <h2><span class="num">06 — WHAT'S READY</span>Built, not pitched</h2>
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">🎮</div>
+            <h3>Working demo</h3>
+            <p>Lobby with mode/grid/rotation/stake/opponents. Solo and PvP with up to 11 bots. Play now.</p>
         </div>
-    </section>
-
-    <section>
-        <h2><span class="num">05 — PLAY IT</span>Try the demo</h2>
-        <p>
-            Pool-based prototype with two bot opponents. Per-drop payment, shared grid, 
-            channel detection, balance system. Play it now.
-        </p>
-        <div style="margin-top:32px;">
-            <a href="https://noisore.uncloned.work" class="btn btn-primary" target="_blank" style="font-size:18px;padding:18px 48px;">
-                ▶ Play Noisore Demo
-            </a>
+        <div class="card">
+            <div class="card-icon">📊</div>
+            <h3>Math verified</h3>
+            <p>50K Monte Carlo across all configs. Bot strategies ranked. Rotation effect quantified.</p>
         </div>
-    </section>
-
-    <section class="cta-section">
-        <h2>Looking for a<br>game worth building</h2>
-        <p>
-            Engine built. Math proven. Multiplayer model designed. 
-            I need a partner with community and ambition.
-        </p>
-        <div class="cta-buttons">
-            <a href="/cdn-cgi/l/email-protection#8deee2e3fef9ffabaebbb9b6eae0ece4e1a3eee2e0" class="btn btn-primary">
-                constr&#64;gmail.com
-            </a>
-            <a href="https://t.me/constrik" class="btn btn-secondary" target="_blank">
-                @constrik on Telegram
-            </a>
+        <div class="card">
+            <div class="card-icon">🔐</div>
+            <h3>Registrar Protocol</h3>
+            <p>Provably fair engine. 1M-session determinism test (χ²/dof = 0.976). <a href="https://medium.com/@constr" target="_blank" style="color:var(--accent);">Published on Medium</a>.</p>
         </div>
-    </section>
+        <div class="card">
+            <div class="card-icon">🧮</div>
+            <h3>15 years in iGaming math</h3>
+            <p>100+ production titles. Verification specialist. Not a first-time builder.</p>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">07 — PLAY IT</span>Try the demo</h2>
+    <p>
+        Lobby → choose mode, grid, rotation, opponents → play. 
+        Desktop and mobile versions available.
+    </p>
+    <div style="margin-top:32px;display:flex;gap:16px;flex-wrap:wrap;">
+        <a href="https://noisore.uncloned.work" class="btn btn-primary" target="_blank" style="font-size:18px;padding:18px 48px;">
+            ▶ Desktop Demo
+        </a>
+        <a href="https://noisore.uncloned.work/mobile.html" class="btn btn-secondary" target="_blank" style="font-size:16px;padding:16px 36px;">
+            📱 Mobile Demo
+        </a>
+    </div>
+</section>
+
+<section class="cta-section">
+    <h2>Looking for a<br>game worth building</h2>
+    <p>
+        Engine built. Math proven. Four products designed. 
+        I need a partner with community and ambition.
+    </p>
+    <div class="cta-buttons">
+        <a href="mailto:constr@gmail.com" class="btn btn-primary">
+            constr@gmail.com
+        </a>
+        <a href="https://t.me/constrik" class="btn btn-secondary" target="_blank">
+            @constrik on Telegram
+        </a>
+    </div>
+</section>
 
 </div>
 
 <footer>
     <div class="container">
-      
+        <a href="https://uncloned.work" target="_blank">Uncloned Math</a> · 
+        <a href="https://medium.com/@constr" target="_blank">Medium</a> · 
+        <a href="https://www.linkedin.com/in/constarik" target="_blank">LinkedIn</a> · 
+        <a href="https://github.com/constarik/Noisore" target="_blank">GitHub</a>
+        <br><br>© 2026 Constantin Razinskyi · Constanța, Romania
+    </div>
+</footer>
+</body>
+</html>

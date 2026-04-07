@@ -134,6 +134,14 @@ footer a:hover{text-decoration:underline;}
         SNIPER (steal canyons, 72.7%), GREEDY (min blockers, 72.1%), POWER (force allocation, 64.8%). 
         <strong>All beat random. DEEP beats them all.</strong>
     </p>
+    <p>
+        When all six play at one table (50,000 rounds, 6×6), the picture changes. 
+        RANDOM collapses to <strong>6%</strong> — losing two thirds of its fair share. 
+        DEEP takes <strong>20%</strong> of all pools (fair would be 16.7%). 
+        POWER rises to 19.6%, GREEDY and SNIPER take 18.9% each, 
+        LIGHT barely breaks even at 16.8%. 
+        <strong>Against other smart players, raw column-sum strategy is not enough.</strong>
+    </p>
 
     <div class="cards">
         <div class="card">
@@ -170,6 +178,16 @@ footer a:hover{text-decoration:underline;}
         <div class="proof-item">
             <span class="proof-check">✓</span>
             <span><a href="https://medium.com/@constr" target="_blank" style="color:#22c55e;text-decoration:none;">Registrar Protocol</a> (χ²/dof = 0.976)</span>
+        </div>
+    </div>
+
+    <div class="cards" style="margin-top:24px;">
+        <div class="card" style="grid-column:1/-1;">
+            <h3 style="color:#f59e0b;margin-bottom:12px;">6-Player Tournament (50K rounds, 6×6)</h3>
+            <p style="color:#d4d4d8;font-size:13px;line-height:1.8;">
+                DEEP 20.0% · POWER 19.6% · GREEDY 18.9% · SNIPER 18.8% · LIGHT 16.8% · <span style="color:#f66;">RANDOM 6.0%</span><br>
+                Fair share = 16.7%. Sum = 100%. RANDOM feeds everyone else.
+            </p>
         </div>
     </div>
 </section>

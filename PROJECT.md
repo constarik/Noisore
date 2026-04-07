@@ -9,7 +9,7 @@
 |---|---|---|---|---|
 | Single-player | EROSION | КАПЕЛЬКА | Water beats stone. Skill beats luck. | Вода камень точит. Мастерство не прольёшь. |
 | Multiplayer PvP | NOISORE | РУССЛО | Water beats stone. Skill beats luck. | Вода камень точит. Мастерство не прольёшь. |
-| Bot Racing | WET BET | МОКРИЦА | — | — |
+| Bot Racing | Bet&Wet | МОКРИЦА | — | — |
 
 NOISORE = EROSION наоборот
 РУССЛО = РУСЛО + СЛОТ + РУССКИЙ
@@ -27,7 +27,7 @@ PvP с ботами. Бесплатно. Обучение перед игрой 
 ### 3. NOISORE / РУССЛО Real
 PvP живые игроки. Ставки USDT. Только живые — ботов нет (бот не отобьёт рейк). Стол не стартует без минимум 2 человек.
 
-### 4. WET BET / МОКРИЦА
+### 4. Bet&Wet / МОКРИЦА
 Ставки на ботов-стратегов. Зритель ставит, боты играют. Платформа = букмекер. Рейк с каждой ставки. Бот Racing — как скачки.
 
 ---
@@ -172,7 +172,7 @@ Noisore v1.5:
 
 - [ ] Прототип с вращением (6×6 или 8×8, Rule E)
 - [ ] Улучшение Kira: path simulation вместо column sum (DEEP strategy)
-- [ ] WET BET / МОКРИЦА: прототип ставок на ботов
+- [ ] Bet&Wet / МОКРИЦА: прототип ставок на ботов
 - [ ] Telegram Mini App интеграция
 - [ ] Medium статья 7 (Erosion → Noisore story)
 - [ ] Reddit r/WebGames, Twitter/X, Itch.io

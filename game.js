@@ -1,4 +1,4 @@
-// game.js — NOISORE v4.9 shared game logic
+// game.js — NOISORE v5.0 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -115,6 +115,7 @@ function setPlayerActive(idx){for(var k=0;k<turnPlayers.length;k++){document.get
 function setPlayerDrop(idx,dp){var el=document.getElementById('p-drop-'+idx);el.textContent=dp;el.classList.add('show');}
 function setPlayerRemaining(idx,rem){document.getElementById('p-rem-'+idx).textContent='\u2192'+rem;}
 function setPlayerDone(idx){document.getElementById('p-row-'+idx).classList.remove('active');document.getElementById('p-row-'+idx).classList.add('done');}
+function resetPlayerStates(){for(var k=0;k<turnPlayers.length;k++){document.getElementById('p-row-'+k).classList.remove('active','done');}}
 function rollDrop(){currentDrop=randDrop();var el=document.getElementById('drop-power');el.textContent=currentDrop;el.className='drop-power-value dp'+currentDrop;document.getElementById('drop-who').innerHTML='YOUR<br>DROP';document.getElementById('drop-who').style.color='#d4d4d8';document.getElementById('drop-remaining').innerHTML='';document.getElementById('payout-area').innerHTML='<span style="color:#f59e0b">choose a column \u2191</span>';}
 function showDropInfo(who,color,power,remaining,spent){document.getElementById('drop-who').innerHTML=who;document.getElementById('drop-who').style.color=color;var dpEl=document.getElementById('drop-power');dpEl.textContent=power;dpEl.className='drop-power-value dp'+power;var remEl=document.getElementById('drop-remaining');if(spent>0)remEl.innerHTML='\u2212'+spent+' \u2192 <span class="rem">'+remaining+'</span>';else remEl.innerHTML='<span class="rem">'+remaining+'</span>';}
 function setColBtnsDisabled(d){document.querySelectorAll('.col-btn').forEach(function(b){if(d)b.classList.add('disabled');else b.classList.remove('disabled');});}
@@ -190,6 +191,7 @@ async function playDrop(startCol){
         if(t<players.length-1)await sleep(400);
     }
     if(ROTATE)await doRotation();
+    resetPlayerStates();
     rollDrop();animating=false;setColBtnsDisabled(false);
 }
 // === BET&WET ===
@@ -235,6 +237,7 @@ async function betRound(){
             if(t<order.length-1)await sleep(150);
         }
         if(ROTATE)await doRotationAuto();
+        resetPlayerStates();
     }
 }
 function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();

@@ -1,4 +1,4 @@
-// game.js — NOISORE v4.8 shared game logic
+// game.js — NOISORE v4.9 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -53,16 +53,19 @@ function updateBetDisplay(){
         var el=document.getElementById('f-'+f.name);
         if(!el)return;
         var sum=CFG.bets[f.name]||0;
-        el.textContent=f.name+(sum>0?' ('+sum.toFixed(2)+')':'');
+        var label=f.name+(f.odds?' \u00d7'+f.odds:'');
+        el.textContent=label+(sum>0?' ('+sum.toFixed(2)+')':'');
         el.classList.toggle('active',sum>0);
     });
     var total=0;for(var k in CFG.bets)total+=CFG.bets[k];
     var el2=document.getElementById('fighter-odds');
-    if(el2)el2.textContent='Total: '+total.toFixed(2)+' USDT  (tap +1, right-click -1)';
+    var isMobile='ontouchstart' in window;
+    if(el2)el2.textContent='Total: '+total.toFixed(2)+' USDT'+(isMobile?'  (tap to add)':'  (click +1, right-click -1)');
 }
 function startGame(){
     document.getElementById('lobby').style.display='none';
     document.getElementById('game').style.display='block';
+    if('ontouchstart' in window&&document.documentElement.requestFullscreen){try{document.documentElement.requestFullscreen();}catch(e){}}
     COLS=CFG.gridSize;ROWS=CFG.gridSize;MAX_H=10;MAX_DROP=10;
     ROTATE=CFG.rotate;
     DROP_COST=(CFG.mode==='pvp'&&CFG.stake===0)?1:CFG.stake;POOL_RATE=0.95;

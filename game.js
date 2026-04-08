@@ -45,8 +45,9 @@ function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.t
 function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);calcOdds();updateBetDisplay();}
 function setStake(v){CFG.stake=v;document.querySelectorAll('#stake-section .lbtn').forEach(function(b){b.classList.remove('active');});var id='stake-'+String(v).replace('.','');var el=document.getElementById(id);if(el)el.classList.add('active');}
 function setBots(n){CFG.numBots=n;document.querySelectorAll('#bots-section .lbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('bots-'+n).classList.add('active');}
-function betAdd(name,e){e.preventDefault();if(!CFG.bets[name])CFG.bets[name]=0;CFG.bets[name]++;updateBetDisplay();return false;}
+function betAdd(name,e){if(e)e.preventDefault();if(!CFG.bets[name])CFG.bets[name]=0;CFG.bets[name]++;updateBetDisplay();return false;}
 function betRemove(name){if(CFG.bets[name]&&CFG.bets[name]>0)CFG.bets[name]--;if(CFG.bets[name]===0)delete CFG.bets[name];updateBetDisplay();}
+function betClear(){CFG.bets={};updateBetDisplay();}
 function updateBetDisplay(){
     var stk=CFG.stake>0?CFG.stake:1;
     BET_FIGHTERS.forEach(function(f){
@@ -60,7 +61,7 @@ function updateBetDisplay(){
     var totalBets=0;for(var k in CFG.bets)totalBets+=CFG.bets[k];
     var cost=totalBets*stk;
     var el2=document.getElementById('fighter-odds');
-    if(el2)el2.textContent='Total: '+cost.toFixed(2)+' USDT  (right-click +1, left-click -1)';
+    if(el2)el2.textContent='Total: '+cost.toFixed(2)+' USDT  (tap +1, right-click -1)';
 }
 function startGame(){
     document.getElementById('lobby').style.display='none';

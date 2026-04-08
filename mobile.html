@@ -118,14 +118,15 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
         <div class="lobby-section" id="fighter-section" style="display:none">
             <div class="lobby-label">Pick your fighter</div>
             <div class="lobby-row">
-                <button class="lbtn" onclick="betRemove('Professor')" oncontextmenu="return betAdd('Professor',event)" id="f-Professor" style="border-color:#4ad;">Professor</button>
-                <button class="lbtn" onclick="betRemove('Scout')" oncontextmenu="return betAdd('Scout',event)" id="f-Scout" style="border-color:#d4a;">Scout</button>
-                <button class="lbtn" onclick="betRemove('Crow')" oncontextmenu="return betAdd('Crow',event)" id="f-Crow" style="border-color:#4d8;">Crow</button>
-                <button class="lbtn" onclick="betRemove('Mole')" oncontextmenu="return betAdd('Mole',event)" id="f-Mole" style="border-color:#a6f;">Mole</button>
-                <button class="lbtn" onclick="betRemove('Colonel')" oncontextmenu="return betAdd('Colonel',event)" id="f-Colonel" style="border-color:#fa0;">Colonel</button>
-                <button class="lbtn" onclick="betRemove('Daisy')" oncontextmenu="return betAdd('Daisy',event)" id="f-Daisy" style="border-color:#f66;">Daisy</button>
+                <button class="lbtn" onclick="betAdd('Professor')" oncontextmenu="return betRemove('Professor'),false" id="f-Professor" style="border-color:#4ad;">Professor</button>
+                <button class="lbtn" onclick="betAdd('Scout')" oncontextmenu="return betRemove('Scout'),false" id="f-Scout" style="border-color:#d4a;">Scout</button>
+                <button class="lbtn" onclick="betAdd('Crow')" oncontextmenu="return betRemove('Crow'),false" id="f-Crow" style="border-color:#4d8;">Crow</button>
+                <button class="lbtn" onclick="betAdd('Mole')" oncontextmenu="return betRemove('Mole'),false" id="f-Mole" style="border-color:#a6f;">Mole</button>
+                <button class="lbtn" onclick="betAdd('Colonel')" oncontextmenu="return betRemove('Colonel'),false" id="f-Colonel" style="border-color:#fa0;">Colonel</button>
+                <button class="lbtn" onclick="betAdd('Daisy')" oncontextmenu="return betRemove('Daisy'),false" id="f-Daisy" style="border-color:#f66;">Daisy</button>
             </div>
             <div class="lobby-hint" id="fighter-odds"></div>
+            <button class="lbtn" onclick="betClear()" style="margin-top:6px;font-size:10px;padding:6px 14px;">CLEAR BETS</button>
         </div>
         <button class="play-btn" onclick="startGame()">▶ PLAY</button>
         <div class="lobby-hint">Water beats stone. Skill beats luck.</div>

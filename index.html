@@ -392,7 +392,7 @@ async function betRound(){
                 if(won){payout=BET_BETS[f.name]*BET_STAKE*fdata.odds;balance+=payout;}
                 updateUI();
                 var msg=won?'<span style="color:#22c55e;font-family:Archivo Black,sans-serif;font-size:20px">YOU WIN \u00d7'+fdata.odds+' \u00d7'+BET_BETS[f.name]+'</span><br><span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">+'+payout.toFixed(2)+' USDT</span>':'<span style="color:#f66;font-family:Archivo Black,sans-serif;font-size:16px">'+f.name+' WINS</span><br><span style="color:#d4d4d8;font-size:13px">no bet on '+f.name+'</span>';
-                document.getElementById('payout-area').innerHTML='<div style="margin-top:4px">'+msg+'<br><button onclick="newBetRound()" style="margin-top:10px;background:'+f.color+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT RACE</button></div>';
+                document.getElementById('payout-area').innerHTML='<div style="margin-top:4px">'+msg+'<br><button onclick="newBetRound()" style="margin-top:10px;background:'+f.color+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">PLACE BETS</button></div>';
                 animating=false;return;
             }
             if(t<order.length-1)await sleep(150);
@@ -400,7 +400,11 @@ async function betRound(){
         if(ROTATE)await doRotationAuto();
     }
 }
-function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();betRound();}
+function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();
+    document.getElementById('game').style.display='none';
+    document.getElementById('lobby').style.display='block';
+    setMode('bet');
+}
 calcOdds();
 </script>
 </body>

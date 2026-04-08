@@ -215,15 +215,17 @@ function betRemove(name){
     updateBetDisplay();
 }
 function updateBetDisplay(){
+    var stk=CFG.stake>0?CFG.stake:1;
     BET_FIGHTERS.forEach(function(f){
         var el=document.getElementById('f-'+f.name);
         var cnt=CFG.bets[f.name]||0;
-        el.textContent=f.name+(cnt>0?' ('+cnt+')':'');
+        var sum=cnt*stk;
+        el.textContent=f.name+(cnt>0?' ('+sum.toFixed(2)+')':'');
         el.classList.toggle('active',cnt>0);
     });
     var totalBets=0;for(var k in CFG.bets)totalBets+=CFG.bets[k];
-    var cost=totalBets*(CFG.stake>0?CFG.stake:1);
-    document.getElementById('fighter-odds').textContent='Total bets: '+totalBets+' = '+cost.toFixed(2)+' USDT  (right-click +1, left-click -1)';
+    var cost=totalBets*stk;
+    document.getElementById('fighter-odds').textContent='Total: '+cost.toFixed(2)+' USDT  (right-click +1, left-click -1)';
 }
 function startGame(){
     document.getElementById('lobby').style.display='none';

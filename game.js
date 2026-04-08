@@ -1,4 +1,4 @@
-// game.js — NOISORE v5.3 shared game logic
+// game.js — NOISORE v5.4 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -110,7 +110,7 @@ function showPowerTag(r,c,remaining,color,playerIdx){var cell=document.getElemen
 function clearPowerTags(){document.querySelectorAll('.power-tag').forEach(function(el){el.remove();});}
 function renderColBtns(){var el=document.getElementById('col-btns');el.innerHTML='';for(var c=0;c<COLS;c++){var btn=document.createElement('div');btn.className='col-btn';btn.textContent='\uD83D\uDCA7';btn.onclick=(function(col){return function(){playDrop(col);};})(c);el.appendChild(btn);}}
 function updateUI(){document.getElementById('pool-value').textContent=pool.toFixed(2);document.getElementById('balance').textContent=balance.toFixed(2);document.getElementById('drop-num').textContent=dropNum;document.getElementById('round-num').textContent=roundNum;}
-function renderPlayersList(players){turnPlayers=players;var el=document.getElementById('players-list');el.innerHTML='';el.classList.toggle('two-cols',players.length>6);for(var k=0;k<players.length;k++){var row=document.createElement('div');row.className='player-row';row.id='p-row-'+k;var ord=document.createElement('span');ord.className='p-order';ord.textContent=(k+1)+'.';var nm=document.createElement('span');nm.className='p-name';nm.textContent=players[k].name;nm.style.color=players[k].color;var dp=document.createElement('span');dp.className='p-drop';dp.id='p-drop-'+k;dp.style.color=players[k].color;var rem=document.createElement('span');rem.className='p-remaining';rem.id='p-rem-'+k;row.appendChild(ord);row.appendChild(nm);row.appendChild(dp);row.appendChild(rem);el.appendChild(row);}}
+function renderPlayersList(players){turnPlayers=players;var el=document.getElementById('players-list');el.innerHTML='';el.classList.toggle('two-cols',players.length>6);var poolWrap=document.getElementById('pool-area-wrap');if(poolWrap)poolWrap.classList.toggle('vertical',players.length>6);for(var k=0;k<players.length;k++){var row=document.createElement('div');row.className='player-row';row.id='p-row-'+k;var ord=document.createElement('span');ord.className='p-order';ord.textContent=(k+1)+'.';var nm=document.createElement('span');nm.className='p-name';nm.textContent=players[k].name;nm.style.color=players[k].color;var dp=document.createElement('span');dp.className='p-drop';dp.id='p-drop-'+k;dp.style.color=players[k].color;var rem=document.createElement('span');rem.className='p-remaining';rem.id='p-rem-'+k;row.appendChild(ord);row.appendChild(nm);row.appendChild(dp);row.appendChild(rem);el.appendChild(row);}}
 function setPlayerActive(idx){for(var k=0;k<turnPlayers.length;k++){document.getElementById('p-row-'+k).classList.remove('active','done');}document.getElementById('p-row-'+idx).classList.add('active');}
 function setPlayerDrop(idx,dp){var el=document.getElementById('p-drop-'+idx);el.textContent=dp;el.classList.add('show');}
 function setPlayerRemaining(idx,rem){document.getElementById('p-rem-'+idx).textContent='\u2192'+rem;}
@@ -157,6 +157,7 @@ async function checkWin(winner,winColor){
     if(keys.length===0)return false;
     for(var i=0;i<keys.length;i++){var parts=keys[i].split('-');var cell=document.getElementById('cell-'+parts[0]+'-'+parts[1]);cell.style.background=winColor;cell.style.border='3px solid '+winColor;cell.style.boxShadow='0 0 16px '+winColor;var tags=cell.querySelectorAll('.power-tag');for(var t=0;t<tags.length;t++){tags[t].style.color='#000';tags[t].style.textShadow='0 0 3px #fff, 0 0 6px #fff';}}
     var flash=document.getElementById('channel-flash');flash.classList.add('show');
+    resetPlayerStates();
     await sleep(1500);flash.classList.remove('show');
     if(winner==='YOU')balance+=pool;
     updateUI();
@@ -224,6 +225,7 @@ async function betRound(){
             if(keys.length>0){
                 for(var ci=0;ci<keys.length;ci++){var parts=keys[ci].split('-');var cell=document.getElementById('cell-'+parts[0]+'-'+parts[1]);cell.style.background=f.color;cell.style.border='3px solid '+f.color;cell.style.boxShadow='0 0 16px '+f.color;var tags=cell.querySelectorAll('.power-tag');for(var tt=0;tt<tags.length;tt++){tags[tt].style.color='#000';tags[tt].style.textShadow='0 0 3px #fff, 0 0 6px #fff';}}
                 var flash=document.getElementById('channel-flash');flash.classList.add('show');
+                resetPlayerStates();
                 await sleep(1500);flash.classList.remove('show');
                 var won=BET_BETS[f.name]&&BET_BETS[f.name]>0;
                 var fdata=BET_FIGHTERS.filter(function(x){return x.name===f.name;})[0];

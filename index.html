@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NOISORE v4.0</title>
+<title>NOISORE v4.1</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -72,7 +72,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v4.0</div>
+    <h1>NOISORE</h1><div class="version">v4.1</div>
     <div id="lobby">
         <div class="lobby-section">
             <div class="lobby-label">Mode</div>
@@ -119,12 +119,12 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
         <div class="lobby-section" id="fighter-section" style="display:none">
             <div class="lobby-label">Pick your fighter</div>
             <div class="lobby-row">
-                <button class="lbtn" onclick="setFighter('DEEP')" id="f-DEEP" style="border-color:#4ad;">DEEP</button>
-                <button class="lbtn" onclick="setFighter('LIGHT')" id="f-LIGHT" style="border-color:#d4a;">LIGHT</button>
-                <button class="lbtn" onclick="setFighter('SNIPER')" id="f-SNIPER" style="border-color:#4d8;">SNIPER</button>
-                <button class="lbtn" onclick="setFighter('GREEDY')" id="f-GREEDY" style="border-color:#a6f;">GREEDY</button>
-                <button class="lbtn" onclick="setFighter('POWER')" id="f-POWER" style="border-color:#fa0;">POWER</button>
-                <button class="lbtn" onclick="setFighter('RANDOM')" id="f-RANDOM" style="border-color:#f66;">RANDOM</button>
+                <button class="lbtn" onclick="betRemove('DEEP')" oncontextmenu="return betAdd('DEEP',event)" id="f-DEEP" style="border-color:#4ad;">DEEP</button>
+                <button class="lbtn" onclick="betRemove('LIGHT')" oncontextmenu="return betAdd('LIGHT',event)" id="f-LIGHT" style="border-color:#d4a;">LIGHT</button>
+                <button class="lbtn" onclick="betRemove('SNIPER')" oncontextmenu="return betAdd('SNIPER',event)" id="f-SNIPER" style="border-color:#4d8;">SNIPER</button>
+                <button class="lbtn" onclick="betRemove('GREEDY')" oncontextmenu="return betAdd('GREEDY',event)" id="f-GREEDY" style="border-color:#a6f;">GREEDY</button>
+                <button class="lbtn" onclick="betRemove('POWER')" oncontextmenu="return betAdd('POWER',event)" id="f-POWER" style="border-color:#fa0;">POWER</button>
+                <button class="lbtn" onclick="betRemove('RANDOM')" oncontextmenu="return betAdd('RANDOM',event)" id="f-RANDOM" style="border-color:#f66;">RANDOM</button>
             </div>
             <div class="lobby-hint" id="fighter-odds"></div>
         </div>
@@ -150,7 +150,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 <script src="engine.js"></script>
 <script>
 requireEngine(1);
-var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP'};
+var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
     {name:'Axel',color:'#4ad',smart:false},{name:'Kira',color:'#d4a',smart:true},
     {name:'Rex',color:'#4d8',smart:false},{name:'Nova',color:'#a6f',smart:true},
@@ -185,6 +185,29 @@ function setFighter(name){
     document.getElementById('f-'+name).classList.add('active');
     var f=BET_FIGHTERS.filter(function(x){return x.name===name;})[0];
     document.getElementById('fighter-odds').textContent=f.name+': wins '+f.pct+'% \u2192 pays \u00d7'+f.odds;
+}
+function betAdd(name,e){
+    e.preventDefault();
+    if(!CFG.bets[name])CFG.bets[name]=0;
+    CFG.bets[name]++;
+    updateBetDisplay();
+    return false;
+}
+function betRemove(name){
+    if(CFG.bets[name]&&CFG.bets[name]>0)CFG.bets[name]--;
+    if(CFG.bets[name]===0)delete CFG.bets[name];
+    updateBetDisplay();
+}
+function updateBetDisplay(){
+    BET_FIGHTERS.forEach(function(f){
+        var el=document.getElementById('f-'+f.name);
+        var cnt=CFG.bets[f.name]||0;
+        el.textContent=f.name+(cnt>0?' ('+cnt+')':'');
+        el.classList.toggle('active',cnt>0);
+    });
+    var totalBets=0;for(var k in CFG.bets)totalBets+=CFG.bets[k];
+    var cost=totalBets*(CFG.stake>0?CFG.stake:1);
+    document.getElementById('fighter-odds').textContent='Total bets: '+totalBets+' = '+cost.toFixed(2)+' USDT  (right-click +1, left-click -1)';
 }
 function startGame(){
     document.getElementById('lobby').style.display='none';
@@ -315,16 +338,20 @@ async function playDrop(startCol){
     rollDrop();animating=false;setColBtnsDisabled(false);
 }
 // === BET&WET ===
-var BET_FIGHTER_CHOICE='',BET_STAKE=0;
+var BET_BETS={},BET_STAKE=0;
 async function betRound(){
-    BET_FIGHTER_CHOICE=CFG.fighter;
+    BET_BETS={};
+    for(var k in CFG.bets)BET_BETS[k]=CFG.bets[k];
     BET_STAKE=DROP_COST;
-    balance-=BET_STAKE;
-    pool=BET_STAKE*6;dropNum=0;
+    var totalBets=0;for(var k2 in BET_BETS)totalBets+=BET_BETS[k2];
+    if(totalBets===0){document.getElementById('payout-area').innerHTML='<span style="color:#f66">place at least one bet (right-click)</span>';return;}
+    balance-=totalBets*BET_STAKE;
+    pool=totalBets*BET_STAKE*6;dropNum=0;
     updateUI();
+    var betList=[];for(var k3 in BET_BETS)betList.push(k3+'\u00d7'+BET_BETS[k3]);
     var fighters=BET_FIGHTERS.map(function(f,i){return{name:f.name,color:f.color,strategy:f.name};});
     renderPlayersList(fighters);
-    document.getElementById('payout-area').innerHTML='<span style="color:#f59e0b">your fighter: <b>'+BET_FIGHTER_CHOICE+'</b> \u2014 watching...</span>';
+    document.getElementById('payout-area').innerHTML='<span style="color:#f59e0b">your bets: '+betList.join(', ')+' \u2014 watching...</span>';
     animating=true;
     for(var cycle=0;cycle<100;cycle++){
         var order=[];for(var i=0;i<fighters.length;i++)order.push(i);
@@ -342,11 +369,12 @@ async function betRound(){
                 for(var ci=0;ci<keys.length;ci++){var parts=keys[ci].split('-');var cell=document.getElementById('cell-'+parts[0]+'-'+parts[1]);cell.style.background=f.color;cell.style.border='3px solid '+f.color;cell.style.boxShadow='0 0 16px '+f.color;var tags=cell.querySelectorAll('.power-tag');for(var tt=0;tt<tags.length;tt++){tags[tt].style.color='#000';tags[tt].style.textShadow='0 0 3px #fff, 0 0 6px #fff';}}
                 var flash=document.getElementById('channel-flash');flash.classList.add('show');
                 await sleep(1500);flash.classList.remove('show');
-                var won=f.name===BET_FIGHTER_CHOICE;
+                var won=BET_BETS[f.name]&&BET_BETS[f.name]>0;
                 var fdata=BET_FIGHTERS.filter(function(x){return x.name===f.name;})[0];
-                if(won){balance+=BET_STAKE*fdata.odds;}
+                var payout=0;
+                if(won){payout=BET_BETS[f.name]*BET_STAKE*fdata.odds;balance+=payout;}
                 updateUI();
-                var msg=won?'<span style="color:#22c55e;font-family:Archivo Black,sans-serif;font-size:20px">YOU WIN \u00d7'+fdata.odds+'</span><br><span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">+'+(BET_STAKE*fdata.odds).toFixed(2)+' USDT</span>':'<span style="color:#f66;font-family:Archivo Black,sans-serif;font-size:16px">'+f.name+' WINS</span><br><span style="color:#d4d4d8;font-size:13px">you bet on '+BET_FIGHTER_CHOICE+'</span>';
+                var msg=won?'<span style="color:#22c55e;font-family:Archivo Black,sans-serif;font-size:20px">YOU WIN \u00d7'+fdata.odds+' \u00d7'+BET_BETS[f.name]+'</span><br><span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">+'+payout.toFixed(2)+' USDT</span>':'<span style="color:#f66;font-family:Archivo Black,sans-serif;font-size:16px">'+f.name+' WINS</span><br><span style="color:#d4d4d8;font-size:13px">no bet on '+f.name+'</span>';
                 document.getElementById('payout-area').innerHTML='<div style="margin-top:4px">'+msg+'<br><button onclick="newBetRound()" style="margin-top:10px;background:'+f.color+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT RACE</button></div>';
                 animating=false;return;
             }

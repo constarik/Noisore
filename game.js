@@ -1,4 +1,4 @@
-// game.js — NOISORE v5.2 shared game logic
+// game.js — NOISORE v5.3 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -110,7 +110,7 @@ function showPowerTag(r,c,remaining,color,playerIdx){var cell=document.getElemen
 function clearPowerTags(){document.querySelectorAll('.power-tag').forEach(function(el){el.remove();});}
 function renderColBtns(){var el=document.getElementById('col-btns');el.innerHTML='';for(var c=0;c<COLS;c++){var btn=document.createElement('div');btn.className='col-btn';btn.textContent='\uD83D\uDCA7';btn.onclick=(function(col){return function(){playDrop(col);};})(c);el.appendChild(btn);}}
 function updateUI(){document.getElementById('pool-value').textContent=pool.toFixed(2);document.getElementById('balance').textContent=balance.toFixed(2);document.getElementById('drop-num').textContent=dropNum;document.getElementById('round-num').textContent=roundNum;}
-function renderPlayersList(players){turnPlayers=players;var el=document.getElementById('players-list');el.innerHTML='';for(var k=0;k<players.length;k++){var row=document.createElement('div');row.className='player-row';row.id='p-row-'+k;var ord=document.createElement('span');ord.className='p-order';ord.textContent=(k+1)+'.';var nm=document.createElement('span');nm.className='p-name';nm.textContent=players[k].name;nm.style.color=players[k].color;var dp=document.createElement('span');dp.className='p-drop';dp.id='p-drop-'+k;dp.style.color=players[k].color;var rem=document.createElement('span');rem.className='p-remaining';rem.id='p-rem-'+k;row.appendChild(ord);row.appendChild(nm);row.appendChild(dp);row.appendChild(rem);el.appendChild(row);}}
+function renderPlayersList(players){turnPlayers=players;var el=document.getElementById('players-list');el.innerHTML='';el.classList.toggle('two-cols',players.length>6);for(var k=0;k<players.length;k++){var row=document.createElement('div');row.className='player-row';row.id='p-row-'+k;var ord=document.createElement('span');ord.className='p-order';ord.textContent=(k+1)+'.';var nm=document.createElement('span');nm.className='p-name';nm.textContent=players[k].name;nm.style.color=players[k].color;var dp=document.createElement('span');dp.className='p-drop';dp.id='p-drop-'+k;dp.style.color=players[k].color;var rem=document.createElement('span');rem.className='p-remaining';rem.id='p-rem-'+k;row.appendChild(ord);row.appendChild(nm);row.appendChild(dp);row.appendChild(rem);el.appendChild(row);}}
 function setPlayerActive(idx){for(var k=0;k<turnPlayers.length;k++){document.getElementById('p-row-'+k).classList.remove('active','done');}document.getElementById('p-row-'+idx).classList.add('active');}
 function setPlayerDrop(idx,dp){var el=document.getElementById('p-drop-'+idx);el.textContent=dp;el.classList.add('show');}
 function setPlayerRemaining(idx,rem){document.getElementById('p-rem-'+idx).textContent='\u2192'+rem;}

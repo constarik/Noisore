@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NOISORE v4.1</title>
+<title>NOISORE v4.2</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -72,7 +72,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v4.1</div>
+    <h1>NOISORE</h1><div class="version">v4.2</div>
     <div id="lobby">
         <div class="lobby-section">
             <div class="lobby-label">Mode</div>
@@ -160,13 +160,29 @@ var BOT_POOL=[
     {name:'Dex',color:'#6af',smart:false}
 ];
 var BET_FIGHTERS=[
-    {name:'DEEP',color:'#4ad',pct:20.0,odds:5.0},
-    {name:'LIGHT',color:'#d4a',pct:16.8,odds:6.0},
-    {name:'SNIPER',color:'#4d8',pct:18.8,odds:5.3},
-    {name:'GREEDY',color:'#a6f',pct:18.9,odds:5.3},
-    {name:'POWER',color:'#fa0',pct:19.6,odds:5.1},
-    {name:'RANDOM',color:'#f66',pct:6.0,odds:16.7}
+    {name:'DEEP',color:'#4ad'},
+    {name:'LIGHT',color:'#d4a'},
+    {name:'SNIPER',color:'#4d8'},
+    {name:'GREEDY',color:'#a6f'},
+    {name:'POWER',color:'#fa0'},
+    {name:'RANDOM',color:'#f66'}
 ];
+var OVERROUND=1.10; // 10% margin
+// 500K simulation data: pct per config [DEEP,LIGHT,SNIPER,GREEDY,POWER,RANDOM]
+var BET_DATA={
+    '6-off':[19.9,17.0,18.7,18.8,19.8,5.9],
+    '6-on': [18.8,19.2,17.7,17.9,18.2,8.2],
+    '8-off':[19.9,17.0,18.7,18.8,19.8,5.9], // placeholder until 8x8 500K
+    '8-on': [18.8,19.2,17.7,17.9,18.2,8.2]  // placeholder until 8x8 500K
+};
+function calcOdds(){
+    var key=CFG.gridSize+'-'+(CFG.rotate?'on':'off');
+    var pcts=BET_DATA[key];
+    for(var i=0;i<BET_FIGHTERS.length;i++){
+        BET_FIGHTERS[i].pct=pcts[i];
+        BET_FIGHTERS[i].odds=Math.round(100/pcts[i]/OVERROUND*10)/10;
+    }
+}
 function setMode(m){
     CFG.mode=m;
     document.querySelectorAll('#lobby .lobby-section:first-child .lbtn').forEach(function(b){b.classList.remove('active');});
@@ -175,8 +191,8 @@ function setMode(m){
     document.getElementById('stake-section').style.display=m==='solo'?'none':'';
     document.getElementById('fighter-section').style.display=m==='bet'?'':'none';
 }
-function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);}
-function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);}
+function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);calcOdds();updateBetDisplay();}
+function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);calcOdds();updateBetDisplay();}
 function setStake(v){CFG.stake=v;document.querySelectorAll('#stake-section .lbtn').forEach(function(b){b.classList.remove('active');});var id='stake-'+String(v).replace('.','');var el=document.getElementById(id);if(el)el.classList.add('active');}
 function setBots(n){CFG.numBots=n;document.querySelectorAll('#bots-section .lbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('bots-'+n).classList.add('active');}
 function setFighter(name){
@@ -221,6 +237,7 @@ function startGame(){
         document.getElementById('game-mode-label').textContent='EROSION';
         document.getElementById('col-btns').style.display='grid';
     }else if(CFG.mode==='bet'){
+        calcOdds();
         BOTS=BET_FIGHTERS;
         document.getElementById('pool-area-wrap').style.display='flex';
         document.getElementById('game-mode-label').textContent='Bet&Wet';
@@ -384,6 +401,7 @@ async function betRound(){
     }
 }
 function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();betRound();}
+calcOdds();
 </script>
 </body>
 </html>

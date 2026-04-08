@@ -43,7 +43,7 @@ function setMode(m){
 }
 function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);calcOdds();updateBetDisplay();}
 function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);calcOdds();updateBetDisplay();}
-function setStake(v){CFG.stake=v;document.querySelectorAll('#stake-section .lbtn').forEach(function(b){b.classList.remove('active');});var id='stake-'+String(v).replace('.','');var el=document.getElementById(id);if(el)el.classList.add('active');}
+function setStake(v){CFG.stake=v;document.querySelectorAll('#stake-section .lbtn').forEach(function(b){b.classList.remove('active');});var id='stake-'+String(v).replace('.','');var el=document.getElementById(id);if(el)el.classList.add('active');updateBetDisplay();}
 function setBots(n){CFG.numBots=n;document.querySelectorAll('#bots-section .lbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('bots-'+n).classList.add('active');}
 function betAdd(name,e){if(e)e.preventDefault();if(!CFG.bets[name])CFG.bets[name]=0;CFG.bets[name]++;updateBetDisplay();return false;}
 function betRemove(name){if(CFG.bets[name]&&CFG.bets[name]>0)CFG.bets[name]--;if(CFG.bets[name]===0)delete CFG.bets[name];updateBetDisplay();}

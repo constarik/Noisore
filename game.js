@@ -1,4 +1,4 @@
-// game.js — NOISORE v6.0 shared game logic
+// game.js — NOISORE v6.1 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -10,12 +10,12 @@ var BOT_POOL=[
     {name:'Dex',color:'#6af',smart:false}
 ];
 var BET_FIGHTERS=[
-    {name:'Professor',strat:'DEEP',color:'#4ad',noise:0.10},
-    {name:'Scout',strat:'LIGHT',color:'#d4a',noise:0.20},
-    {name:'Crow',strat:'SNIPER',color:'#4d8',noise:0.25},
-    {name:'Mole',strat:'GREEDY',color:'#a6f',noise:0.25},
-    {name:'Colonel',strat:'POWER',color:'#fa0',noise:0.15},
-    {name:'Daisy',strat:'RANDOM',color:'#f66',noise:0.40}
+    {name:'Professor',strat:'DEEP',color:'#4ad',noise:10},
+    {name:'Scout',strat:'LIGHT',color:'#d4a',noise:20},
+    {name:'Crow',strat:'SNIPER',color:'#4d8',noise:25},
+    {name:'Mole',strat:'GREEDY',color:'#a6f',noise:25},
+    {name:'Colonel',strat:'POWER',color:'#fa0',noise:15},
+    {name:'Daisy',strat:'RANDOM',color:'#f66',noise:40}
 ];
 var OVERROUND=1.05;
 var SKIN_PACKS=[
@@ -99,8 +99,8 @@ function setMode(m){
     if(m==='bet'&&CFG.stake===0){setStake(1);}
     if(m==='bet'){randomizeFighterNames();}
 }
-function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);calcOdds();updateBetDisplay();}
-function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);calcOdds();updateBetDisplay();}
+function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);calcOdds();if(CFG.mode==='bet')updateFighterButtons();else updateBetDisplay();}
+function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);calcOdds();if(CFG.mode==='bet')updateFighterButtons();else updateBetDisplay();}
 function setStake(v){CFG.stake=v;document.querySelectorAll('#stake-section .lbtn').forEach(function(b){b.classList.remove('active');});var id='stake-'+String(v).replace('.','');var el=document.getElementById(id);if(el)el.classList.add('active');updateBetDisplay();}
 function setBots(n){CFG.numBots=n;document.querySelectorAll('#bots-section .lbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('bots-'+n).classList.add('active');}
 function betAdd(name,e){if(e)e.preventDefault();var stk=CFG.stake>0?CFG.stake:1;if(!CFG.bets[name])CFG.bets[name]=0;CFG.bets[name]+=stk;updateBetDisplay();return false;}
@@ -260,7 +260,7 @@ async function playDrop(startCol){
 // === BET&WET ===
 var BET_BETS={},BET_TOTAL=0;
 function betPickCol(fighter,dp){
-    var n=fighter.noise||0;
+    var n=(fighter.noise||0)/100;
     var strat=fighter.strat||fighter.strategy;
     if(strat==='RANDOM'){
         if(Math.random()<n)return STRATEGY_PICK['DEEP'](dp);

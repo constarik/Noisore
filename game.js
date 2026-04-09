@@ -1,4 +1,4 @@
-// game.js — NOISORE v6.6 shared game logic
+// game.js — NOISORE v6.7 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -153,7 +153,7 @@ function startGame(){
     }else{
         BOTS=BOT_POOL.slice().sort(function(){return Math.random()-0.5;}).slice(0,CFG.numBots);
         document.getElementById('pool-area-wrap').style.display='flex';
-        document.getElementById('game-mode-label').textContent='NOISORE';
+        document.getElementById('game-mode-label').textContent='SOIRON';
         document.getElementById('col-btns').style.display='grid';
     }
     document.getElementById('info-left').textContent=COLS+'\u00d7'+ROWS+(ROTATE?' rotate':'')+' - stone 1-'+MAX_H;

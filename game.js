@@ -1,4 +1,4 @@
-// game.js — NOISORE v7.7 shared game logic
+// game.js — NOISORE v7.8 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -135,10 +135,8 @@ function updateBetDisplay(){
 function startGame(){
     sndPlay('click');sndInit();
     document.getElementById('lobby').style.display='none';
-    document.getElementById('game').style.display='flex';
-    document.querySelector('h1').style.display='none';
-    document.querySelector('.version').style.display='none';
-    window.scrollTo(0,0);
+    document.getElementById('game').style.display='block';
+    document.body.style.overflow='hidden';
     if('ontouchstart' in window&&document.documentElement.requestFullscreen){try{document.documentElement.requestFullscreen();}catch(e){}}
     COLS=CFG.gridSize;ROWS=CFG.gridSize;MAX_H=10;MAX_DROP=10;
     ROTATE=CFG.rotate;
@@ -168,7 +166,7 @@ function startGame(){
     initGame();
     if(CFG.mode==='bet') betRound();
 }
-function backToLobby(){sndPlay('click');document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';document.querySelector('h1').style.display='';document.querySelector('.version').style.display='';animating=false;}
+function backToLobby(){sndPlay('click');document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';document.body.style.overflow='';window.scrollTo(0,0);animating=false;}
 // === GAME STATE ===
 var COLS=6,ROWS=6,MAX_H=10,MAX_DROP=10,DROP_COST=0,POOL_RATE=0.95,ANIM_DELAY=200;
 var ROTATE=true,BOTS=[];
@@ -350,8 +348,8 @@ async function betRound(){
 function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();
     document.getElementById('game').style.display='none';
     document.getElementById('lobby').style.display='block';
-    document.querySelector('h1').style.display='';
-    document.querySelector('.version').style.display='';
+    document.body.style.overflow='';
+    window.scrollTo(0,0);
     randomizeFighterNames();
     setMode('bet');
 }

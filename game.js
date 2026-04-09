@@ -1,4 +1,4 @@
-// game.js — NOISORE v7.0 shared game logic
+// game.js — NOISORE v7.1 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -94,6 +94,7 @@ function calcOdds(){
 }
 // === LOBBY ===
 function setMode(m){
+    sndPlay('click');
     CFG.mode=m;
     document.querySelectorAll('#lobby .lobby-section:first-child .lbtn').forEach(function(b){b.classList.remove('active');});
     document.getElementById('mode-'+m).classList.add('active');
@@ -107,13 +108,13 @@ function setMode(m){
     if(m==='bet'&&CFG.stake===0){setStake(1);}
     if(m==='bet'){randomizeFighterNames();}
 }
-function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);if(CFG.mode==='bet')randomizeFighterNames();else{calcOdds();updateBetDisplay();}}
-function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);if(CFG.mode==='bet')randomizeFighterNames();else{calcOdds();updateBetDisplay();}}
-function setStake(v){CFG.stake=v;document.querySelectorAll('#stake-section .lbtn').forEach(function(b){b.classList.remove('active');});var id='stake-'+String(v).replace('.','');var el=document.getElementById(id);if(el)el.classList.add('active');updateBetDisplay();}
-function setBots(n){CFG.numBots=n;document.querySelectorAll('#bots-section .lbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('bots-'+n).classList.add('active');}
+function setGrid(s){sndPlay('click');CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);if(CFG.mode==='bet')randomizeFighterNames();else{calcOdds();updateBetDisplay();}}
+function setRotation(on){sndPlay('click');CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);if(CFG.mode==='bet')randomizeFighterNames();else{calcOdds();updateBetDisplay();}}
+function setStake(v){sndPlay('click');CFG.stake=v;document.querySelectorAll('#stake-section .lbtn').forEach(function(b){b.classList.remove('active');});var id='stake-'+String(v).replace('.','');var el=document.getElementById(id);if(el)el.classList.add('active');updateBetDisplay();}
+function setBots(n){sndPlay('click');CFG.numBots=n;document.querySelectorAll('#bots-section .lbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('bots-'+n).classList.add('active');}
 function betAdd(name,e){if(e)e.preventDefault();var stk=CFG.stake>0?CFG.stake:1;if(!CFG.bets[name])CFG.bets[name]=0;CFG.bets[name]+=stk;sndPlay('bet');updateBetDisplay();return false;}
-function betRemove(name){delete CFG.bets[name];updateBetDisplay();}
-function betClear(){CFG.bets={};updateBetDisplay();}
+function betRemove(name){sndPlay('click');delete CFG.bets[name];updateBetDisplay();}
+function betClear(){sndPlay('click');CFG.bets={};updateBetDisplay();}
 function updateBetDisplay(){
     var row=document.getElementById('fighter-btns');
     if(row){
@@ -132,6 +133,7 @@ function updateBetDisplay(){
     if(el2)el2.textContent='Total: '+total.toFixed(2)+' USDT'+(isMobile?'  (tap to add)':'  (click +1, right-click -1)');
 }
 function startGame(){
+    sndPlay('click');sndInit();
     document.getElementById('lobby').style.display='none';
     document.getElementById('game').style.display='block';
     if('ontouchstart' in window&&document.documentElement.requestFullscreen){try{document.documentElement.requestFullscreen();}catch(e){}}
@@ -163,7 +165,7 @@ function startGame(){
     initGame();
     if(CFG.mode==='bet') betRound();
 }
-function backToLobby(){document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';animating=false;}
+function backToLobby(){sndPlay('click');document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';animating=false;}
 // === GAME STATE ===
 var COLS=6,ROWS=6,MAX_H=10,MAX_DROP=10,DROP_COST=0,POOL_RATE=0.95,ANIM_DELAY=200;
 var ROTATE=true,BOTS=[];

@@ -244,9 +244,14 @@ def run_betwet_verify(rounds, rows, cols, rotate, noise_list, overround,
         elif bet_strategy == 'random':
             bets[random.randint(0, 5)] = 1.0
         elif bet_strategy == 'weighted':
-            # bet proportional to odds (more on longshots)
             for i in range(6):
                 bets[i] = odds[i] / sum(odds)
+        elif bet_strategy == 'mix':
+            # random mix each round: 1-3 random fighters, 1-3 bets each
+            n_fighters = random.randint(1, 3)
+            chosen = random.sample(range(6), n_fighters)
+            for idx in chosen:
+                bets[idx] = random.randint(1, 3) * 1.0
         
         wagered = sum(bets)
         total_wagered += wagered
@@ -304,7 +309,7 @@ def main():
     parser.add_argument('--noise', type=str, default='10,20,25,25,15,40',
                         help='Noise per fighter: Prof,Scout,Crow,Mole,Colonel,Daisy')
     parser.add_argument('--overround', type=float, default=1.05)
-    parser.add_argument('--bet-strategy', choices=['uniform','favorite','longshot','random','weighted'],
+    parser.add_argument('--bet-strategy', choices=['uniform','favorite','longshot','random','weighted','mix'],
                         default='uniform')
     parser.add_argument('--seed', type=int, default=None)
     args = parser.parse_args()

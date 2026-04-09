@@ -1,13 +1,18 @@
-// game.js — NOISORE v6.4 shared game logic
+// game.js — NOISORE v6.5 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
-    {name:'Axel',color:'#4ad',smart:false},{name:'Kira',color:'#d4a',smart:true},
-    {name:'Rex',color:'#4d8',smart:false},{name:'Nova',color:'#a6f',smart:true},
-    {name:'Zed',color:'#f66',smart:false},{name:'Ivy',color:'#6d6',smart:true},
-    {name:'Bolt',color:'#fa0',smart:false},{name:'Luna',color:'#8af',smart:true},
-    {name:'Jinx',color:'#f4a',smart:false},{name:'Sage',color:'#ad4',smart:true},
-    {name:'Dex',color:'#6af',smart:false}
+    {name:'Axel',color:'#4ad',strat:'DEEP',noise:15},
+    {name:'Kira',color:'#d4a',strat:'LIGHT',noise:20},
+    {name:'Rex',color:'#4d8',strat:'SNIPER',noise:25},
+    {name:'Nova',color:'#a6f',strat:'GREEDY',noise:20},
+    {name:'Zed',color:'#f66',strat:'RANDOM',noise:30},
+    {name:'Ivy',color:'#6d6',strat:'POWER',noise:15},
+    {name:'Bolt',color:'#fa0',strat:'RANDOM',noise:35},
+    {name:'Luna',color:'#8af',strat:'DEEP',noise:25},
+    {name:'Jinx',color:'#f4a',strat:'RANDOM',noise:40},
+    {name:'Sage',color:'#ad4',strat:'LIGHT',noise:10},
+    {name:'Dex',color:'#6af',strat:'RANDOM',noise:45}
 ];
 var BET_FIGHTERS=[
     {name:'Professor',strat:'DEEP',color:'#4ad',noise:10},
@@ -231,6 +236,16 @@ async function checkWin(winner,winColor){
     animating=false;setColBtnsDisabled(true);return true;
 }
 // === SOLO & PVP ===
+function botPickCol(bot,dp){
+    var n=(bot.noise||0)/100;
+    var strat=bot.strat||'RANDOM';
+    if(strat==='RANDOM'){
+        if(Math.random()<n){var alts=['DEEP','LIGHT','SNIPER','GREEDY','POWER'];return STRATEGY_PICK[alts[Math.floor(Math.random()*alts.length)]](dp);}
+        return STRATEGY_PICK['RANDOM'](dp);
+    }
+    if(Math.random()<n)return STRATEGY_PICK['RANDOM'](dp);
+    return STRATEGY_PICK[strat](dp);
+}
 async function playDrop(startCol){
     if(animating)return;animating=true;setColBtnsDisabled(true);
     if(DROP_COST>0&&balance<DROP_COST){document.getElementById('payout-area').innerHTML='<span style="color:#f66">insufficient balance</span>';animating=false;setColBtnsDisabled(false);return;}
@@ -245,7 +260,7 @@ async function playDrop(startCol){
         return;
     }
     var players=[{name:'YOU',color:'#f59e0b',col:startCol,dp:currentDrop,isPlayer:true}];
-    for(var b=0;b<BOTS.length;b++){var botCol=BOTS[b].smart?pickLight():Math.floor(Math.random()*COLS);players.push({name:BOTS[b].name,color:BOTS[b].color,col:botCol,dp:randDrop(),isPlayer:false});}
+    for(var b=0;b<BOTS.length;b++){var botDp=randDrop();var botCol=botPickCol(BOTS[b],botDp);players.push({name:BOTS[b].name,color:BOTS[b].color,col:botCol,dp:botDp,isPlayer:false});}
     for(var i=players.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=players[i];players[i]=players[j];players[j]=tmp;}
     renderPlayersList(players);clearPowerTags();
     for(var t=0;t<players.length;t++){

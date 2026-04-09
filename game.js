@@ -1,4 +1,4 @@
-// game.js — NOISORE v6.8 shared game logic
+// game.js — NOISORE v6.9 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -345,7 +345,7 @@ function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;d
 // === SOUND ===
 var SND_MUTED=true,SND_CTX=null;
 function sndInit(){if(!SND_CTX)SND_CTX=new(window.AudioContext||window.webkitAudioContext)();if(SND_CTX.state==='suspended')SND_CTX.resume();}
-function sndToggle(){sndInit();SND_MUTED=!SND_MUTED;var btn=document.getElementById('mute-btn');if(btn)btn.textContent=SND_MUTED?'\uD83D\uDD07':'\uD83D\uDD0A';}
+function sndToggle(){sndInit();SND_MUTED=!SND_MUTED;var btn=document.getElementById('mute-btn');if(btn)btn.innerHTML=SND_MUTED?'&#128263;':'&#128266;';}
 function sndPlay(type){
     if(SND_MUTED||!SND_CTX)return;
     var ctx=SND_CTX,now=ctx.currentTime;

@@ -1,4 +1,4 @@
-// game.js — NOISORE v5.4 shared game logic
+// game.js — NOISORE v5.5 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -40,6 +40,11 @@ function setMode(m){
     document.getElementById('bots-section').style.display=m==='pvp'?'':'none';
     document.getElementById('stake-section').style.display=m==='solo'?'none':'';
     document.getElementById('fighter-section').style.display=m==='bet'?'':'none';
+    var stakeLabel=document.getElementById('stake-label');
+    if(stakeLabel)stakeLabel.textContent=m==='bet'?'Bet size':'Stake per drop';
+    var freeBtn=document.getElementById('stake-0');
+    if(freeBtn)freeBtn.style.display=m==='bet'?'none':'';
+    if(m==='bet'&&CFG.stake===0){setStake(1);}
 }
 function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);calcOdds();updateBetDisplay();}
 function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);calcOdds();updateBetDisplay();}

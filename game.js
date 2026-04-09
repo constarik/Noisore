@@ -382,12 +382,24 @@ function sndPlay(type){
     }else if(type==='rotate'){
         // long creaky rotation ~1.2s
         var dur=1.2;
+        // rusty mechanism: noise burst + modulated tone
+        var nBuf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
+        var nd=nBuf.getChannelData(0);
+        for(var ni=0;ni<nd.length;ni++){
+            var t=ni/ctx.sampleRate;
+            var env=Math.min(t*5,1)*Math.max(0,1-t/(dur*0.9));
+            nd[ni]=(Math.random()*2-1)*env*0.5*Math.sin(t*40)*Math.sin(t*7);
+        }
+        var nSrc=ctx.createBufferSource();nSrc.buffer=nBuf;
+        var nGain=ctx.createGain();nGain.gain.value=0.1;
+        nSrc.connect(nGain);nGain.connect(ctx.destination);nSrc.start(now);
+        // tonal creak
         osc=ctx.createOscillator();gain=ctx.createGain();
         var lfo=ctx.createOscillator();var lfoGain=ctx.createGain();
-        lfo.type='sine';lfo.frequency.value=8;lfoGain.gain.value=30;
+        lfo.type='triangle';lfo.frequency.value=12;lfoGain.gain.value=50;
         lfo.connect(lfoGain);lfoGain.connect(osc.frequency);
-        osc.type='sawtooth';osc.frequency.setValueAtTime(60,now);osc.frequency.linearRampToValueAtTime(140,now+dur);
-        gain.gain.setValueAtTime(0.07,now);gain.gain.linearRampToValueAtTime(0.06,now+dur*0.5);gain.gain.exponentialRampToValueAtTime(0.001,now+dur);
+        osc.type='sawtooth';osc.frequency.setValueAtTime(50,now);osc.frequency.linearRampToValueAtTime(100,now+dur*0.7);osc.frequency.linearRampToValueAtTime(70,now+dur);
+        gain.gain.setValueAtTime(0.05,now);gain.gain.linearRampToValueAtTime(0.04,now+dur*0.5);gain.gain.exponentialRampToValueAtTime(0.001,now+dur);
         osc.connect(gain);gain.connect(ctx.destination);
         osc.start(now);osc.stop(now+dur);lfo.start(now);lfo.stop(now+dur);
     }else if(type==='bet'){

@@ -193,20 +193,26 @@ async function doRotation(){
     document.getElementById('rotate-ind').textContent='\u21bb 5s or click grid';
     document.getElementById('rotate-ind').classList.add('show');
     await waitForRotate();
-    rotateGridCW();if(hasChannel()){fillRowIfChannel();}
     sndPlay('rotate');
+    var g=document.getElementById('grid');g.style.transition='transform 1.2s ease-in-out';g.style.transform='rotate(90deg)';
+    await sleep(1200);
+    g.style.transition='none';g.style.transform='';
+    rotateGridCW();if(hasChannel()){fillRowIfChannel();}
     clearPowerTags();renderGrid();
     document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';
-    await sleep(800);
+    await sleep(400);
     document.getElementById('rotate-ind').classList.remove('show');
 }
 async function doRotationAuto(){
-    rotateGridCW();if(hasChannel()){fillRowIfChannel();}
     sndPlay('rotate');
+    var g=document.getElementById('grid');g.style.transition='transform 1.2s ease-in-out';g.style.transform='rotate(90deg)';
+    await sleep(1200);
+    g.style.transition='none';g.style.transform='';
+    rotateGridCW();if(hasChannel()){fillRowIfChannel();}
     clearPowerTags();renderGrid();
     document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';
     document.getElementById('rotate-ind').classList.add('show');
-    await sleep(600);
+    await sleep(400);
     document.getElementById('rotate-ind').classList.remove('show');
 }
 async function animateDrop(col,dropPower,who,color,playerIdx){
@@ -374,10 +380,16 @@ function sndPlay(type){
             osc.connect(gain);gain.connect(ctx.destination);osc.start(now+i*0.12);osc.stop(now+i*0.12+0.4);
         });
     }else if(type==='rotate'){
+        // long creaky rotation ~1.2s
+        var dur=1.2;
         osc=ctx.createOscillator();gain=ctx.createGain();
-        osc.type='sawtooth';osc.frequency.setValueAtTime(80,now);osc.frequency.linearRampToValueAtTime(120,now+0.3);
-        gain.gain.setValueAtTime(0.06,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.3);
-        osc.connect(gain);gain.connect(ctx.destination);osc.start(now);osc.stop(now+0.3);
+        var lfo=ctx.createOscillator();var lfoGain=ctx.createGain();
+        lfo.type='sine';lfo.frequency.value=8;lfoGain.gain.value=30;
+        lfo.connect(lfoGain);lfoGain.connect(osc.frequency);
+        osc.type='sawtooth';osc.frequency.setValueAtTime(60,now);osc.frequency.linearRampToValueAtTime(140,now+dur);
+        gain.gain.setValueAtTime(0.07,now);gain.gain.setValueAtTime(0.07,now+dur*0.8);gain.gain.exponentialRampToValueAtTime(0.001,now+dur);
+        osc.connect(gain);gain.connect(ctx.destination);
+        osc.start(now);osc.stop(now+dur);lfo.start(now);lfo.stop(now+dur);
     }else if(type==='bet'){
         osc=ctx.createOscillator();gain=ctx.createGain();
         osc.type='square';osc.frequency.value=2400;

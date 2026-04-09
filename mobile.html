@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NOISORE v7.6m</title>
+<title>NOISORE v7.7m</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -23,7 +23,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .lbtn.disabled{opacity:0.3;pointer-events:none;}
 .play-btn{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0a0f;font-family:'Archivo Black',sans-serif;font-size:16px;letter-spacing:4px;padding:12px 40px;border:none;border-radius:10px;cursor:pointer;margin-top:12px;}
 .lobby-hint{font-size:10px;color:#b0b0b8;margin-top:6px;}
-#game{display:none;flex-direction:column;height:100vh;box-sizing:border-box;padding:0 8px;}
+#game{display:none;}
 .game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
 .game-title{font-family:'Archivo Black',sans-serif;font-size:13px;color:#f59e0b;letter-spacing:2px;}
 .back-btn{background:none;border:1px solid #2a2a4a;color:#d4d4d8;font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 10px;border-radius:6px;cursor:pointer;}
@@ -51,8 +51,8 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .col-btn{background:#1a1a2e;border:2px solid #2a2a4a;border-radius:5px 5px 0 0;color:#f59e0b;font-size:16px;font-weight:700;padding:6px 0;cursor:pointer;text-align:center;min-height:36px;}
 .col-btn:active{background:#2a2a4a;border-color:#f59e0b;}
 .col-btn.disabled{opacity:0.3;pointer-events:none;}
-.grid-wrap{padding:2px;background:#12121a;border-radius:5px;border:1px solid #1e1e2e;flex:1;min-height:0;display:flex;align-items:stretch;}
-.grid{display:grid;gap:2px;flex:1;}
+.grid-wrap{padding:2px;background:#12121a;border-radius:5px;border:1px solid #1e1e2e;}
+.grid{display:grid;gap:2px;}
 .cell{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;position:relative;overflow:hidden;}
 .cell.h10{background:#6b4226;color:#fff;border:1px solid #7d4e2e;}.cell.h9{background:#6e4a2a;color:#fff;border:1px solid #80522e;}
 .cell.h8{background:#72522e;color:#fff;border:1px solid #845a32;}.cell.h7{background:#765a34;color:#fff;border:1px solid #886238;}
@@ -75,7 +75,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v7.6m</div>
+    <h1>NOISORE</h1><div class="version">v7.7m</div>
     <button id="mute-btn" onclick="sndToggle()" style="position:fixed;top:6px;right:6px;z-index:200;background:none;border:1px solid #333;border-radius:6px;color:#888;font-size:16px;padding:3px 6px;cursor:pointer;">&#128263;</button>
     <div id="lobby">
         <div class="lobby-section">

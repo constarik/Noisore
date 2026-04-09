@@ -215,27 +215,29 @@ Order: [DEEP, LIGHT, SNIPER, GREEDY, POWER, RANDOM]
 | `betwet_verify.py` | Totalizator profitability verifier |
 | `verify_all.bat` | Full verification batch (15 tests) |
 
-### Fighter Skins (alternative name packs)
+### Fighter Skins (max 9 chars per name)
 
-| Strategy | Classic | Двор | Школа | Зона | Офис | Армия |
+**RU packs:**
+
+| Strategy | Классика | Двор | Школа | Зона | Офис | Армия |
 |---|---|---|---|---|---|---|
-| DEEP | Professor / Профессор | Мозг | Отличник | Адвокат | Аналитик | Штабной |
-| LIGHT | Scout / Разведчик | Шустрый | Подлиза | Шестёрка | Стажёр | Дозорный |
-| SNIPER | Crow / Ворона | Щипач | Хулиган | Медвежатник | Аудитор | Снайпер |
-| GREEDY | Mole / Крот | Крыса | Жадина | Крот | Бухгалтер | Сапёр |
-| POWER | Colonel / Полковник | Бык | Физрук | Смотрящий | Директор | Полковник |
-| RANDOM | Daisy / Фрося | Промокашка | Двоечник | Первоход | Новичок | Салага |
+| DEEP | Профессор | Мозг | Отличник | Адвокат | Аналитик | Штабной |
+| LIGHT | Разведчик | Шустрый | Подлиза | Шестёрка | Стажёр | Дозорный |
+| SNIPER | Ворона | Щипач | Хулиган | Домушник | Ревизор | Снайпер |
+| GREEDY | Крот | Крыса | Жадина | Барыга | Бухгалтер | Сапёр |
+| POWER | Полковник | Бык | Физрук | Смотрящий | Директор | Сержант |
+| RANDOM | Фрося | Шалопай | Двоечник | Первоход | Новичок | Салага |
 
-EN packs (future):
+**EN packs:**
 
-| Strategy | Classic | Street | Casino | Pirate |
-|---|---|---|---|---|
-| DEEP | Professor | Brains | Card Counter | Navigator |
-| LIGHT | Scout | Quickie | Dealer | Lookout |
-| SNIPER | Crow | Pickpocket | Hustler | Gunner |
-| GREEDY | Mole | Rat | Loan Shark | Digger |
-| POWER | Colonel | Bull | Bouncer | Captain |
-| RANDOM | Daisy | Rookie | Lucky | Parrot |
+| Strategy | Classic | Street | Casino | Pirate | Sport | Spy |
+|---|---|---|---|---|---|---|
+| DEEP | Professor | Brains | Counter | Navigator | Coach | Analyst |
+| LIGHT | Scout | Quickie | Dealer | Lookout | Sprinter | Mole |
+| SNIPER | Crow | Thief | Hustler | Gunner | Striker | Hitman |
+| GREEDY | Mole | Rat | Shark | Digger | Keeper | Hoarder |
+| POWER | Colonel | Bull | Bouncer | Captain | Enforcer | Commando |
+| RANDOM | Daisy | Rookie | Lucky | Parrot | Benchman | Decoy |
 
 ---
 

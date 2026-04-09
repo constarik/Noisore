@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NOISORE v8.0m</title>
+<title>NOISORE v8.1m</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
-body{background:#0a0a0f;color:#e4e4e7;font-family:'JetBrains Mono',monospace;display:flex;flex-direction:column;align-items:center;}
+body{background:linear-gradient(180deg,#0a1628 0%,#0d2847 15%,#134e6f 30%,#1a7a8a 45%,#2da89a 55%,#4ec6a0 62%,#c2b280 65%,#d4c49a 70%,#8b7355 100%);color:#e4e4e7;font-family:'JetBrains Mono',monospace;display:flex;flex-direction:column;align-items:center;}
 #app{width:100%;max-width:400px;padding:8px 10px;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
-h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-align:center;letter-spacing:5px;margin-bottom:1px;}
+h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-align:center;letter-spacing:5px;margin-bottom:1px;text-shadow:0 2px 8px rgba(0,0,0,0.5);}
 .version{text-align:center;font-size:9px;color:#f59e0b;margin-bottom:8px;}
 #lobby{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;}
 .lobby-section{margin-bottom:10px;}
@@ -51,7 +51,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .col-btn{background:#1a1a2e;border:2px solid #2a2a4a;border-radius:5px 5px 0 0;color:#f59e0b;font-size:16px;font-weight:700;padding:6px 0;cursor:pointer;text-align:center;min-height:36px;}
 .col-btn:active{background:#2a2a4a;border-color:#f59e0b;}
 .col-btn.disabled{opacity:0.3;pointer-events:none;}
-.grid-wrap{padding:2px;background:#12121a;border-radius:5px;border:1px solid #1e1e2e;}
+.grid-wrap{padding:2px;border-radius:5px;border:1px solid #2a2a3a;background:rgba(10,10,20,0.85);box-shadow:inset 0 0 20px rgba(0,0,0,0.6),0 3px 15px rgba(0,0,0,0.5);}
 .grid{display:grid;gap:2px;}
 .cell{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;position:relative;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,0.5);filter:url(#stone-edge);}
 .cell.h0{filter:none;}
@@ -81,7 +81,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v8.0m</div>
+    <h1>NOISORE</h1><div class="version">v8.1m</div>
     <button id="mute-btn" onclick="sndToggle()" style="position:fixed;top:6px;right:6px;z-index:200;background:none;border:1px solid #333;border-radius:6px;color:#888;font-size:16px;padding:3px 6px;cursor:pointer;">&#128263;</button>
     <div id="lobby">
         <div class="lobby-section">

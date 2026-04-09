@@ -387,7 +387,7 @@ function sndPlay(type){
         lfo.type='sine';lfo.frequency.value=8;lfoGain.gain.value=30;
         lfo.connect(lfoGain);lfoGain.connect(osc.frequency);
         osc.type='sawtooth';osc.frequency.setValueAtTime(60,now);osc.frequency.linearRampToValueAtTime(140,now+dur);
-        gain.gain.setValueAtTime(0.07,now);gain.gain.setValueAtTime(0.07,now+dur*0.8);gain.gain.exponentialRampToValueAtTime(0.001,now+dur);
+        gain.gain.setValueAtTime(0.07,now);gain.gain.linearRampToValueAtTime(0.06,now+dur*0.5);gain.gain.exponentialRampToValueAtTime(0.001,now+dur);
         osc.connect(gain);gain.connect(ctx.destination);
         osc.start(now);osc.stop(now+dur);lfo.start(now);lfo.stop(now+dur);
     }else if(type==='bet'){

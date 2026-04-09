@@ -1,4 +1,4 @@
-// game.js — NOISORE v7.5 shared game logic
+// game.js — NOISORE v7.6 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -135,8 +135,7 @@ function updateBetDisplay(){
 function startGame(){
     sndPlay('click');sndInit();
     document.getElementById('lobby').style.display='none';
-    document.getElementById('game').style.display='block';
-    document.body.style.overflow='hidden';
+    document.getElementById('game').style.display='flex';
     window.scrollTo(0,0);
     if('ontouchstart' in window&&document.documentElement.requestFullscreen){try{document.documentElement.requestFullscreen();}catch(e){}}
     COLS=CFG.gridSize;ROWS=CFG.gridSize;MAX_H=10;MAX_DROP=10;
@@ -167,7 +166,7 @@ function startGame(){
     initGame();
     if(CFG.mode==='bet') betRound();
 }
-function backToLobby(){sndPlay('click');document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';document.body.style.overflow='';window.scrollTo(0,0);animating=false;}
+function backToLobby(){sndPlay('click');document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';animating=false;}
 // === GAME STATE ===
 var COLS=6,ROWS=6,MAX_H=10,MAX_DROP=10,DROP_COST=0,POOL_RATE=0.95,ANIM_DELAY=200;
 var ROTATE=true,BOTS=[];
@@ -175,7 +174,7 @@ var grid=[],pool=0,balance=100,dropNum=0,roundNum=1,animating=false,currentDrop=
 var TAG_POS=[{top:'1px',left:'2px'},{top:'1px',right:'2px'},{bottom:'1px',left:'2px'},{bottom:'1px',right:'2px'},{top:'1px',left:'50%',tx:'-50%'},{bottom:'1px',left:'50%',tx:'-50%'},{top:'50%',left:'1px',ty:'-50%'},{top:'50%',right:'1px',ty:'-50%'},{top:'30%',left:'2px'},{top:'30%',right:'2px'},{bottom:'30%',left:'2px'},{bottom:'30%',right:'2px'}];
 function randH(){return 1+Math.floor(Math.random()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
-function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();rollDrop();setColBtnsDisabled(false);window.scrollTo(0,0);}
+function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
 function renderGrid(){var el=document.getElementById('grid');el.innerHTML='';for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var cell=document.createElement('div');cell.className='cell h'+grid[r][c];cell.id='cell-'+r+'-'+c;cell.textContent=grid[r][c]>0?grid[r][c]:'';el.appendChild(cell);}}
 function updateCell(r,c){var cell=document.getElementById('cell-'+r+'-'+c);var tags=cell.querySelectorAll('.power-tag');cell.className='cell h'+grid[r][c];cell.textContent=grid[r][c]>0?grid[r][c]:'';for(var i=0;i<tags.length;i++)cell.appendChild(tags[i]);}
@@ -246,7 +245,6 @@ async function checkWin(winner,winColor){
     updateUI();
     var label=winner+(winner==='YOU'?' WIN':' WINS');
     document.getElementById('payout-area').innerHTML='<div style="margin-top:4px"><span style="font-family:Archivo Black,sans-serif;font-size:18px;color:'+winColor+'">'+label+'</span><br>'+(pool>0?'<span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">'+pool.toFixed(2)+' USDT</span><br>':'')+'<button onclick="newRound()" style="margin-top:10px;background:'+winColor+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT ROUND</button></div>';
-    window.scrollTo(0,0);
     animating=false;setColBtnsDisabled(true);return true;
 }
 // === SOLO & PVP ===
@@ -339,7 +337,6 @@ async function betRound(){
                 updateUI();
                 var msg=won?'<span style="color:#22c55e;font-family:Archivo Black,sans-serif;font-size:20px">YOU WIN</span><br><span style="color:#d4d4d8;font-size:12px">'+BET_BETS[f.name].toFixed(2)+' \u00d7 '+fdata.odds+' =</span><br><span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">+'+payout.toFixed(2)+' USDT</span>':'<span style="color:#f66;font-family:Archivo Black,sans-serif;font-size:16px">'+f.name+' WINS</span><br><span style="color:#d4d4d8;font-size:13px">no bet on '+f.name+'</span>';
                 document.getElementById('payout-area').innerHTML='<div style="margin-top:4px">'+msg+'<br><button onclick="newBetRound()" style="margin-top:10px;background:'+f.color+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">PLACE BETS</button></div>';
-                window.scrollTo(0,0);
                 animating=false;return;
             }
             if(t<order.length-1)await sleep(150);
@@ -351,8 +348,6 @@ async function betRound(){
 function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();
     document.getElementById('game').style.display='none';
     document.getElementById('lobby').style.display='block';
-    document.body.style.overflow='';
-    window.scrollTo(0,0);
     randomizeFighterNames();
     setMode('bet');
 }

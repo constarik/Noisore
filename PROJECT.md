@@ -215,6 +215,28 @@ Order: [DEEP, LIGHT, SNIPER, GREEDY, POWER, RANDOM]
 | `betwet_verify.py` | Totalizator profitability verifier |
 | `verify_all.bat` | Full verification batch (15 tests) |
 
+### Fighter Skins (alternative name packs)
+
+| Strategy | Classic | Двор | Школа | Зона | Офис | Армия |
+|---|---|---|---|---|---|---|
+| DEEP | Professor / Профессор | Мозг | Отличник | Адвокат | Аналитик | Штабной |
+| LIGHT | Scout / Разведчик | Шустрый | Подлиза | Шестёрка | Стажёр | Дозорный |
+| SNIPER | Crow / Ворона | Щипач | Хулиган | Медвежатник | Аудитор | Снайпер |
+| GREEDY | Mole / Крот | Крыса | Жадина | Крот | Бухгалтер | Сапёр |
+| POWER | Colonel / Полковник | Бык | Физрук | Смотрящий | Директор | Полковник |
+| RANDOM | Daisy / Фрося | Промокашка | Двоечник | Первоход | Новичок | Салага |
+
+EN packs (future):
+
+| Strategy | Classic | Street | Casino | Pirate |
+|---|---|---|---|---|
+| DEEP | Professor | Brains | Card Counter | Navigator |
+| LIGHT | Scout | Quickie | Dealer | Lookout |
+| SNIPER | Crow | Pickpocket | Hustler | Gunner |
+| GREEDY | Mole | Rat | Loan Shark | Digger |
+| POWER | Colonel | Bull | Bouncer | Captain |
+| RANDOM | Daisy | Rookie | Lucky | Parrot |
+
 ---
 
 ## CURRENT VERSION: v5.8

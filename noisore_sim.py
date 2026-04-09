@@ -175,15 +175,28 @@ STRATEGIES = [
 ]
 
 def noise_pick(pick_fn, name, grid, drop_power, rows, cols, noise):
-    if noise <= 0:
+    if isinstance(noise, dict):
+        n = noise.get(name, 0)
+    else:
+        n = noise
+    if n <= 0:
         return pick_fn(grid, drop_power, rows, cols)
     if name == 'RANDOM':
-        if random.random() < noise:
+        if random.random() < n:
             return pick_deep(grid, drop_power, rows, cols)
         return pick_random(grid, drop_power, rows, cols)
-    if random.random() < noise:
+    if random.random() < n:
         return pick_random(grid, drop_power, rows, cols)
     return pick_fn(grid, drop_power, rows, cols)
+
+BET_NOISE_PROFILE = {
+    'DEEP': 0.10,
+    'LIGHT': 0.20,
+    'SNIPER': 0.25,
+    'GREEDY': 0.25,
+    'POWER': 0.15,
+    'RANDOM': 0.40
+}
 
 # === SIMULATION ===
 
@@ -298,7 +311,7 @@ def main():
     parser.add_argument('--rotate', action='store_true', default=False, help='Enable rotation')
     parser.add_argument('--no-rotate', action='store_true', default=False, help='Disable rotation')
     parser.add_argument('--mode', choices=['tournament', 'duel', 'all'], default='all', help='Simulation mode')
-    parser.add_argument('--noise', type=float, default=0, help='Noise mix ratio 0-1 (default: 0, use 0.3 for Bet&Wet)')
+    parser.add_argument('--noise', default='0', help='Noise: 0, float (uniform), or "bet" for per-strategy profile')
     parser.add_argument('--seed', type=int, default=None, help='Random seed')
     args = parser.parse_args()
     
@@ -309,6 +322,13 @@ def main():
         random.seed(seed)
         print(f"Seed: {seed}")
     
+    if args.noise == 'bet':
+        noise_val = BET_NOISE_PROFILE
+        noise_label = 'bet-profile'
+    else:
+        noise_val = float(args.noise)
+        noise_label = str(noise_val) if noise_val > 0 else None
+    
     rotations = []
     if args.rotate and not args.no_rotate:
         rotations = [True]
@@ -318,7 +338,7 @@ def main():
         rotations = [False, True]
     
     print(f"\n{'='*60}")
-    print(f"NOISORE SIMULATOR — {args.rounds} rounds" + (f", noise={args.noise}" if args.noise>0 else ""))
+    print(f"NOISORE SIMULATOR — {args.rounds} rounds" + (f", noise={noise_label}" if noise_label else ""))
     print(f"{'='*60}")
     
     for grid_size in args.grid:
@@ -328,7 +348,7 @@ def main():
             
             if args.mode in ('duel', 'all'):
                 print(f"\n1v1 DUELS (each vs RANDOM):")
-                results = run_duels(args.rounds, grid_size, grid_size, rotate, noise=args.noise)
+                results = run_duels(args.rounds, grid_size, grid_size, rotate, noise=noise_val)
                 print(f"\n{'Strategy':<10} {'Wins':>8} {'%':>8} {'RANDOM':>8} {'%':>8}")
                 print("-" * 50)
                 for name in ['DEEP', 'LIGHT', 'SNIPER', 'GREEDY', 'POWER']:
@@ -339,7 +359,7 @@ def main():
             
             if args.mode in ('tournament', 'all'):
                 print(f"\n6-PLAYER TOURNAMENT:")
-                wins, draws, elapsed = run_tournament(args.rounds, grid_size, grid_size, rotate, noise=args.noise)
+                wins, draws, elapsed = run_tournament(args.rounds, grid_size, grid_size, rotate, noise=noise_val)
                 print(f"\n{'Strategy':<10} {'Wins':>8} {'%':>8} {'vs Fair':>10}")
                 print("-" * 40)
                 fair = 100.0 / len(STRATEGIES)

@@ -1,4 +1,4 @@
-// game.js — NOISORE v5.7 shared game logic
+// game.js — NOISORE v5.8 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -26,10 +26,27 @@ var BET_DATA={
 };
 function calcOdds(){
     var key=CFG.gridSize+'-'+(CFG.rotate?'on':'off');
-    var pcts=BET_DATA[key];
+    var pure=BET_DATA[key];
+    var daisyIdx=5; // RANDOM is last
+    var daisyPure=pure[daisyIdx];
+    // avg of non-Daisy pure pcts
+    var sumOthers=0;for(var j=0;j<pure.length;j++){if(j!==daisyIdx)sumOthers+=pure[j];}
+    var avgOthers=sumOthers/(pure.length-1);
+    // calc effective pcts
+    var eff=[];
     for(var i=0;i<BET_FIGHTERS.length;i++){
-        BET_FIGHTERS[i].pct=pcts[i];
-        BET_FIGHTERS[i].odds=Math.round(100/pcts[i]/OVERROUND*10)/10;
+        var n=BET_FIGHTERS[i].noise/100;
+        if(i===daisyIdx){
+            eff.push(daisyPure*(1-n)+avgOthers*n);
+        }else{
+            eff.push(pure[i]*(1-n)+daisyPure*n);
+        }
+    }
+    // normalize to 100%
+    var total=0;for(var k=0;k<eff.length;k++)total+=eff[k];
+    for(var m=0;m<BET_FIGHTERS.length;m++){
+        BET_FIGHTERS[m].pct=Math.round(eff[m]/total*1000)/10;
+        BET_FIGHTERS[m].odds=Math.round(100/BET_FIGHTERS[m].pct/OVERROUND*10)/10;
     }
 }
 // === LOBBY ===

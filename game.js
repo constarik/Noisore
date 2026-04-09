@@ -1,4 +1,4 @@
-// game.js — NOISORE v6.3 shared game logic
+// game.js — NOISORE v6.4 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -47,6 +47,9 @@ function updateFighterButtons(){
         var btn=document.createElement('button');
         btn.className='lbtn';
         btn.style.borderColor=f.color;
+        btn.style.whiteSpace='nowrap';
+        btn.style.fontSize='11px';
+        btn.style.padding='6px 8px';
         btn.textContent=f.name;
         btn.onclick=function(){betAdd(f.name);};btn.oncontextmenu=function(e){e.preventDefault();betRemove(f.name);return false;};
         row.appendChild(btn);

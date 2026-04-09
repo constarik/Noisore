@@ -1,4 +1,4 @@
-// game.js — NOISORE v6.1 shared game logic
+// game.js — NOISORE v6.2 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -99,8 +99,8 @@ function setMode(m){
     if(m==='bet'&&CFG.stake===0){setStake(1);}
     if(m==='bet'){randomizeFighterNames();}
 }
-function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);calcOdds();if(CFG.mode==='bet')updateFighterButtons();else updateBetDisplay();}
-function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);calcOdds();if(CFG.mode==='bet')updateFighterButtons();else updateBetDisplay();}
+function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);if(CFG.mode==='bet')randomizeFighterNames();else{calcOdds();updateBetDisplay();}}
+function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);if(CFG.mode==='bet')randomizeFighterNames();else{calcOdds();updateBetDisplay();}}
 function setStake(v){CFG.stake=v;document.querySelectorAll('#stake-section .lbtn').forEach(function(b){b.classList.remove('active');});var id='stake-'+String(v).replace('.','');var el=document.getElementById(id);if(el)el.classList.add('active');updateBetDisplay();}
 function setBots(n){CFG.numBots=n;document.querySelectorAll('#bots-section .lbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('bots-'+n).classList.add('active');}
 function betAdd(name,e){if(e)e.preventDefault();var stk=CFG.stake>0?CFG.stake:1;if(!CFG.bets[name])CFG.bets[name]=0;CFG.bets[name]+=stk;updateBetDisplay();return false;}

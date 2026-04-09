@@ -1,4 +1,4 @@
-// game.js — NOISORE v5.5 shared game logic
+// game.js — NOISORE v5.6 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -201,7 +201,16 @@ async function playDrop(startCol){
     rollDrop();animating=false;setColBtnsDisabled(false);
 }
 // === BET&WET ===
+var BET_NOISE=0.3; // 30% noise mix
 var BET_BETS={},BET_TOTAL=0;
+function betPickCol(strat,dp){
+    if(strat==='RANDOM'){
+        if(Math.random()<BET_NOISE)return STRATEGY_PICK['DEEP'](dp);
+        return STRATEGY_PICK['RANDOM'](dp);
+    }
+    if(Math.random()<BET_NOISE)return STRATEGY_PICK['RANDOM'](dp);
+    return STRATEGY_PICK[strat](dp);
+}
 async function betRound(){
     BET_BETS={};
     for(var k in CFG.bets)BET_BETS[k]=CFG.bets[k];
@@ -223,7 +232,7 @@ async function betRound(){
             var idx=order[t];
             var f=fighters[idx];
             var dp=randDrop();
-            var col=STRATEGY_PICK[f.strategy](dp);
+            var col=betPickCol(f.strategy,dp);
             dropNum++;updateUI();
             await animateDrop(col,dp,f.name,f.color,idx);
             var ch=findChannelCells();var keys=Object.keys(ch);

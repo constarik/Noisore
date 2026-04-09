@@ -174,9 +174,20 @@ STRATEGIES = [
     ('RANDOM', pick_random),
 ]
 
+def noise_pick(pick_fn, name, grid, drop_power, rows, cols, noise):
+    if noise <= 0:
+        return pick_fn(grid, drop_power, rows, cols)
+    if name == 'RANDOM':
+        if random.random() < noise:
+            return pick_deep(grid, drop_power, rows, cols)
+        return pick_random(grid, drop_power, rows, cols)
+    if random.random() < noise:
+        return pick_random(grid, drop_power, rows, cols)
+    return pick_fn(grid, drop_power, rows, cols)
+
 # === SIMULATION ===
 
-def run_tournament(rounds, rows, cols, rotate, max_h=10, max_drop=10, max_cycles=200):
+def run_tournament(rounds, rows, cols, rotate, noise=0, max_h=10, max_drop=10, max_cycles=200):
     wins = {name: 0 for name, _ in STRATEGIES}
     draws = 0
     t0 = time.time()
@@ -199,7 +210,7 @@ def run_tournament(rounds, rows, cols, rotate, max_h=10, max_drop=10, max_cycles
             for idx in order:
                 name, pick_fn = STRATEGIES[idx]
                 dp = random.randint(1, max_drop)
-                col = pick_fn(grid, dp, rows, cols)
+                col = noise_pick(pick_fn, name, grid, dp, rows, cols, noise)
                 simulate_drop(grid, col, dp, rows, cols)
                 if has_channel(grid, rows, cols):
                     winner = name
@@ -222,7 +233,7 @@ def run_tournament(rounds, rows, cols, rotate, max_h=10, max_drop=10, max_cycles
     sys.stdout.write(f"\r  {rounds}/{rounds} done in {elapsed:.1f}s\n")
     return wins, draws, elapsed
 
-def run_duels(rounds, rows, cols, rotate, max_h=10, max_drop=10, max_cycles=200):
+def run_duels(rounds, rows, cols, rotate, noise=0, max_h=10, max_drop=10, max_cycles=200):
     results = {}
     
     for name, pick_fn in STRATEGIES:
@@ -252,7 +263,7 @@ def run_duels(rounds, rows, cols, rotate, max_h=10, max_drop=10, max_cycles=200)
                 for idx in order:
                     pname, pfn = players[idx]
                     dp = random.randint(1, max_drop)
-                    col = pfn(grid, dp, rows, cols)
+                    col = noise_pick(pfn, pname, grid, dp, rows, cols, noise)
                     simulate_drop(grid, col, dp, rows, cols)
                     if has_channel(grid, rows, cols):
                         winner = pname
@@ -287,6 +298,7 @@ def main():
     parser.add_argument('--rotate', action='store_true', default=False, help='Enable rotation')
     parser.add_argument('--no-rotate', action='store_true', default=False, help='Disable rotation')
     parser.add_argument('--mode', choices=['tournament', 'duel', 'all'], default='all', help='Simulation mode')
+    parser.add_argument('--noise', type=float, default=0, help='Noise mix ratio 0-1 (default: 0, use 0.3 for Bet&Wet)')
     parser.add_argument('--seed', type=int, default=None, help='Random seed')
     args = parser.parse_args()
     
@@ -306,7 +318,7 @@ def main():
         rotations = [False, True]
     
     print(f"\n{'='*60}")
-    print(f"NOISORE SIMULATOR — {args.rounds} rounds")
+    print(f"NOISORE SIMULATOR — {args.rounds} rounds" + (f", noise={args.noise}" if args.noise>0 else ""))
     print(f"{'='*60}")
     
     for grid_size in args.grid:
@@ -316,7 +328,7 @@ def main():
             
             if args.mode in ('duel', 'all'):
                 print(f"\n1v1 DUELS (each vs RANDOM):")
-                results = run_duels(args.rounds, grid_size, grid_size, rotate)
+                results = run_duels(args.rounds, grid_size, grid_size, rotate, noise=args.noise)
                 print(f"\n{'Strategy':<10} {'Wins':>8} {'%':>8} {'RANDOM':>8} {'%':>8}")
                 print("-" * 50)
                 for name in ['DEEP', 'LIGHT', 'SNIPER', 'GREEDY', 'POWER']:
@@ -327,7 +339,7 @@ def main():
             
             if args.mode in ('tournament', 'all'):
                 print(f"\n6-PLAYER TOURNAMENT:")
-                wins, draws, elapsed = run_tournament(args.rounds, grid_size, grid_size, rotate)
+                wins, draws, elapsed = run_tournament(args.rounds, grid_size, grid_size, rotate, noise=args.noise)
                 print(f"\n{'Strategy':<10} {'Wins':>8} {'%':>8} {'vs Fair':>10}")
                 print("-" * 40)
                 fair = 100.0 / len(STRATEGIES)

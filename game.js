@@ -1,4 +1,4 @@
-// game.js — NOISORE v6.5 shared game logic
+// game.js — NOISORE v6.6 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -151,7 +151,7 @@ function startGame(){
         document.getElementById('col-btns').style.display='none';
         DROP_COST=CFG.stake>0?CFG.stake:1;
     }else{
-        BOTS=BOT_POOL.slice(0,CFG.numBots);
+        BOTS=BOT_POOL.slice().sort(function(){return Math.random()-0.5;}).slice(0,CFG.numBots);
         document.getElementById('pool-area-wrap').style.display='flex';
         document.getElementById('game-mode-label').textContent='NOISORE';
         document.getElementById('col-btns').style.display='grid';

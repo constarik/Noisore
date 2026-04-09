@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NOISORE v5.8m</title>
+<title>NOISORE v5.9m</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -64,6 +64,8 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .cell.water-hit{animation:waterHit 0.2s ease;}
 @keyframes waterHit{0%{box-shadow:inset 0 0 0 0 rgba(245,158,11,0.5);}50%{box-shadow:inset 0 0 10px 3px rgba(245,158,11,0.5);}100%{box-shadow:inset 0 0 0 0 rgba(245,158,11,0);}}
 .cell.washed{animation:washAway 0.3s ease;}
+.cell.trail{animation:trailFade 1.2s ease forwards;}
+@keyframes trailFade{0%{box-shadow:inset 0 0 10px 3px var(--trail-color,#f59e0b);}100%{box-shadow:inset 0 0 0 0 transparent;}}
 @keyframes washAway{0%{transform:scale(1);opacity:1;}50%{transform:scale(1.1);opacity:0.6;background:#f59e0b;}100%{transform:scale(1);opacity:1;}}
 .payout-area{min-height:24px;margin-top:4px;text-align:center;font-size:11px;color:#d4d4d8;}
 .info-bar{display:flex;justify-content:space-between;font-size:9px;color:#f59e0b;border-top:1px solid #1e1e2e;padding-top:4px;margin-top:4px;}
@@ -73,7 +75,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v5.8m</div>
+    <h1>NOISORE</h1><div class="version">v5.9m</div>
     <div id="lobby">
         <div class="lobby-section">
             <div class="lobby-label">Mode</div>
@@ -119,13 +121,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
         </div>
         <div class="lobby-section" id="fighter-section" style="display:none">
             <div class="lobby-label">Pick your fighter</div>
-            <div class="lobby-row">
-                <button class="lbtn" onclick="betAdd('Professor')" oncontextmenu="return betRemove('Professor'),false" id="f-Professor" style="border-color:#4ad;">Professor</button>
-                <button class="lbtn" onclick="betAdd('Scout')" oncontextmenu="return betRemove('Scout'),false" id="f-Scout" style="border-color:#d4a;">Scout</button>
-                <button class="lbtn" onclick="betAdd('Crow')" oncontextmenu="return betRemove('Crow'),false" id="f-Crow" style="border-color:#4d8;">Crow</button>
-                <button class="lbtn" onclick="betAdd('Mole')" oncontextmenu="return betRemove('Mole'),false" id="f-Mole" style="border-color:#a6f;">Mole</button>
-                <button class="lbtn" onclick="betAdd('Colonel')" oncontextmenu="return betRemove('Colonel'),false" id="f-Colonel" style="border-color:#fa0;">Colonel</button>
-                <button class="lbtn" onclick="betAdd('Daisy')" oncontextmenu="return betRemove('Daisy'),false" id="f-Daisy" style="border-color:#f66;">Daisy</button>
+            <div class="lobby-row" id="fighter-btns">
             </div>
             <div class="lobby-hint" id="fighter-odds"></div>
             <button class="lbtn" onclick="betClear()" style="margin-top:6px;font-size:10px;padding:6px 14px;">CLEAR BETS</button>

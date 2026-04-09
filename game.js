@@ -1,4 +1,4 @@
-// game.js — NOISORE v5.8 shared game logic
+// game.js — NOISORE v5.9 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -18,6 +18,34 @@ var BET_FIGHTERS=[
     {name:'Daisy',strat:'RANDOM',color:'#f66',noise:0.40}
 ];
 var OVERROUND=1.05;
+var SKIN_PACKS=[
+    ['Professor','Scout','Crow','Mole','Colonel','Daisy'],
+    ['Brains','Quickie','Thief','Rat','Bull','Rookie'],
+    ['Counter','Dealer','Hustler','Shark','Bouncer','Lucky'],
+    ['Navigator','Lookout','Gunner','Digger','Captain','Parrot'],
+    ['Coach','Sprinter','Striker','Keeper','Enforcer','Benchman'],
+    ['Analyst','Mole','Hitman','Hoarder','Commando','Decoy']
+];
+function randomizeFighterNames(){
+    var pack=SKIN_PACKS[Math.floor(Math.random()*SKIN_PACKS.length)];
+    for(var i=0;i<BET_FIGHTERS.length;i++)BET_FIGHTERS[i].name=pack[i];
+    updateFighterButtons();
+}
+function updateFighterButtons(){
+    var row=document.getElementById('fighter-btns');
+    if(!row)return;
+    row.innerHTML='';
+    CFG.bets={};
+    BET_FIGHTERS.forEach(function(f){
+        var btn=document.createElement('button');
+        btn.className='lbtn';
+        btn.style.borderColor=f.color;
+        btn.textContent=f.name;
+        btn.onclick=function(){betAdd(f.name);};btn.oncontextmenu=function(e){e.preventDefault();betRemove(f.name);return false;};
+        row.appendChild(btn);
+    });
+    calcOdds();updateBetDisplay();
+}
 var BET_DATA={
     '6-off':[19.9,17.0,18.7,18.8,19.8,5.9],
     '6-on': [18.8,19.2,17.9,17.8,18.1,8.2],
@@ -62,6 +90,7 @@ function setMode(m){
     var freeBtn=document.getElementById('stake-0');
     if(freeBtn)freeBtn.style.display=m==='bet'?'none':'';
     if(m==='bet'&&CFG.stake===0){setStake(1);}
+    if(m==='bet'){randomizeFighterNames();}
 }
 function setGrid(s){CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);calcOdds();updateBetDisplay();}
 function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);calcOdds();updateBetDisplay();}
@@ -71,14 +100,17 @@ function betAdd(name,e){if(e)e.preventDefault();var stk=CFG.stake>0?CFG.stake:1;
 function betRemove(name){var stk=CFG.stake>0?CFG.stake:1;if(CFG.bets[name]&&CFG.bets[name]>=stk)CFG.bets[name]-=stk;if(!CFG.bets[name]||CFG.bets[name]<0.001)delete CFG.bets[name];updateBetDisplay();}
 function betClear(){CFG.bets={};updateBetDisplay();}
 function updateBetDisplay(){
-    BET_FIGHTERS.forEach(function(f){
-        var el=document.getElementById('f-'+f.name);
-        if(!el)return;
-        var sum=CFG.bets[f.name]||0;
-        var label=f.name+(f.odds?' \u00d7'+f.odds:'');
-        el.textContent=label+(sum>0?' ('+sum.toFixed(2)+')':'');
-        el.classList.toggle('active',sum>0);
-    });
+    var row=document.getElementById('fighter-btns');
+    if(row){
+        var btns=row.children;
+        for(var i=0;i<BET_FIGHTERS.length&&i<btns.length;i++){
+            var f=BET_FIGHTERS[i];
+            var sum=CFG.bets[f.name]||0;
+            var label=f.name+(f.odds?' \u00d7'+f.odds:'');
+            btns[i].textContent=label+(sum>0?' ('+sum.toFixed(2)+')':'');
+            btns[i].classList.toggle('active',sum>0);
+        }
+    }
     var total=0;for(var k in CFG.bets)total+=CFG.bets[k];
     var el2=document.getElementById('fighter-odds');
     var isMobile='ontouchstart' in window;
@@ -165,7 +197,8 @@ async function animateDrop(col,dropPower,who,color,playerIdx){
     showDropInfo(who,color,dropPower,power,0);if(BOTS.length>0){setPlayerActive(playerIdx);setPlayerDrop(playerIdx,dropPower);}
     for(var row=0;row<ROWS&&power>0;row++){
         var cell=document.getElementById('cell-'+row+'-'+c);
-        cell.classList.remove('water-hit');void cell.offsetWidth;cell.classList.add('water-hit');
+        cell.classList.remove('water-hit','trail');void cell.offsetWidth;cell.classList.add('water-hit');
+        cell.style.setProperty('--trail-color',color);cell.classList.add('trail');
         if(grid[row][c]===0){showDropInfo(who,color,dropPower,power,0);showPowerTag(row,c,power,color,playerIdx);if(BOTS.length>0)setPlayerRemaining(playerIdx,power);await sleep(ANIM_DELAY/2);if(row<ROWS-1)c=chooseNext(row,c);continue;}
         var stoneH=grid[row][c];
         if(power>=stoneH){power-=stoneH;grid[row][c]=0;washed++;updateCell(row,c);cell.classList.add('washed');showDropInfo(who,color,dropPower,power,stoneH);showPowerTag(row,c,power,color,playerIdx);if(BOTS.length>0)setPlayerRemaining(playerIdx,power);
@@ -277,6 +310,7 @@ async function betRound(){
 function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();
     document.getElementById('game').style.display='none';
     document.getElementById('lobby').style.display='block';
+    randomizeFighterNames();
     setMode('bet');
 }
-calcOdds();
+calcOdds();updateFighterButtons();

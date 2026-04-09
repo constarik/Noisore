@@ -28,7 +28,14 @@ var SKIN_PACKS=[
 ];
 function randomizeFighterNames(){
     var pack=SKIN_PACKS[Math.floor(Math.random()*SKIN_PACKS.length)];
-    for(var i=0;i<BET_FIGHTERS.length;i++)BET_FIGHTERS[i].name=pack[i];
+    for(var i=0;i<BET_FIGHTERS.length;i++){
+        BET_FIGHTERS[i].name=pack[i];
+        if(BET_FIGHTERS[i].strat==='RANDOM'){
+            BET_FIGHTERS[i].noise=20+Math.floor(Math.random()*31);// 20-50
+        }else{
+            BET_FIGHTERS[i].noise=5+Math.floor(Math.random()*41);// 5-45
+        }
+    }
     updateFighterButtons();
 }
 function updateFighterButtons(){

@@ -97,7 +97,7 @@ function setRotation(on){CFG.rotate=on;document.getElementById('rot-off').classL
 function setStake(v){CFG.stake=v;document.querySelectorAll('#stake-section .lbtn').forEach(function(b){b.classList.remove('active');});var id='stake-'+String(v).replace('.','');var el=document.getElementById(id);if(el)el.classList.add('active');updateBetDisplay();}
 function setBots(n){CFG.numBots=n;document.querySelectorAll('#bots-section .lbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('bots-'+n).classList.add('active');}
 function betAdd(name,e){if(e)e.preventDefault();var stk=CFG.stake>0?CFG.stake:1;if(!CFG.bets[name])CFG.bets[name]=0;CFG.bets[name]+=stk;updateBetDisplay();return false;}
-function betRemove(name){var stk=CFG.stake>0?CFG.stake:1;if(CFG.bets[name]&&CFG.bets[name]>=stk)CFG.bets[name]-=stk;if(!CFG.bets[name]||CFG.bets[name]<0.001)delete CFG.bets[name];updateBetDisplay();}
+function betRemove(name){delete CFG.bets[name];updateBetDisplay();}
 function betClear(){CFG.bets={};updateBetDisplay();}
 function updateBetDisplay(){
     var row=document.getElementById('fighter-btns');

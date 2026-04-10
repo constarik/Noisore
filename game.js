@@ -1,4 +1,4 @@
-// game.js — NOISORE v8.7 shared game logic
+// game.js — NOISORE v8.8 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -176,7 +176,7 @@ function randH(){return 1+Math.floor(Math.random()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
 function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
-function renderGrid(){var el=document.getElementById('grid');el.innerHTML='';for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var cell=document.createElement('div');cell.className='cell h'+grid[r][c];cell.id='cell-'+r+'-'+c;cell.textContent=grid[r][c]>0?grid[r][c]:'';el.appendChild(cell);}}
+function renderGrid(){var el=document.getElementById('grid');el.innerHTML='';for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var cell=document.createElement('div');cell.className='cell h'+grid[r][c];cell.id='cell-'+r+'-'+c;cell.textContent=grid[r][c]>0?grid[r][c]:'';if(grid[r][c]>0){var a=3+((r*7+c*13+1)%5),b=3+((r*11+c*3+2)%6),d=3+((r*5+c*17+3)%5),e=3+((r*13+c*7+4)%6);cell.style.borderRadius=a+'px '+b+'px '+d+'px '+e+'px';cell.style.filter='url(#s'+((r*COLS+c)%6)+')';}el.appendChild(cell);}}
 function updateCell(r,c){var cell=document.getElementById('cell-'+r+'-'+c);var tags=cell.querySelectorAll('.power-tag');cell.className='cell h'+grid[r][c];cell.textContent=grid[r][c]>0?grid[r][c]:'';for(var i=0;i<tags.length;i++)cell.appendChild(tags[i]);}
 function showPowerTag(r,c,remaining,color,playerIdx){var cell=document.getElementById('cell-'+r+'-'+c);var tag=document.createElement('span');tag.className='power-tag';var pos=TAG_POS[playerIdx%TAG_POS.length];if(pos.top)tag.style.top=pos.top;if(pos.bottom)tag.style.bottom=pos.bottom;if(pos.left)tag.style.left=pos.left;if(pos.right)tag.style.right=pos.right;var tf='';if(pos.tx)tf+='translateX('+pos.tx+')';if(pos.ty)tf+='translateY('+pos.ty+')';if(tf)tag.style.transform=tf;tag.style.color=color;tag.textContent=remaining;cell.appendChild(tag);}
 function clearPowerTags(){document.querySelectorAll('.power-tag').forEach(function(el){el.remove();});}

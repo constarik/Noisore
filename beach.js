@@ -9,6 +9,7 @@ function init(){
     canvas.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;';
     document.body.insertBefore(canvas,document.body.firstChild);
     resize();
+    ctx=canvas.getContext('2d');
     window.addEventListener('resize',resize);
     for(var i=0;i<5;i++) clouds.push({
         x:Math.random()*W, y:H*0.05+Math.random()*H*0.15,

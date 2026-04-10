@@ -26,7 +26,7 @@ function init(){
     loop();
 }
 
-function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;ctx=canvas.getContext('2d');}
 
 function drawSky(){
     var g=ctx.createLinearGradient(0,0,0,H*0.55);

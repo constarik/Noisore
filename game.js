@@ -1,4 +1,4 @@
-// game.js — NOISORE v9.0 shared game logic
+// game.js — NOISORE v9.1 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -179,32 +179,52 @@ function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating
 function stoneClip(r,c){
     var s=((r*7+c*13+grid[r][c]*3+r*r*5+c*c*11)&0xFFFF);
     function rn(){s=(s*1103515245+12345)&0x7FFFFFFF;return(s%1000)/1000;}
-    var d=7;// edge deviation %
-    var w=5;// wobble inward %
-    var pts=[];
-    // top: 5 points
+    var d=7;var w=5;var pts=[];
     pts.push((rn()*d)+'% '+(rn()*d)+'%');
     pts.push((18+rn()*8)+'% '+(rn()*w)+'%');
     pts.push((42+rn()*16)+'% '+(rn()*w)+'%');
     pts.push((75+rn()*8)+'% '+(rn()*w)+'%');
     pts.push((100-rn()*d)+'% '+(rn()*d)+'%');
-    // right: 4 points
     pts.push((100-rn()*d)+'% '+(18+rn()*8)+'%');
     pts.push((100-rn()*w)+'% '+(38+rn()*12)+'%');
     pts.push((100-rn()*w)+'% '+(62+rn()*12)+'%');
     pts.push((100-rn()*d)+'% '+(100-rn()*d)+'%');
-    // bottom: 5 points
     pts.push((78+rn()*8)+'% '+(100-rn()*w)+'%');
     pts.push((55+rn()*12)+'% '+(100-rn()*w)+'%');
     pts.push((30+rn()*12)+'% '+(100-rn()*w)+'%');
     pts.push((rn()*d)+'% '+(100-rn()*d)+'%');
-    // left: 4 points
     pts.push((rn()*d)+'% '+(78+rn()*8)+'%');
     pts.push((rn()*w)+'% '+(55+rn()*12)+'%');
     pts.push((rn()*w)+'% '+(25+rn()*12)+'%');
     return 'polygon('+pts.join(',')+')';
 }
-function renderGrid(){var el=document.getElementById('grid');el.innerHTML='';for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var cell=document.createElement('div');cell.className='cell h'+grid[r][c];cell.id='cell-'+r+'-'+c;cell.textContent=grid[r][c]>0?grid[r][c]:'';if(grid[r][c]>0){cell.style.clipPath=stoneClip(r,c);}el.appendChild(cell);}}
+var stoneSvgEl=null;
+function ensureStoneSvg(){
+    if(stoneSvgEl)stoneSvgEl.remove();
+    stoneSvgEl=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    stoneSvgEl.setAttribute('width','0');stoneSvgEl.setAttribute('height','0');
+    stoneSvgEl.style.position='absolute';
+    var defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+    stoneSvgEl.appendChild(defs);
+    document.body.appendChild(stoneSvgEl);
+    return defs;
+}
+function addStoneFilter(defs,id,seed,scale){
+    var f=document.createElementNS('http://www.w3.org/2000/svg','filter');
+    f.setAttribute('id',id);
+    var turb=document.createElementNS('http://www.w3.org/2000/svg','feTurbulence');
+    turb.setAttribute('type','turbulence');
+    turb.setAttribute('baseFrequency','0.05');
+    turb.setAttribute('numOctaves','3');
+    turb.setAttribute('seed',String(seed));
+    var disp=document.createElementNS('http://www.w3.org/2000/svg','feDisplacementMap');
+    disp.setAttribute('in','SourceGraphic');
+    disp.setAttribute('scale',String(scale));
+    disp.setAttribute('xChannelSelector','R');
+    disp.setAttribute('yChannelSelector','G');
+    f.appendChild(turb);f.appendChild(disp);defs.appendChild(f);
+}
+function renderGrid(){var el=document.getElementById('grid');el.innerHTML='';var defs=ensureStoneSvg();for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var cell=document.createElement('div');cell.className='cell h'+grid[r][c];cell.id='cell-'+r+'-'+c;cell.textContent=grid[r][c]>0?grid[r][c]:'';if(grid[r][c]>0){var fid='sf-'+r+'-'+c;var seed=r*137+c*311+grid[r][c]*53;addStoneFilter(defs,fid,seed,3);cell.style.filter='url(#'+fid+')';cell.style.clipPath=stoneClip(r,c);}el.appendChild(cell);}}
 function updateCell(r,c){var cell=document.getElementById('cell-'+r+'-'+c);var tags=cell.querySelectorAll('.power-tag');cell.className='cell h'+grid[r][c];cell.textContent=grid[r][c]>0?grid[r][c]:'';for(var i=0;i<tags.length;i++)cell.appendChild(tags[i]);}
 function showPowerTag(r,c,remaining,color,playerIdx){var cell=document.getElementById('cell-'+r+'-'+c);var tag=document.createElement('span');tag.className='power-tag';var pos=TAG_POS[playerIdx%TAG_POS.length];if(pos.top)tag.style.top=pos.top;if(pos.bottom)tag.style.bottom=pos.bottom;if(pos.left)tag.style.left=pos.left;if(pos.right)tag.style.right=pos.right;var tf='';if(pos.tx)tf+='translateX('+pos.tx+')';if(pos.ty)tf+='translateY('+pos.ty+')';if(tf)tag.style.transform=tf;tag.style.color=color;tag.textContent=remaining;cell.appendChild(tag);}
 function clearPowerTags(){document.querySelectorAll('.power-tag').forEach(function(el){el.remove();});}

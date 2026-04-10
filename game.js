@@ -1,4 +1,4 @@
-// game.js — NOISORE v9.1 shared game logic
+// game.js — NOISORE v9.2 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -132,7 +132,30 @@ function updateBetDisplay(){
     var isMobile='ontouchstart' in window;
     if(el2)el2.textContent='Total: '+total.toFixed(2)+' USDT'+(isMobile?'  (tap to add)':'  (click +1, right-click -1)');
 }
-function startGame(){
+function fitGrid(){
+    var h1=document.querySelector('h1');var ver=document.querySelector('.version');
+    if(h1)h1.style.display='none';if(ver)ver.style.display='none';
+    requestAnimationFrame(function(){
+        var vh=window.innerHeight;
+        var grid=document.querySelector('.grid-wrap');
+        var gridRect=grid.getBoundingClientRect();
+        var above=gridRect.top;
+        var payout=document.getElementById('payout-area');
+        var info=document.querySelector('.info-bar');
+        var below=(payout?payout.offsetHeight:0)+(info?info.offsetHeight:0)+12;
+        var available=vh-above-below;
+        var gap=3;
+        var cellH=Math.floor((available-(ROWS-1)*gap)/ROWS);
+        if(cellH<20)cellH=20;
+        if(cellH>80)return;// don't shrink if already fits
+        var cells=document.querySelectorAll('.cell');
+        for(var i=0;i<cells.length;i++){cells[i].style.aspectRatio='auto';cells[i].style.height=cellH+'px';}
+    });
+}
+function unfitGrid(){
+    var h1=document.querySelector('h1');var ver=document.querySelector('.version');
+    if(h1)h1.style.display='';if(ver)ver.style.display='';
+}
     sndPlay('click');sndInit();
     document.getElementById('lobby').style.display='none';
     document.getElementById('game').style.display='block';
@@ -164,9 +187,10 @@ function startGame(){
     document.getElementById('grid').style.gridTemplateColumns='repeat('+COLS+',1fr)';
     document.getElementById('col-btns').style.gridTemplateColumns='repeat('+COLS+',1fr)';
     initGame();
+    fitGrid();
     if(CFG.mode==='bet') betRound();
 }
-function backToLobby(){sndPlay('click');document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';document.body.style.overflow='';window.scrollTo(0,0);animating=false;}
+function backToLobby(){sndPlay('click');unfitGrid();document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';document.body.style.overflow='';window.scrollTo(0,0);animating=false;}
 // === GAME STATE ===
 var COLS=6,ROWS=6,MAX_H=10,MAX_DROP=10,DROP_COST=0,POOL_RATE=0.95,ANIM_DELAY=200;
 var ROTATE=true,BOTS=[];
@@ -174,7 +198,7 @@ var grid=[],pool=0,balance=100,dropNum=0,roundNum=1,animating=false,currentDrop=
 var TAG_POS=[{top:'1px',left:'2px'},{top:'1px',right:'2px'},{bottom:'1px',left:'2px'},{bottom:'1px',right:'2px'},{top:'1px',left:'50%',tx:'-50%'},{bottom:'1px',left:'50%',tx:'-50%'},{top:'50%',left:'1px',ty:'-50%'},{top:'50%',right:'1px',ty:'-50%'},{top:'30%',left:'2px'},{top:'30%',right:'2px'},{bottom:'30%',left:'2px'},{bottom:'30%',right:'2px'}];
 function randH(){return 1+Math.floor(Math.random()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
-function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();rollDrop();setColBtnsDisabled(false);}
+function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
 function stoneClip(r,c){
     var s=((r*7+c*13+grid[r][c]*3+r*r*5+c*c*11)&0xFFFF);
@@ -393,9 +417,10 @@ async function betRound(){
         resetPlayerStates();
     }
 }
-function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();
+function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();
     document.getElementById('game').style.display='none';
     document.getElementById('lobby').style.display='block';
+    unfitGrid();
     document.body.style.overflow='';
     window.scrollTo(0,0);
     randomizeFighterNames();

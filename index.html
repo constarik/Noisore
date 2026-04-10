@@ -3,28 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NOISORE v8.4</title>
+<title>NOISORE v8.5</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:linear-gradient(180deg,#0a1628 0%,#0d2847 15%,#134e6f 30%,#1a7a8a 45%,#2da89a 55%,#4ec6a0 62%,#c2b280 65%,#d4c49a 70%,#8b7355 100%);color:#e4e4e7;font-family:'JetBrains Mono',monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow-x:hidden;}
+body{background:#0a0a14;color:#e4e4e7;font-family:'JetBrains Mono',monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow-x:hidden;}
 #app{width:420px;padding:16px;position:relative;z-index:1;}
-.scene-wave{position:fixed;left:0;right:0;height:6px;z-index:0;background:rgba(255,255,255,0.08);border-radius:50%;}
-.scene-wave1{top:57%;animation:waveRoll 3s ease-in-out infinite;}
-.scene-wave2{top:58.5%;animation:waveRoll 3.5s ease-in-out infinite 0.5s;opacity:0.5;}
-.scene-wave3{top:60%;animation:waveRoll 4s ease-in-out infinite 1s;opacity:0.3;}
-@keyframes waveRoll{0%{transform:scaleX(0.8) translateY(-4px);opacity:0;}30%{opacity:1;}70%{opacity:0.6;}100%{transform:scaleX(1.1) translateY(8px);opacity:0;}}
-.scene-palm{position:fixed;bottom:0;font-size:70px;z-index:0;filter:brightness(0.7);}
-.scene-palm-l{left:8px;transform:scaleX(-1);}.scene-palm-r{right:8px;}
-.scene-crab{position:fixed;font-size:22px;z-index:0;bottom:8%;}
-.scene-crab1{animation:crabWalk1 12s linear infinite;}
-.scene-crab2{animation:crabWalk2 15s linear infinite;bottom:12%;}
-.scene-crab3{animation:crabWalk3 100s linear infinite;bottom:5%;}
-@keyframes crabWalk1{0%{left:-30px;}50%{left:45%;}100%{left:-30px;}}
-@keyframes crabWalk2{0%{right:-30px;}50%{right:40%;}100%{right:-30px;}}
-@keyframes crabWalk3{0%{left:10%;}25%{left:30%;}50%{left:15%;}75%{left:35%;}100%{left:10%;}}
 h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-align:center;letter-spacing:6px;margin-bottom:2px;text-shadow:0 2px 8px rgba(0,0,0,0.5);}
 .version{text-align:center;font-size:10px;color:#f59e0b;margin-bottom:14px;}
 #lobby{text-align:center;}
@@ -95,7 +81,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v8.4</div>
+    <h1>NOISORE</h1><div class="version">v8.5</div>
     <button id="mute-btn" onclick="sndToggle()" style="position:fixed;top:8px;right:8px;z-index:200;background:none;border:1px solid #333;border-radius:6px;color:#888;font-size:18px;padding:4px 8px;cursor:pointer;">&#128263;</button>
     <div id="lobby">
         <div class="lobby-section">
@@ -165,17 +151,10 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
     </div>
 </div>
 <div class="channel-flash" id="channel-flash"></div>
-<div class="scene-wave scene-wave1"></div>
-<div class="scene-wave scene-wave2"></div>
-<div class="scene-wave scene-wave3"></div>
-<div class="scene-palm scene-palm-l">🌴</div>
-<div class="scene-palm scene-palm-r">🌴</div>
-<div class="scene-crab scene-crab1">🦀</div>
-<div class="scene-crab scene-crab2">🦀</div>
-<div class="scene-crab scene-crab3">🐚</div>
 <svg width="0" height="0" style="position:absolute"><defs>
 <filter id="stone-edge"><feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="3" result="turb"/><feDisplacementMap in="SourceGraphic" in2="turb" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>
 </defs></svg>
+<script src="beach.js"></script>
 <script src="engine.js"></script>
 <script src="game.js"></script>
 </body>

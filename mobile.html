@@ -3,19 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NOISORE v8.4m</title>
+<title>NOISORE v8.5m</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
-body{background:linear-gradient(180deg,#0a1628 0%,#0d2847 15%,#134e6f 30%,#1a7a8a 45%,#2da89a 55%,#4ec6a0 62%,#c2b280 65%,#d4c49a 70%,#8b7355 100%);color:#e4e4e7;font-family:'JetBrains Mono',monospace;display:flex;flex-direction:column;align-items:center;}
+body{background:#0a0a14;color:#e4e4e7;font-family:'JetBrains Mono',monospace;display:flex;flex-direction:column;align-items:center;}
 #app{width:100%;max-width:400px;padding:8px 10px;display:flex;flex-direction:column;height:100vh;overflow-y:auto;z-index:1;position:relative;}
-.scene-wave{position:fixed;left:0;right:0;height:4px;z-index:0;background:rgba(255,255,255,0.07);border-radius:50%;}
-.scene-wave1{top:57%;animation:waveRoll 3s ease-in-out infinite;}
-.scene-wave2{top:58.5%;animation:waveRoll 3.5s ease-in-out infinite 0.5s;opacity:0.5;}
-@keyframes waveRoll{0%{transform:scaleX(0.8) translateY(-3px);opacity:0;}30%{opacity:1;}70%{opacity:0.6;}100%{transform:scaleX(1.1) translateY(6px);opacity:0;}}
 h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-align:center;letter-spacing:5px;margin-bottom:1px;text-shadow:0 2px 8px rgba(0,0,0,0.5);}
 .version{text-align:center;font-size:9px;color:#f59e0b;margin-bottom:8px;}
 #lobby{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;}
@@ -85,7 +81,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v8.4m</div>
+    <h1>NOISORE</h1><div class="version">v8.5m</div>
     <button id="mute-btn" onclick="sndToggle()" style="position:fixed;top:6px;right:6px;z-index:200;background:none;border:1px solid #333;border-radius:6px;color:#888;font-size:16px;padding:3px 6px;cursor:pointer;">&#128263;</button>
     <div id="lobby">
         <div class="lobby-section">
@@ -156,11 +152,10 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
     </div>
 </div>
 <div class="channel-flash" id="channel-flash"></div>
-<div class="scene-wave scene-wave1"></div>
-<div class="scene-wave scene-wave2"></div>
 <svg width="0" height="0" style="position:absolute"><defs>
 <filter id="stone-edge"><feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="3" result="turb"/><feDisplacementMap in="SourceGraphic" in2="turb" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
 </defs></svg>
+<script src="beach.js"></script>
 <script src="engine.js"></script>
 <script src="game.js"></script>
 </body>

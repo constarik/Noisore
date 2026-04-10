@@ -1,4 +1,4 @@
-// game.js — NOISORE v8.9 shared game logic
+// game.js — NOISORE v9.0 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -179,24 +179,29 @@ function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating
 function stoneClip(r,c){
     var s=((r*7+c*13+grid[r][c]*3+r*r*5+c*c*11)&0xFFFF);
     function rn(){s=(s*1103515245+12345)&0x7FFFFFFF;return(s%1000)/1000;}
-    var d=4;// max deviation %
+    var d=7;// edge deviation %
+    var w=5;// wobble inward %
     var pts=[];
-    // top: 4 points
+    // top: 5 points
     pts.push((rn()*d)+'% '+(rn()*d)+'%');
-    pts.push((25+rn()*8)+'% '+(rn()*d)+'%');
-    pts.push((60+rn()*8)+'% '+(rn()*d)+'%');
+    pts.push((18+rn()*8)+'% '+(rn()*w)+'%');
+    pts.push((42+rn()*16)+'% '+(rn()*w)+'%');
+    pts.push((75+rn()*8)+'% '+(rn()*w)+'%');
     pts.push((100-rn()*d)+'% '+(rn()*d)+'%');
-    // right: 3 points
-    pts.push((100-rn()*d)+'% '+(25+rn()*8)+'%');
-    pts.push((100-rn()*d)+'% '+(60+rn()*8)+'%');
+    // right: 4 points
+    pts.push((100-rn()*d)+'% '+(18+rn()*8)+'%');
+    pts.push((100-rn()*w)+'% '+(38+rn()*12)+'%');
+    pts.push((100-rn()*w)+'% '+(62+rn()*12)+'%');
     pts.push((100-rn()*d)+'% '+(100-rn()*d)+'%');
-    // bottom: 4 points
-    pts.push((70+rn()*8)+'% '+(100-rn()*d)+'%');
-    pts.push((35+rn()*8)+'% '+(100-rn()*d)+'%');
+    // bottom: 5 points
+    pts.push((78+rn()*8)+'% '+(100-rn()*w)+'%');
+    pts.push((55+rn()*12)+'% '+(100-rn()*w)+'%');
+    pts.push((30+rn()*12)+'% '+(100-rn()*w)+'%');
     pts.push((rn()*d)+'% '+(100-rn()*d)+'%');
-    // left: 3 points
-    pts.push((rn()*d)+'% '+(70+rn()*8)+'%');
-    pts.push((rn()*d)+'% '+(30+rn()*8)+'%');
+    // left: 4 points
+    pts.push((rn()*d)+'% '+(78+rn()*8)+'%');
+    pts.push((rn()*w)+'% '+(55+rn()*12)+'%');
+    pts.push((rn()*w)+'% '+(25+rn()*12)+'%');
     return 'polygon('+pts.join(',')+')';
 }
 function renderGrid(){var el=document.getElementById('grid');el.innerHTML='';for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var cell=document.createElement('div');cell.className='cell h'+grid[r][c];cell.id='cell-'+r+'-'+c;cell.textContent=grid[r][c]>0?grid[r][c]:'';if(grid[r][c]>0){cell.style.clipPath=stoneClip(r,c);}el.appendChild(cell);}}

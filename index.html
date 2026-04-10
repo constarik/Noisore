@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NOISORE v8.6</title>
+<title>NOISORE v8.7</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#0a0a14;color:#e4e4e7;font-family:'JetBrains Mono',monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow-x:hidden;}
-#app{width:420px;padding:16px;position:relative;z-index:1;}
+#app{width:420px;padding:16px;position:relative;z-index:1;background:rgba(10,10,20,0.75);border-radius:12px;margin:8px 0;}
 h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-align:center;letter-spacing:6px;margin-bottom:2px;text-shadow:0 2px 8px rgba(0,0,0,0.5);}
 .version{text-align:center;font-size:10px;color:#f59e0b;margin-bottom:14px;}
 #lobby{text-align:center;}
@@ -81,7 +81,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 .rotate-indicator.show{opacity:1;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v8.6</div>
+    <h1>NOISORE</h1><div class="version">v8.7</div>
     <button id="mute-btn" onclick="sndToggle()" style="position:fixed;top:8px;right:8px;z-index:200;background:none;border:1px solid #333;border-radius:6px;color:#888;font-size:18px;padding:4px 8px;cursor:pointer;">&#128263;</button>
     <div id="lobby">
         <div class="lobby-section">
@@ -154,7 +154,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:28px;color:#f59e0b;text-alig
 <svg width="0" height="0" style="position:absolute"><defs>
 <filter id="stone-edge"><feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="3" result="turb"/><feDisplacementMap in="SourceGraphic" in2="turb" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>
 </defs></svg>
-<script src="beach.js?v=86"></script>
+<script src="beach.js?v=87"></script>
 <script src="engine.js"></script>
 <script src="game.js"></script>
 </body>

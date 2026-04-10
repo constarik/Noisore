@@ -156,6 +156,7 @@ function unfitGrid(){
     var h1=document.querySelector('h1');var ver=document.querySelector('.version');
     if(h1)h1.style.display='';if(ver)ver.style.display='';
 }
+function startGame(){
     sndPlay('click');sndInit();
     document.getElementById('lobby').style.display='none';
     document.getElementById('game').style.display='block';

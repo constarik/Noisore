@@ -1,4 +1,4 @@
-// game.js — NOISORE v9.7 shared game logic
+// game.js — NOISORE v9.8 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -202,10 +202,11 @@ var COLS=6,ROWS=6,MAX_H=10,MAX_DROP=10,DROP_COST=0,POOL_RATE=0.95,ANIM_DELAY=200
 var ROTATE=true,BOTS=[];
 var grid=[],pool=0,balance=100,dropNum=0,roundNum=1,animating=false,currentDrop=0,turnPlayers=[];
 var playerDropResults=[];
+var playerSpent={};
 var TAG_POS=[{top:'1px',left:'2px'},{top:'1px',right:'2px'},{bottom:'1px',left:'2px'},{bottom:'1px',right:'2px'},{top:'1px',left:'50%',tx:'-50%'},{bottom:'1px',left:'50%',tx:'-50%'},{top:'50%',left:'1px',ty:'-50%'},{top:'50%',right:'1px',ty:'-50%'},{top:'30%',left:'2px'},{top:'30%',right:'2px'},{bottom:'30%',left:'2px'},{bottom:'30%',right:'2px'}];
 function randH(){return 1+Math.floor(Math.random()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
-function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;playerDropResults=[];document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
+function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;playerDropResults=[];playerSpent={};document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
 function stoneClip(r,c){
     var s=((r*7+c*13+grid[r][c]*3+r*r*5+c*c*11)&0xFFFF);
@@ -323,13 +324,14 @@ async function checkWin(winner,winColor){
     if(winner==='YOU')balance+=pool;
     updateUI();
     var label=winner+(winner==='YOU'?' WIN':' WINS');
-    if(playerDropResults.length>0&&pool>0){
-        for(var pi=0;pi<playerDropResults.length;pi++){
-            var pr=playerDropResults[pi];
+    if(turnPlayers.length>0&&pool>0){
+        for(var pi=0;pi<turnPlayers.length;pi++){
+            var pn=turnPlayers[pi].name;
             var remEl=document.getElementById('p-rem-'+pi);
             if(remEl){
-                if(pr.name===winner) remEl.textContent='+'+pool.toFixed(2);
-                else remEl.textContent='-'+DROP_COST.toFixed(2);
+                var spent=playerSpent[pn]||0;
+                if(pn===winner) remEl.textContent='+'+(pool-spent).toFixed(2);
+                else if(spent>0) remEl.textContent='-'+spent.toFixed(2);
             }
         }
     }
@@ -366,6 +368,8 @@ async function playDrop(startCol){
     renderPlayersList(players);clearPowerTags();playerDropResults=[];
     for(var t=0;t<players.length;t++){
         var p=players[t];
+        if(!playerSpent[p.name])playerSpent[p.name]=0;
+        playerSpent[p.name]+=DROP_COST;
         if(p.isPlayer&&DROP_COST>0)balance-=DROP_COST;
         pool+=DROP_COST*POOL_RATE;dropNum++;updateUI();
         var rem=await animateDrop(p.col,p.dp,p.name,p.color,t);

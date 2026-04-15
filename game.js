@@ -1,4 +1,4 @@
-// game.js — NOISORE v9.6 shared game logic
+// game.js — NOISORE v9.7 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -323,17 +323,17 @@ async function checkWin(winner,winColor){
     if(winner==='YOU')balance+=pool;
     updateUI();
     var label=winner+(winner==='YOU'?' WIN':' WINS');
-    var summary='';
-    if(playerDropResults.length>0){
-        summary='<div style="margin-top:10px;font-size:11px;text-align:left;max-width:280px;margin-left:auto;margin-right:auto">';
+    if(playerDropResults.length>0&&pool>0){
         for(var pi=0;pi<playerDropResults.length;pi++){
             var pr=playerDropResults[pi];
-            var isWinner=pr.name===winner;
-            summary+='<div style="color:'+(isWinner?pr.color:'#666')+';padding:2px 0">'+(isWinner?'★ ':'')+pr.name+' — drop '+pr.dp+', remaining '+pr.remaining+'</div>';
+            var remEl=document.getElementById('p-rem-'+pi);
+            if(remEl){
+                if(pr.name===winner) remEl.textContent='+'+pool.toFixed(2);
+                else remEl.textContent='-'+DROP_COST.toFixed(2);
+            }
         }
-        summary+='</div>';
     }
-    document.getElementById('payout-area').innerHTML='<div style="margin-top:4px"><span style="font-family:Archivo Black,sans-serif;font-size:18px;color:'+winColor+'">'+label+'</span><br>'+(pool>0?'<span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">'+pool.toFixed(2)+' USDT</span><br>':'')+summary+'<button onclick="newRound()" style="margin-top:10px;background:'+winColor+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT ROUND</button></div>';
+    document.getElementById('payout-area').innerHTML='<div style="margin-top:4px"><span style="font-family:Archivo Black,sans-serif;font-size:18px;color:'+winColor+'">'+label+'</span><br>'+(pool>0?'<span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">'+pool.toFixed(2)+' USDT</span><br>':'')+'<button onclick="newRound()" style="margin-top:10px;background:'+winColor+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT ROUND</button></div>';
     animating=false;setColBtnsDisabled(true);return true;
 }
 // === SOLO & PVP ===

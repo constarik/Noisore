@@ -1,4 +1,4 @@
-// game.js — NOISORE v9.8 shared game logic
+// game.js — NOISORE v9.9 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -324,14 +324,15 @@ async function checkWin(winner,winColor){
     if(winner==='YOU')balance+=pool;
     updateUI();
     var label=winner+(winner==='YOU'?' WIN':' WINS');
-    if(turnPlayers.length>0&&pool>0){
+    if(turnPlayers.length>0&&DROP_COST>0){
+        var dropsPerPlayer=Math.ceil(dropNum/turnPlayers.length);
+        var lossCost=dropsPerPlayer*DROP_COST;
         for(var pi=0;pi<turnPlayers.length;pi++){
             var pn=turnPlayers[pi].name;
             var remEl=document.getElementById('p-rem-'+pi);
             if(remEl){
-                var spent=playerSpent[pn]||0;
-                if(pn===winner) remEl.textContent='+'+(pool-spent).toFixed(2);
-                else if(spent>0) remEl.textContent='-'+spent.toFixed(2);
+                if(pn===winner) remEl.textContent='+'+pool.toFixed(2);
+                else remEl.textContent='-'+lossCost.toFixed(2);
             }
         }
     }

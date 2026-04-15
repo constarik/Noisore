@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NOISORE — Tutorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a1a;color:#fff;font-family:'Orbitron',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.scene{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+/* Grid */
+.grid{display:inline-grid;gap:3px;margin:20px auto}
+.cell{width:56px;height:56px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;transition:all 0.3s;cursor:default;position:relative}
+.cell.stone{background:linear-gradient(135deg,#334,#223);border:1px solid #445;color:#8cf}
+.cell.empty{background:rgba(0,200,255,0.08);border:1px solid rgba(0,200,255,0.15);color:rgba(0,200,255,0.3)}
+.cell.channel{background:rgba(0,200,255,0.25);border:1px solid #0cf;color:#0ff;box-shadow:0 0 12px rgba(0,200,255,0.4)}
+.cell.hit{animation:hitFlash 0.4s ease}
+@keyframes hitFlash{0%{background:#f80;transform:scale(1.15)}100%{transform:scale(1)}}
+
+/* Column buttons */
+.col-btns{display:flex;gap:3px;margin-bottom:4px}
+.col-btn{width:56px;height:36px;border:2px solid #0cf;border-radius:6px 6px 0 0;background:rgba(0,200,255,0.05);color:#0cf;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;letter-spacing:1px}
+.col-btn:hover{background:rgba(0,200,255,0.2);transform:translateY(-2px)}
+.col-btn:disabled{opacity:0.2;cursor:default;transform:none}
+.col-btn.highlight{animation:pulse 0.8s infinite alternate;box-shadow:0 0 16px rgba(0,200,255,0.6)}
+@keyframes pulse{from{border-color:#0cf;box-shadow:0 0 8px rgba(0,200,255,0.3)}to{border-color:#0ff;box-shadow:0 0 20px rgba(0,200,255,0.8)}}
+
+/* Drop indicator */
+.drop-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px;height:40px}
+.drop-icon{font-size:28px}
+.drop-power{font-size:24px;font-weight:900;color:#4df;text-shadow:0 0 12px rgba(0,200,255,0.6);min-width:40px;text-align:center}
+.drop-label{font-size:10px;color:#68a;letter-spacing:2px}
+
+/* Overlay / tooltip */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.overlay.show{opacity:1;pointer-events:auto}
+.msg-box{background:#111;border:2px solid #0cf;border-radius:12px;padding:28px 36px;max-width:440px;text-align:center;transform:translateY(20px);transition:transform 0.3s}
+.overlay.show .msg-box{transform:translateY(0)}
+.msg-box h2{font-size:18px;color:#0cf;margin-bottom:12px;letter-spacing:2px}
+.msg-box p{font-size:12px;color:#aac;line-height:1.8;margin-bottom:16px}
+.msg-box .em{color:#0ff;font-weight:700}
+.btn-next{background:linear-gradient(180deg,#0cf,#08a);color:#000;border:none;border-radius:8px;padding:12px 32px;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:transform 0.15s}
+.btn-next:hover{transform:scale(1.05)}
+
+/* Info bar */
+.info-bar{font-size:10px;color:#456;letter-spacing:2px;margin-top:16px;text-align:center}
+
+/* Win */
+.win-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-weight:900;color:#0f8;text-shadow:0 0 30px rgba(0,255,136,0.6);letter-spacing:6px;z-index:50;opacity:0;transition:opacity 0.5s;pointer-events:none}
+.win-banner.show{opacity:1}
+
+/* Phase indicator */
+.phase{position:fixed;top:16px;left:50%;transform:translateX(-50%);font-size:10px;color:#456;letter-spacing:3px}
+
+/* Back link */
+.back{position:fixed;top:16px;left:16px;font-size:10px;color:#456;text-decoration:none;letter-spacing:1px}
+.back:hover{color:#0cf}
+
+/* Progress dots */
+.progress{position:fixed;bottom:20px;display:flex;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:#223;border:1px solid #334;transition:all 0.3s}
+.dot.done{background:#0cf;border-color:#0cf}
+.dot.active{background:#0ff;border-color:#0ff;box-shadow:0 0 8px #0cf}
+
+/* Players sidebar (NOISORE tutorial) */
+.players{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:center}
+.player-tag{font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid #334;color:#68a;letter-spacing:1px}
+.player-tag.you{border-color:#0cf;color:#0cf}
+.player-tag.winner{border-color:#0f8;color:#0f8;box-shadow:0 0 8px rgba(0,255,136,0.3)}
+
+/* Fighters (Bet&Wet tutorial) */
+.fighters{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.fighter-btn{font-size:10px;padding:6px 12px;border-radius:6px;border:2px solid #334;background:rgba(0,0,0,0.3);color:#68a;cursor:pointer;transition:all 0.15s;letter-spacing:1px}
+.fighter-btn:hover{border-color:#0cf;color:#0cf}
+.fighter-btn.bet{border-color:#fff;color:#fff;box-shadow:0 0 8px rgba(255,255,255,0.3)}
+</style>
+</head>
+<body>
+
+<a class="back" href="https://noisore.uncloned.work">← NOISORE</a>
+
+<div class="scene" id="scene">
+  <div class="phase" id="phase">TUTORIAL</div>
+  <div class="drop-bar" id="drop-bar" style="visibility:hidden">
+    <span class="drop-icon">💧</span>
+    <span class="drop-power" id="drop-power">—</span>
+    <span class="drop-label">DROP STRENGTH</span>
+  </div>
+  <div class="col-btns" id="col-btns"></div>
+  <div class="grid" id="grid"></div>
+  <div class="info-bar" id="info-bar"></div>
+  <div class="players" id="players" style="display:none"></div>
+  <div class="fighters" id="fighters" style="display:none"></div>
+</div>
+
+<div class="overlay" id="overlay"><div class="msg-box" id="msg-box"></div></div>
+<div class="win-banner" id="win-banner">CHANNEL!</div>
+
+<div class="progress" id="progress"></div>
+
+<script>
+// ============================================================
+// TUTORIAL MINI-ENGINE (standalone, no external deps)
+// ============================================================
+var T = {
+  grid: [],
+  rows: 0,
+  cols: 0,
+  dropPower: 0,
+  phase: 0,       // 0=erosion, 1=noisore, 2=betwet
+  step: 0,
+  waiting: false,
+  colCallback: null
+};
+
+function makeGrid(rows, cols, data) {
+  T.rows = rows; T.cols = cols;
+  T.grid = [];
+  for (var r = 0; r < rows; r++) {
+    T.grid[r] = [];
+    for (var c = 0; c < cols; c++) {
+      T.grid[r][c] = data ? data[r][c] : (1 + Math.floor(Math.random() * 8));
+    }
+  }
+}
+
+function renderGrid() {
+  var el = document.getElementById('grid');
+  el.style.gridTemplateColumns = 'repeat(' + T.cols + ', 56px)';
+  el.innerHTML = '';
+  var ch = findChannel();
+  for (var r = 0; r < T.rows; r++) {
+    for (var c = 0; c < T.cols; c++) {
+      var cell = document.createElement('div');
+      var v = T.grid[r][c];
+      var key = r + '-' + c;
+      if (v === 0) {
+        cell.className = ch[key] ? 'cell channel' : 'cell empty';
+        cell.textContent = '';
+      } else {
+        cell.className = 'cell stone';
+        cell.textContent = v;
+        var bright = Math.round(40 + v * 15);
+        cell.style.color = 'rgb(' + bright + ',' + (bright + 40) + ',' + (bright + 80) + ')';
+      }
+      cell.id = 'c-' + r + '-' + c;
+      el.appendChild(cell);
+    }
+  }
+}
+
+function renderColBtns(enabled, highlight) {
+  var el = document.getElementById('col-btns');
+  el.innerHTML = '';
+  for (var c = 0; c < T.cols; c++) {
+    var btn = document.createElement('button');
+    btn.className = 'col-btn' + (highlight === c ? ' highlight' : (highlight === -1 ? ' highlight' : ''));
+    btn.textContent = '▼';
+    btn.disabled = !enabled;
+    btn.setAttribute('data-col', c);
+    btn.onclick = function() {
+      var col = parseInt(this.getAttribute('data-col'));
+      if (T.colCallback) T.colCallback(col);
+    };
+    el.appendChild(btn);
+  }
+}
+
+function setDrop(power) {
+  T.dropPower = power;
+  document.getElementById('drop-bar').style.visibility = power > 0 ? 'visible' : 'hidden';
+  document.getElementById('drop-power').textContent = power > 0 ? power : '—';
+}
+
+// --- Drop animation ---
+function animateDrop(col, power, cb) {
+  var r = 0;
+  var currentCol = col;
+
+  function step() {
+    if (r >= T.rows || power <= 0) {
+      renderGrid();
+      if (cb) cb();
+      return;
+    }
+    var v = T.grid[r][currentCol];
+    if (v === 0) {
+      // empty — flow diagonally
+      var cell = document.getElementById('c-' + r + '-' + currentCol);
+      if (cell) { cell.classList.add('hit'); setTimeout(function(c){c.classList.remove('hit')}, 300, cell); }
+      if (r < T.rows - 1) currentCol = chooseNextCol(r, currentCol);
+      r++;
+      setTimeout(step, 150);
+    } else if (power >= v) {
+      power -= v;
+      T.grid[r][currentCol] = 0;
+      var cell2 = document.getElementById('c-' + r + '-' + currentCol);
+      if (cell2) { cell2.classList.add('hit'); }
+      renderGrid();
+      setDrop(power);
+      if (r < T.rows - 1 && power > 0) currentCol = chooseNextCol(r, currentCol);
+      r++;
+      setTimeout(step, 250);
+    } else {
+      T.grid[r][currentCol] -= power;
+      power = 0;
+      renderGrid();
+      setDrop(0);
+      if (cb) cb();
+      return;
+    }
+  }
+  step();
+}
+
+function chooseNextCol(row, col) {
+  var cands = [];
+  for (var dc = -1; dc <= 1; dc++) {
+    var nc = col + dc;
+    if (nc >= 0 && nc < T.cols) cands.push({ c: nc, h: T.grid[row + 1][nc] });
+  }
+  var nz = cands.filter(function(x) { return x.h > 0; });
+  if (nz.length === 0) return cands[Math.floor(Math.random() * cands.length)].c;
+  // weighted by 1/hardness
+  var w = nz.map(function(x) { return 1 / x.h; });
+  var tw = w.reduce(function(a, b) { return a + b; }, 0);
+  var r = Math.random() * tw;
+  for (var i = 0; i < nz.length; i++) {
+    r -= w[i];
+    if (r <= 0) return nz[i].c;
+  }
+  return nz[nz.length - 1].c;
+}
+
+// --- Channel detection ---
+function findChannel() {
+  var ch = {};
+  for (var c = 0; c < T.cols; c++) {
+    if (T.grid[0][c] === 0) {
+      var path = [];
+      if (dfs(0, c, {}, path)) {
+        for (var i = 0; i < path.length; i++) ch[path[i]] = true;
+      }
+    }
+  }
+  return ch;
+}
+
+function dfs(row, col, vis, path) {
+  var k = row + '-' + col;
+  if (vis[k]) return false;
+  vis[k] = true;
+  if (T.grid[row][col] !== 0) return false;
+  path.push(k);
+  if (row === T.rows - 1) return true;
+  var found = false;
+  for (var dc = -1; dc <= 1; dc++) {
+    var nc = col + dc;
+    if (nc >= 0 && nc < T.cols) {
+      var before = path.length;
+      if (dfs(row + 1, nc, vis, path)) found = true;
+      else path.length = before;
+    }
+  }
+  if (!found) path.pop();
+  return found;
+}
+
+function hasChannel() {
+  var ch = findChannel();
+  return Object.keys(ch).length > 0;
+}
+
+// --- Rotation ---
+function rotateGrid() {
+  var S = T.rows;
+  var ng = [];
+  for (var r = 0; r < S; r++) {
+    ng[r] = [];
+    for (var c = 0; c < S; c++) {
+      ng[r][c] = T.grid[S - 1 - c][r];
+    }
+  }
+  T.grid = ng;
+}
+
+// ============================================================
+// OVERLAY SYSTEM
+// ============================================================
+function showMsg(title, text, btnText, cb) {
+  var box = document.getElementById('msg-box');
+  box.innerHTML = '<h2>' + title + '</h2><p>' + text + '</p>' +
+    (btnText ? '<button class="btn-next" id="btn-next">' + btnText + '</button>' : '');
+  var ov = document.getElementById('overlay');
+  ov.classList.add('show');
+  if (btnText) {
+    document.getElementById('btn-next').onclick = function() {
+      ov.classList.remove('show');
+      if (cb) setTimeout(cb, 300);
+    };
+  }
+}
+
+function hideMsg() {
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function showWin() {
+  var el = document.getElementById('win-banner');
+  el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 2000);
+}
+
+// ============================================================
+// PROGRESS DOTS
+// ============================================================
+var TOTAL_STEPS = 9;
+function updateProgress(current) {
+  var el = document.getElementById('progress');
+  el.innerHTML = '';
+  for (var i = 0; i < TOTAL_STEPS; i++) {
+    var d = document.createElement('div');
+    d.className = 'dot' + (i < current ? ' done' : '') + (i === current ? ' active' : '');
+    el.appendChild(d);
+  }
+}
+
+// ============================================================
+// TUTORIAL SCRIPT
+// ============================================================
+var EROSION_GRID = [
+  [3, 5, 2, 4],
+  [6, 1, 4, 3],
+  [2, 3, 7, 1],
+  [4, 2, 1, 5]
+];
+
+function startTutorial() {
+  T.phase = 0;
+  T.step = 0;
+  updateProgress(0);
+  erosionStep0();
+}
+
+// --- EROSION PHASE ---
+
+function erosionStep0() {
+  document.getElementById('phase').textContent = 'EROSION — TUTORIAL';
+  updateProgress(0);
+  showMsg('💧 EROSION', 
+    'Water beats stone.<br>Your goal: <span class="em">erode a channel</span> from top to bottom.',
+    'START', erosionStep1);
+}
+
+function erosionStep1() {
+  updateProgress(1);
+  makeGrid(4, 4, EROSION_GRID);
+  renderGrid();
+  renderColBtns(false);
+  setDrop(0);
+  showMsg('THE GRID',
+    'Each cell is a <span class="em">stone</span> with hardness 1–10.<br>Lower number = weaker stone, easier to break.',
+    'GOT IT', erosionStep2);
+}
+
+function erosionStep2() {
+  updateProgress(2);
+  setDrop(7);
+  showMsg('YOUR DROP',
+    'You have a <span class="em">💧 drop with strength 7</span>.<br>It loses power as it breaks through stones.<br>Strength 7 can break stones totaling up to 7 hardness.',
+    'GOT IT', erosionStep3);
+}
+
+function erosionStep3() {
+  updateProgress(3);
+  renderColBtns(false, 2); // highlight column 2
+  showMsg('CHOOSE A COLUMN',
+    'Column 3 has stones: <span class="em">2, 4, 7, 1</span> (sum = 14).<br>Column 2 has: <span class="em">5, 1, 3, 2</span> (sum = 11).<br><br>Your drop is 7 — choose wisely!<br>Pick any column to drop.',
+    'LET ME TRY', function() {
+      renderColBtns(true, -1); // enable all, highlight all
+      T.colCallback = function(col) {
+        T.colCallback = null;
+        renderColBtns(false);
+        animateDrop(col, T.dropPower, erosionStep4);
+      };
+    });
+}
+
+function erosionStep4() {
+  updateProgress(4);
+  setDrop(0);
+  if (hasChannel()) {
+    showWin();
+    showMsg('AMAZING!',
+      'You created a <span class="em">channel</span> from top to bottom on the first drop! That\'s rare.<br>In a real game, it usually takes several drops.',
+      'CONTINUE', noisoreStep0);
+  } else {
+    showMsg('NICE!',
+      'See how the drop broke through some stones?<br>Empty cells (dark) are your progress.<br><br>Keep dropping until you create a <span class="em">continuous path</span> from top to bottom.<br>Let\'s do a few more drops.',
+      'NEXT DROP', erosionStep5);
+  }
+}
+
+function erosionStep5() {
+  updateProgress(4);
+  var power = 4 + Math.floor(Math.random() * 5); // 4-8
+  setDrop(power);
+  renderColBtns(true, -1);
+  document.getElementById('info-bar').textContent = 'Choose a column — aim for weak spots!';
+  T.colCallback = function(col) {
+    T.colCallback = null;
+    renderColBtns(false);
+    document.getElementById('info-bar').textContent = '';
+    animateDrop(col, T.dropPower, function() {
+      if (hasChannel()) {
+        showWin();
+        renderGrid();
+        setTimeout(function() {
+          showMsg('CHANNEL!',
+            'You carved a path from top to bottom!<br><span class="em">In EROSION, this means you win.</span><br><br>Now let\'s see what happens with opponents...',
+            'NEXT: PVP', noisoreStep0);
+        }, 1500);
+      } else {
+        // one more drop
+        var p2 = 5 + Math.floor(Math.random() * 4);
+        setDrop(p2);
+        renderColBtns(true, -1);
+        T.colCallback = function(col2) {
+          T.colCallback = null;
+          renderColBtns(false);
+          animateDrop(col2, T.dropPower, function() {
+            if (hasChannel()) {
+              showWin();
+              renderGrid();
+              setTimeout(function() {
+                showMsg('CHANNEL!',
+                  'You carved a path!<br>Now let\'s add opponents...',
+                  'NEXT: PVP', noisoreStep0);
+              }, 1500);
+            } else {
+              // force channel for demo
+              T.grid[0][1] = 0; T.grid[1][1] = 0; T.grid[2][1] = 0; T.grid[3][1] = 0;
+              renderGrid();
+              showWin();
+              setTimeout(function() {
+                showMsg('CHANNEL!',
+                  'A channel appeared!<br>In a real game, you keep dropping until this happens.<br><br>Now let\'s add opponents...',
+                  'NEXT: PVP', noisoreStep0);
+              }, 1500);
+            }
+          });
+        };
+      }
+    });
+  };
+}
+
+// --- NOISORE PHASE ---
+
+function noisoreStep0() {
+  T.phase = 1;
+  updateProgress(5);
+  document.getElementById('phase').textContent = 'NOISORE — PVP';
+  document.getElementById('players').style.display = 'flex';
+  document.getElementById('players').innerHTML =
+    '<div class="player-tag you">🎯 YOU</div>' +
+    '<div class="player-tag" style="border-color:#d4a;color:#d4a">🤖 Kira</div>' +
+    '<div class="player-tag" style="border-color:#4d8;color:#4d8">🤖 Rex</div>';
+  
+  showMsg('🏆 NOISORE',
+    'Same grid, same drops — but now you compete.<br><br><span class="em">Everyone shares the same grid.</span><br>Each player drops in turn. First to create a channel wins.<br><br>Your opponents are bots with different strategies.',
+    'GOT IT', noisoreStep1);
+}
+
+function noisoreStep1() {
+  updateProgress(6);
+  makeGrid(4, 4);
+  renderGrid();
+  setDrop(0);
+
+  showMsg('YOUR TURN',
+    'In NOISORE, players take turns.<br>You drop first, then bots play automatically.<br><br>The bot who builds a channel first <span class="em">wins the pot</span>.<br>Skill matters — smart column choice beats random.',
+    'PLAY A ROUND', function() {
+    var power = 5 + Math.floor(Math.random() * 4);
+    setDrop(power);
+    renderColBtns(true, -1);
+    document.getElementById('info-bar').textContent = 'Your turn — choose a column';
+    T.colCallback = function(col) {
+      T.colCallback = null;
+      renderColBtns(false);
+      document.getElementById('info-bar').textContent = '';
+      animateDrop(col, T.dropPower, function() {
+        // Bot turns
+        document.getElementById('info-bar').textContent = '🤖 Kira is thinking...';
+        setTimeout(function() {
+          var botPower = 3 + Math.floor(Math.random() * 5);
+          var botCol = pickLightCol();
+          animateDrop(botCol, botPower, function() {
+            document.getElementById('info-bar').textContent = '🤖 Rex is thinking...';
+            setTimeout(function() {
+              var botPower2 = 3 + Math.floor(Math.random() * 5);
+              var botCol2 = Math.floor(Math.random() * T.cols);
+              animateDrop(botCol2, botPower2, function() {
+                document.getElementById('info-bar').textContent = '';
+                // Random winner for demo
+                var winners = ['you', 'kira', 'rex'];
+                var w = winners[Math.floor(Math.random() * 3)];
+                if (w === 'you') {
+                  T.grid[0][0] = 0; T.grid[1][0] = 0; T.grid[2][0] = 0; T.grid[3][0] = 0;
+                } else {
+                  T.grid[0][3] = 0; T.grid[1][3] = 0; T.grid[2][3] = 0; T.grid[3][3] = 0;
+                }
+                renderGrid();
+                showWin();
+                var tags = document.querySelectorAll('.player-tag');
+                if (w === 'you') {
+                  tags[0].classList.add('winner');
+                } else if (w === 'kira') {
+                  tags[1].classList.add('winner');
+                } else {
+                  tags[2].classList.add('winner');
+                }
+                var winName = w === 'you' ? 'YOU' : w === 'kira' ? 'Kira' : 'Rex';
+                setTimeout(function() {
+                  if (w === 'you') {
+                    showMsg('YOU WIN!',
+                      'You created a channel first!<br><span class="em">In NOISORE Real, you\'d win the pot minus 5% rake.</span><br><br>One more mode to learn...',
+                      'NEXT: BET&WET', betwetStep0);
+                  } else {
+                    showMsg('🤖 ' + winName + ' WINS!',
+                      winName + ' created a channel before you.<br><span class="em">In PvP, you lose your stake.</span><br>Better strategy next time!<br><br>One more mode to learn...',
+                      'NEXT: BET&WET', betwetStep0);
+                  }
+                }, 1500);
+              });
+            }, 800);
+          });
+        }, 800);
+      });
+    };
+  });
+}
+
+// Bot strategy helper
+function pickLightCol() {
+  var best = 0, bs = Infinity;
+  for (var c = 0; c < T.cols; c++) {
+    var s = 0;
+    for (var r = 0; r < T.rows; r++) s += T.grid[r][c];
+    if (s < bs) { bs = s; best = c; }
+  }
+  return best;
+}
+
+// --- BET&WET PHASE ---
+
+function betwetStep0() {
+  T.phase = 2;
+  updateProgress(7);
+  document.getElementById('phase').textContent = 'BET&WET — SPECTATOR';
+  document.getElementById('players').style.display = 'none';
+  document.getElementById('fighters').style.display = 'flex';
+  
+  var fighters = [
+    {name:'Professor', odds:'×4.8', color:'#4ad'},
+    {name:'Scout', odds:'×5.2', color:'#d4a'},
+    {name:'Crow', odds:'×5.5', color:'#4d8'},
+    {name:'Mole', odds:'×5.4', color:'#a6f'},
+    {name:'Colonel', odds:'×5.0', color:'#fa0'},
+    {name:'Daisy', odds:'×12.1', color:'#f66'}
+  ];
+  
+  var el = document.getElementById('fighters');
+  el.innerHTML = '';
+  fighters.forEach(function(f) {
+    var btn = document.createElement('button');
+    btn.className = 'fighter-btn';
+    btn.style.borderColor = f.color;
+    btn.style.color = f.color;
+    btn.innerHTML = f.name + ' <small>' + f.odds + '</small>';
+    btn.onclick = function() {
+      btn.classList.toggle('bet');
+      if (btn.classList.contains('bet')) {
+        btn.style.borderColor = '#fff';
+        btn.style.color = '#fff';
+        if (!T.betFighters) T.betFighters = [];
+        T.betFighters.push(f.name);
+        T.betFighter = f.name;
+      } else {
+        btn.style.borderColor = f.color;
+        btn.style.color = f.color;
+        T.betFighters = (T.betFighters||[]).filter(function(n){return n!==f.name});
+        T.betFighter = T.betFighters.length ? T.betFighters[0] : null;
+      }
+    };
+    el.appendChild(btn);
+  });
+
+  showMsg('🎰 BET&WET',
+    'You don\'t play — you <span class="em">watch and bet</span>.<br><br>6 bot fighters compete. Each has a strategy and odds.<br><span class="em">Daisy</span> is random (high odds, low chance).<br><span class="em">Professor</span> is smart (low odds, high chance).<br><br>Pick your fighter!',
+    'GOT IT', betwetStep1);
+}
+
+function betwetStep1() {
+  updateProgress(8);
+  document.getElementById('info-bar').textContent = 'Tap a fighter to place your bet';
+  
+  makeGrid(4, 4);
+  renderGrid();
+  renderColBtns(false);
+  setDrop(0);
+
+  showMsg('PLACE YOUR BET',
+    'Click fighters to bet on them — <span class="em">you can pick several</span>.<br>If any of your fighters creates a channel first — <span class="em">you win at their odds</span>.<br><br>More bets = more chances, but more risk.',
+    'BET NOW', function() {
+      // Wait for bet confirmation via button
+      T.betFighter = null;
+      T.betFighters = [];
+      var confirmBtn = document.createElement('button');
+      confirmBtn.className = 'btn-next';
+      confirmBtn.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:50;display:none';
+      confirmBtn.textContent = 'CONFIRM BET';
+      confirmBtn.id = 'confirm-bet';
+      confirmBtn.onclick = function() {
+        confirmBtn.remove();
+        document.getElementById('info-bar').textContent = 'Bets: ' + T.betFighters.join(', ') + ' — Watching...';
+        setTimeout(betwetStep2, 1000);
+      };
+      document.body.appendChild(confirmBtn);
+      var poll = setInterval(function() {
+        if (T.betFighters && T.betFighters.length > 0) {
+          confirmBtn.style.display = '';
+          confirmBtn.textContent = 'CONFIRM (' + T.betFighters.length + ')';
+        } else {
+          confirmBtn.style.display = 'none';
+        }
+        if (!document.getElementById('confirm-bet')) clearInterval(poll);
+      }, 200);
+    });
+}
+
+function betwetStep2() {
+  // Simulate quick auto-play
+  var drops = 0;
+  function autoDrop() {
+    if (drops >= 4 || hasChannel()) {
+      renderGrid();
+      if (!hasChannel()) {
+        T.grid[0][2]=0;T.grid[1][2]=0;T.grid[2][2]=0;T.grid[3][2]=0;
+        renderGrid();
+      }
+      showWin();
+      // Highlight winner
+      var btns = document.querySelectorAll('.fighter-btn');
+      btns[0].classList.add('bet'); // Professor wins
+      setTimeout(function() {
+        var won = (T.betFighters||[]).indexOf('Professor') >= 0;
+        var bets = (T.betFighters||[]).join(', ') || 'nobody';
+        showMsg(won ? '💰 YOU WON!' : '😅 NOT THIS TIME',
+          won 
+            ? 'Professor created the channel!<br>Your bet on Professor paid out at <span class="em">×4.8</span>!'
+            : 'Professor won this round.<br>You bet on: ' + bets + '.<br><br>That\'s Bet&Wet — spread your bets or go all-in!',
+          'FINISH', tutorialEnd);
+      }, 1500);
+      return;
+    }
+    var power = 3 + Math.floor(Math.random() * 6);
+    var col = drops % 2 === 0 ? pickLightCol() : Math.floor(Math.random() * T.cols);
+    setDrop(power);
+    animateDrop(col, power, function() {
+      drops++;
+      setTimeout(autoDrop, 500);
+    });
+  }
+  autoDrop();
+}
+
+function tutorialEnd() {
+  updateProgress(9);
+  document.getElementById('fighters').style.display = 'none';
+  document.getElementById('info-bar').textContent = '';
+  
+  showMsg('🎓 TUTORIAL COMPLETE',
+    '<span class="em">EROSION</span> — solo, learn the mechanics<br>' +
+    '<span class="em">NOISORE</span> — PvP, compete for the pot<br>' +
+    '<span class="em">BET&WET</span> — spectate and bet on fighters<br><br>' +
+    'Same engine. Same grid. Three ways to play.',
+    'PLAY NOW', function() {
+      window.location.href = 'https://noisore.uncloned.work';
+    });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+startTutorial();
+</script>
+</body>
+</html>

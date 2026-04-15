@@ -1,4 +1,4 @@
-// game.js — NOISORE v9.3 shared game logic
+// game.js — NOISORE v9.4 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -146,12 +146,15 @@ function fitGrid(){
         var available=vh-above-below;
         var gap=3;
         var cellH=Math.floor((available-(ROWS-1)*gap)/ROWS);
-        if(cellH<20)cellH=20;
-        if(cellH>80)return;// don't shrink if already fits
+        var gridW=grid.clientWidth-6;
+        var cellW=Math.floor((gridW-(COLS-1)*gap)/COLS);
+        var cell=Math.min(cellH,cellW);
+        if(cell<20)cell=20;
+        if(cell>80)return;
         var cells=document.querySelectorAll('.cell');
-        for(var i=0;i<cells.length;i++){cells[i].style.height=cellH+'px';cells[i].style.width=cellH+'px';}
-        document.getElementById('grid').style.gridTemplateColumns='repeat('+COLS+','+cellH+'px)';
-        document.getElementById('col-btns').style.gridTemplateColumns='repeat('+COLS+','+cellH+'px)';
+        for(var i=0;i<cells.length;i++){cells[i].style.height=cell+'px';cells[i].style.width=cell+'px';}
+        document.getElementById('grid').style.gridTemplateColumns='repeat('+COLS+','+cell+'px)';
+        document.getElementById('col-btns').style.gridTemplateColumns='repeat('+COLS+','+cell+'px)';
     });
 }
 function unfitGrid(){

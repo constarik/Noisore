@@ -205,7 +205,7 @@ var playerDropResults=[];
 var TAG_POS=[{top:'1px',left:'2px'},{top:'1px',right:'2px'},{bottom:'1px',left:'2px'},{bottom:'1px',right:'2px'},{top:'1px',left:'50%',tx:'-50%'},{bottom:'1px',left:'50%',tx:'-50%'},{top:'50%',left:'1px',ty:'-50%'},{top:'50%',right:'1px',ty:'-50%'},{top:'30%',left:'2px'},{top:'30%',right:'2px'},{bottom:'30%',left:'2px'},{bottom:'30%',right:'2px'}];
 function randH(){return 1+Math.floor(Math.random()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
-function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
+function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;playerDropResults=[];document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
 function stoneClip(r,c){
     var s=((r*7+c*13+grid[r][c]*3+r*r*5+c*c*11)&0xFFFF);
@@ -324,7 +324,7 @@ async function checkWin(winner,winColor){
     updateUI();
     var label=winner+(winner==='YOU'?' WIN':' WINS');
     var summary='';
-    if(playerDropResults.length>1){
+    if(playerDropResults.length>0){
         summary='<div style="margin-top:10px;font-size:11px;text-align:left;max-width:280px;margin-left:auto;margin-right:auto">';
         for(var pi=0;pi<playerDropResults.length;pi++){
             var pr=playerDropResults[pi];

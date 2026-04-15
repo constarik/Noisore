@@ -1,4 +1,4 @@
-// game.js — NOISORE v9.4 shared game logic
+// game.js — NOISORE v9.5 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -201,6 +201,7 @@ function backToLobby(){sndPlay('click');unfitGrid();document.getElementById('gam
 var COLS=6,ROWS=6,MAX_H=10,MAX_DROP=10,DROP_COST=0,POOL_RATE=0.95,ANIM_DELAY=200;
 var ROTATE=true,BOTS=[];
 var grid=[],pool=0,balance=100,dropNum=0,roundNum=1,animating=false,currentDrop=0,turnPlayers=[];
+var playerDropResults=[];
 var TAG_POS=[{top:'1px',left:'2px'},{top:'1px',right:'2px'},{bottom:'1px',left:'2px'},{bottom:'1px',right:'2px'},{top:'1px',left:'50%',tx:'-50%'},{bottom:'1px',left:'50%',tx:'-50%'},{top:'50%',left:'1px',ty:'-50%'},{top:'50%',right:'1px',ty:'-50%'},{top:'30%',left:'2px'},{top:'30%',right:'2px'},{bottom:'30%',left:'2px'},{bottom:'30%',right:'2px'}];
 function randH(){return 1+Math.floor(Math.random()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
@@ -309,7 +310,7 @@ async function animateDrop(col,dropPower,who,color,playerIdx){
         }else{sndPlay('drop');grid[row][c]-=power;showDropInfo(who,color,dropPower,0,power);showPowerTag(row,c,0,color,playerIdx);if(BOTS.length>0)setPlayerRemaining(playerIdx,0);power=0;updateCell(row,c);}
         await sleep(ANIM_DELAY);if(power>0&&row<ROWS-1)c=chooseNext(row,c);
     }
-    if(BOTS.length>0)setPlayerDone(playerIdx);return washed;
+    if(BOTS.length>0)setPlayerDone(playerIdx);return power;
 }
 async function checkWin(winner,winColor){
     var ch=findChannelCells();var keys=Object.keys(ch);
@@ -322,7 +323,17 @@ async function checkWin(winner,winColor){
     if(winner==='YOU')balance+=pool;
     updateUI();
     var label=winner+(winner==='YOU'?' WIN':' WINS');
-    document.getElementById('payout-area').innerHTML='<div style="margin-top:4px"><span style="font-family:Archivo Black,sans-serif;font-size:18px;color:'+winColor+'">'+label+'</span><br>'+(pool>0?'<span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">'+pool.toFixed(2)+' USDT</span><br>':'')+'<button onclick="newRound()" style="margin-top:10px;background:'+winColor+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT ROUND</button></div>';
+    var summary='';
+    if(playerDropResults.length>1){
+        summary='<div style="margin-top:10px;font-size:11px;text-align:left;max-width:280px;margin-left:auto;margin-right:auto">';
+        for(var pi=0;pi<playerDropResults.length;pi++){
+            var pr=playerDropResults[pi];
+            var isWinner=pr.name===winner;
+            summary+='<div style="color:'+(isWinner?pr.color:'#666')+';padding:2px 0">'+(isWinner?'★ ':'')+pr.name+' — drop '+pr.dp+', remaining '+pr.remaining+'</div>';
+        }
+        summary+='</div>';
+    }
+    document.getElementById('payout-area').innerHTML='<div style="margin-top:4px"><span style="font-family:Archivo Black,sans-serif;font-size:18px;color:'+winColor+'">'+label+'</span><br>'+(pool>0?'<span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">'+pool.toFixed(2)+' USDT</span><br>':'')+summary+'<button onclick="newRound()" style="margin-top:10px;background:'+winColor+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT ROUND</button></div>';
     animating=false;setColBtnsDisabled(true);return true;
 }
 // === SOLO & PVP ===
@@ -352,12 +363,13 @@ async function playDrop(startCol){
     var players=[{name:'YOU',color:'#f59e0b',col:startCol,dp:currentDrop,isPlayer:true}];
     for(var b=0;b<BOTS.length;b++){var botDp=randDrop();var botCol=botPickCol(BOTS[b],botDp);players.push({name:BOTS[b].name,color:BOTS[b].color,col:botCol,dp:botDp,isPlayer:false});}
     for(var i=players.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=players[i];players[i]=players[j];players[j]=tmp;}
-    renderPlayersList(players);clearPowerTags();
+    renderPlayersList(players);clearPowerTags();playerDropResults=[];
     for(var t=0;t<players.length;t++){
         var p=players[t];
         if(p.isPlayer&&DROP_COST>0)balance-=DROP_COST;
         pool+=DROP_COST*POOL_RATE;dropNum++;updateUI();
-        await animateDrop(p.col,p.dp,p.name,p.color,t);
+        var rem=await animateDrop(p.col,p.dp,p.name,p.color,t);
+        playerDropResults.push({name:p.name,color:p.color,dp:p.dp,remaining:rem});
         if(await checkWin(p.name,p.color))return;
         if(t<players.length-1)await sleep(400);
     }

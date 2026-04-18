@@ -78,7 +78,10 @@ function tutWaitDrop(col){
 }
 function tutSkip(){
     TUT.active=false;tutHide();
+    tutResetFighters();
+    var pb=document.querySelector('.play-btn');if(pb)pb.style.display='';
     if(_tutOrigRandom){Math.random=_tutOrigRandom;_tutOrigRandom=null;}
+    CFG.bets={};try{betClear();}catch(e){}
     backToLobby();
 }
 
@@ -303,7 +306,10 @@ async function tutBetwet(){
     var f2=BET_FIGHTERS[2];
     var f4=BET_FIGHTERS[4];
 
+    var playBtn=document.querySelector('.play-btn');
+
     // Step 1: explain
+    playBtn.style.display='none';
     tutShow(
         '<div class="tut-step">BET & WET — STEP 1/6</div>'+
         '<b style="color:#f59e0b">6 fighters</b> race to carve a channel.<br><br>'+
@@ -361,7 +367,8 @@ async function tutBetwet(){
     if(!TUT.active)return;
 
     // Step 6: hit PLAY
-    tutResetFighters();
+    tutDisableAllFighters();
+    playBtn.style.display='';
     tutShowHint(
         '<div class="tut-step">STEP 6/6</div>'+
         'Two fighters backed.<br>'+
@@ -386,6 +393,8 @@ async function tutBetwet(){
     TUT.active=false;tutHide();
     Math.random=_tutOrigRandom;_tutOrigRandom=null;
     CFG.bets={};
+    betClear();
+    tutResetFighters();
     backToLobby();
 }
 

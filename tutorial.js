@@ -232,69 +232,135 @@ async function tutSoiron(){
 // ========== BET&WET ==========
 var TUT_BET_SEED=42;
 
+function tutFighterBtn(idx){
+    return document.getElementById('fighter-btns').children[idx];
+}
+function tutDisableAllFighters(){
+    var btns=document.getElementById('fighter-btns').children;
+    for(var i=0;i<btns.length;i++){btns[i].style.opacity='0.3';btns[i].style.pointerEvents='none';}
+}
+function tutEnableFighter(idx){
+    var btn=tutFighterBtn(idx);
+    btn.style.opacity='1';btn.style.pointerEvents='auto';btn.style.outline='2px solid #f59e0b';
+}
+function tutResetFighters(){
+    var btns=document.getElementById('fighter-btns').children;
+    for(var i=0;i<btns.length;i++){btns[i].style.opacity='';btns[i].style.pointerEvents='';btns[i].style.outline='';}
+}
+function tutWaitFighter(idx){
+    return new Promise(function(resolve){
+        var btn=tutFighterBtn(idx);
+        var orig=btn.onclick;
+        btn.onclick=function(){
+            if(orig)orig.call(btn);
+            btn.onclick=orig;
+            btn.style.outline='';
+            resolve();
+        };
+    });
+}
+
 async function tutBetwet(){
     TUT.active=true;
+    _tutOrigRandom=Math.random;
+    Math.random=_tutRng(TUT_BET_SEED);
+    
     CFG.mode='bet';CFG.gridSize=6;CFG.rotate=true;CFG.stake=1;CFG.bets={};
-    setMode('bet');randomizeFighterNames();
-    await sleep(300);
+    setMode('bet');
+    randomizeFighterNames();
+    await sleep(400);
+    
+    var f0=BET_FIGHTERS[0]; // usually favorite (lowest odds)
+    var f2=BET_FIGHTERS[2];
+    var f4=BET_FIGHTERS[4];
 
     // Step 1: explain
     tutShow(
-        '<div class="tut-step">BET & WET — STEP 1/4</div>'+
+        '<div class="tut-step">BET & WET — STEP 1/6</div>'+
         '<b style="color:#f59e0b">6 fighters</b> race to carve a channel.<br><br>'+
-        'Each fighter has a strategy and <b style="color:#f59e0b">odds</b>.<br>'+
-        'Higher odds = bigger payout, lower chance.<br><br>'+
-        'You pick a fighter and bet on it.','middle');
+        'Each has different odds.<br>'+
+        'Higher odds = bigger payout, lower chance.','middle');
     await tutWaitTap(3000);
     if(!TUT.active)return;
     tutHide();
 
-    // Step 2: pick fighter
+    // Step 2: bet on favorite
+    tutDisableAllFighters();
+    tutEnableFighter(0);
     tutShowHint(
-        '<div class="tut-step">STEP 2/4</div>'+
-        '<b style="color:#f59e0b">Tap a fighter to bet on them!</b><br><br>'+
-        'The number after × is the payout multiplier.<br>'+
-        'Example: ×5.2 means bet 1.00 → win 5.20','top');
-    var fBtns=document.getElementById('fighter-btns');
-    await new Promise(function(resolve){
-        var buttons=fBtns.querySelectorAll('button');
-        var h=function(){for(var i=0;i<buttons.length;i++)buttons[i].removeEventListener('click',h);resolve();};
-        for(var i=0;i<buttons.length;i++)buttons[i].addEventListener('click',h);
-    });
+        '<div class="tut-step">STEP 2/6</div>'+
+        'Tap <b style="color:'+f0.color+'">'+f0.name+'</b> — the favorite!<br>'+
+        '<span style="color:#888">odds ×'+f0.odds+' (safe but low payout)</span>','top');
+    await tutWaitFighter(0);
     document.getElementById('tut-text').style.display='none';
-    await sleep(500);
+    await sleep(800);
     if(!TUT.active)return;
 
-    // Step 3: explain what happens next, then start race
+    // Step 3: add second bet
+    tutDisableAllFighters();
+    tutEnableFighter(4);
+    tutShowHint(
+        '<div class="tut-step">STEP 3/6</div>'+
+        'Now also bet on <b style="color:'+f4.color+'">'+f4.name+'</b>!<br>'+
+        '<span style="color:#888">odds ×'+f4.odds+' (risky but big payout)</span>','top');
+    await tutWaitFighter(4);
+    document.getElementById('tut-text').style.display='none';
+    await sleep(800);
+    if(!TUT.active)return;
+
+    // Step 4: remove first bet
+    tutDisableAllFighters();
     tutShow(
-        '<div class="tut-step">STEP 3/4</div>'+
-        'Bet placed! Now watch the race.<br><br>'+
-        'All 6 fighters drop water automatically.<br>'+
-        'First to carve a channel <b style="color:#f59e0b">wins</b>!<br><br>'+
+        '<div class="tut-step">STEP 4/6</div>'+
+        'Hmm, <b style="color:'+f0.color+'">'+f0.name+'</b> has low payout (×'+f0.odds+').<br>'+
+        'Let\'s remove that bet.<br><br>'+
+        '<span style="color:#888;font-size:11px">tap to remove</span>','middle');
+    await tutWaitTap(2000);
+    betRemove(f0.name);
+    sndPlay('click');
+    await sleep(600);
+    if(!TUT.active)return;
+    tutHide();
+
+    // Step 5: add different fighter
+    tutDisableAllFighters();
+    tutEnableFighter(2);
+    tutShowHint(
+        '<div class="tut-step">STEP 5/6</div>'+
+        'Pick <b style="color:'+f2.color+'">'+f2.name+'</b> instead!<br>'+
+        '<span style="color:#888">odds ×'+f2.odds+' (balanced risk/reward)</span>','top');
+    await tutWaitFighter(2);
+    document.getElementById('tut-text').style.display='none';
+    await sleep(600);
+    if(!TUT.active)return;
+
+    // Step 6: start race
+    tutResetFighters();
+    tutShow(
+        '<div class="tut-step">STEP 6/6</div>'+
+        'Bets placed! Two fighters backed.<br>'+
+        'If either wins — you get the payout!<br><br>'+
         '<span style="color:#888;font-size:11px">tap to start the race</span>','middle');
     await tutWaitTap(3000);
     if(!TUT.active)return;
     tutHide();
 
-    // Seed RNG and start game
-    _tutOrigRandom=Math.random;
-    Math.random=_tutRng(TUT_BET_SEED);
-    startGame(); // triggers betRound automatically
-
+    // Start race
+    startGame();
+    
     // wait for race to finish
-    await sleep(2000); // let it start
+    await sleep(2000);
     var maxWait=60;
     while(animating && maxWait>0){await sleep(1000);maxWait--;}
-    await sleep(3000); // let user see the result
+    await sleep(3000);
     if(!TUT.active){Math.random=_tutOrigRandom;_tutOrigRandom=null;return;}
 
-    // Step 4: explain result
+    // Conclusion
     tutShow(
         '🎉 <b style="color:#f59e0b">RACE OVER!</b><br><br>'+
         'The winner carved a channel first.<br>'+
-        'If you bet on the winner — you get<br>'+
-        'your bet × the odds!<br><br>'+
-        'That\'s Bet&Wet — virtual water racing!','top');
+        'If your fighter won — bet × odds = payout!<br><br>'+
+        'That\'s <b style="color:#f59e0b">Bet&Wet</b> — virtual water racing!','top');
     await tutWaitTap(4000);
     TUT.active=false;tutHide();
     Math.random=_tutOrigRandom;_tutOrigRandom=null;

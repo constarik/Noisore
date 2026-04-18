@@ -259,6 +259,35 @@ function tutWaitFighter(idx){
         };
     });
 }
+function tutWaitRightClick(idx){
+    return new Promise(function(resolve){
+        var btn=tutFighterBtn(idx);
+        btn.style.opacity='1';btn.style.pointerEvents='auto';btn.style.outline='2px solid #f66';
+        var handler=function(e){
+            e.preventDefault();
+            btn.removeEventListener('contextmenu',handler);
+            btn.style.outline='';
+            // betRemove fires from original oncontextmenu
+            resolve();
+            return false;
+        };
+        btn.addEventListener('contextmenu',handler);
+    });
+}
+function tutWaitPlayBtn(){
+    return new Promise(function(resolve){
+        var btn=document.querySelector('.play-btn');
+        btn.style.outline='3px solid #f59e0b';
+        btn.style.position='relative';btn.style.zIndex='160';
+        var orig=btn.onclick;
+        btn.onclick=function(){
+            btn.style.outline='';btn.style.position='';btn.style.zIndex='';
+            btn.onclick=orig;
+            if(orig)orig.call(btn);
+            resolve();
+        };
+    });
+}
 
 async function tutBetwet(){
     TUT.active=true;
@@ -308,19 +337,16 @@ async function tutBetwet(){
     await sleep(800);
     if(!TUT.active)return;
 
-    // Step 4: remove first bet
+    // Step 4: remove first bet — RIGHT CLICK
     tutDisableAllFighters();
-    tutShow(
+    tutShowHint(
         '<div class="tut-step">STEP 4/6</div>'+
-        'Hmm, <b style="color:'+f0.color+'">'+f0.name+'</b> has low payout (×'+f0.odds+').<br>'+
-        'Let\'s remove that bet.<br><br>'+
-        '<span style="color:#888;font-size:11px">tap to remove</span>','middle');
-    await tutWaitTap(2000);
-    betRemove(f0.name);
-    sndPlay('click');
-    await sleep(600);
+        '<b style="color:'+f0.color+'">'+f0.name+'</b> has low payout (×'+f0.odds+').<br><br>'+
+        '<b style="color:#f66">Right-click</b> on '+f0.name+' to remove the bet!','top');
+    await tutWaitRightClick(0);
+    document.getElementById('tut-text').style.display='none';
+    await sleep(800);
     if(!TUT.active)return;
-    tutHide();
 
     // Step 5: add different fighter
     tutDisableAllFighters();
@@ -334,21 +360,16 @@ async function tutBetwet(){
     await sleep(600);
     if(!TUT.active)return;
 
-    // Step 6: start race
+    // Step 6: hit PLAY
     tutResetFighters();
-    tutShow(
+    tutShowHint(
         '<div class="tut-step">STEP 6/6</div>'+
-        'Bets placed! Two fighters backed.<br>'+
-        'If either wins — you get the payout!<br><br>'+
-        '<span style="color:#888;font-size:11px">tap to start the race</span>','middle');
-    await tutWaitTap(3000);
-    if(!TUT.active)return;
-    tutHide();
-
-    // Start race
-    startGame();
+        'Two fighters backed.<br>'+
+        'Hit <b style="color:#f59e0b">▶ PLAY</b> to start the race!','bottom');
+    await tutWaitPlayBtn();
+    document.getElementById('tut-text').style.display='none';
     
-    // wait for race to finish
+    // race is now running (startGame→betRound fired by PLAY click)
     await sleep(2000);
     var maxWait=60;
     while(animating && maxWait>0){await sleep(1000);maxWait--;}

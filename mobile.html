@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NOISORE v9.3m</title>
+<title>NOISORE v9.4m</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
@@ -78,7 +78,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .channel-flash.show{opacity:1;}
 .rotate-indicator{text-align:center;font-size:10px;color:#f59e0b;padding:2px 0;opacity:0;transition:opacity 0.3s;}
 .rotate-indicator.show{opacity:1;}
-.tut-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:150;display:none;pointer-events:auto;}
+.tut-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:150;display:none;pointer-events:auto;}
 .tut-overlay.show{display:block;}
 .tut-hole{position:absolute;border:3px solid #f59e0b;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.75);z-index:151;pointer-events:none;animation:tut-pulse 1.5s ease-in-out infinite;}
 @keyframes tut-pulse{0%,100%{box-shadow:0 0 0 9999px rgba(0,0,0,0.75),0 0 12px #f59e0b;}50%{box-shadow:0 0 0 9999px rgba(0,0,0,0.75),0 0 24px #f59e0b;}}
@@ -88,7 +88,7 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 .tut-skip:hover{color:#fff;border-color:#f59e0b;}
 </style></head><body>
 <div id="app">
-    <h1>NOISORE</h1><div class="version">v9.3m</div>
+    <h1>NOISORE</h1><div class="version">v9.4m</div>
     <button id="mute-btn" onclick="sndToggle()" style="position:fixed;top:6px;right:6px;z-index:200;background:none;border:1px solid #333;border-radius:6px;color:#888;font-size:16px;padding:3px 6px;cursor:pointer;">&#128263;</button>
     <div id="lobby">
         <div class="lobby-section">
@@ -164,9 +164,9 @@ h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-alig
 <div class="tut-hole" id="tut-hole" style="display:none"></div>
 <div class="tut-text" id="tut-text" style="display:none"></div>
 <button class="tut-skip" id="tut-skip" style="display:none" onclick="tutSkip()">SKIP ✕</button>
-<script src="beach.js?v=93"></script>
-<script src="engine.js?v=93"></script>
-<script src="game.js?v=93"></script>
-<script src="tutorial.js?v=93"></script>
+<script src="beach.js?v=94"></script>
+<script src="engine.js?v=94"></script>
+<script src="game.js?v=94"></script>
+<script src="tutorial.js?v=94"></script>
 </body>
 </html>

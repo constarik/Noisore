@@ -100,6 +100,7 @@ async function tutErosion(){
     
     // Step 1: explain
     setColBtnsDisabled(true);
+    document.getElementById('col-btns').style.visibility='hidden';
     tutShow(
         '<div class="tut-step">EROSION — STEP 1/'+(TUT_TURNS.length+2)+'</div>'+
         'Carve a <b style="color:#f59e0b">water channel</b><br>from top to bottom!<br><br>'+
@@ -108,6 +109,7 @@ async function tutErosion(){
     await tutWaitTap(3000);
     if(!TUT.active)return;
     tutHide();
+    document.getElementById('col-btns').style.visibility='';
     
     // Play turns
     for(var t=0;t<TUT_TURNS.length;t++){
@@ -166,6 +168,7 @@ async function tutSoiron(){
 
     // Step 1: explain
     setColBtnsDisabled(true);
+    document.getElementById('col-btns').style.visibility='hidden';
     tutShow(
         '<div class="tut-step">SOIRON — STEP 1/'+(TUT_SOIRON_TURNS.length+2)+'</div>'+
         'Race against <b style="color:#f59e0b">3 opponents</b>!<br><br>'+
@@ -175,6 +178,7 @@ async function tutSoiron(){
     await tutWaitTap(3000);
     if(!TUT.active)return;
     tutHide();
+    document.getElementById('col-btns').style.visibility='';
 
     // Play turns
     for(var t=0;t<TUT_SOIRON_TURNS.length;t++){

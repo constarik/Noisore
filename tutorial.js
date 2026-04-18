@@ -413,9 +413,13 @@ async function tutBetwet(){
     tutUnlockLobby();
     backToLobby();
 }
-
 function startTutorial(){
     sndPlay('click');
+    try{tutUnlockLobby();}catch(e){}
+    try{tutResetFighters();}catch(e){}
+    try{tutHide();}catch(e){}
+    if(_tutOrigRandom){Math.random=_tutOrigRandom;_tutOrigRandom=null;}
     if(CFG.mode==='solo') tutErosion();
     else if(CFG.mode==='pvp') tutSoiron();
     else if(CFG.mode==='bet') tutBetwet();
+}

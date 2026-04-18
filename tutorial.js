@@ -13,7 +13,6 @@ var TUT_TURNS=[
     {col:4, dp:10, colDisplay:5, hint:'Column 5 — carve through to the bottom!'}
 ];
 
-var TUT_GRID_SOIRON=[[7,2,8,5,9,6],[6,3,7,4,8,5],[5,2,6,3,7,4],[8,3,5,6,9,3],[9,2,4,7,8,6],[7,3,3,8,5,4]];
 
 function tutShow(text,textPos){
     var txt=document.getElementById('tut-text');
@@ -149,51 +148,81 @@ async function tutErosion(){
 }
 
 // ========== SOIRON ==========
+var TUT_SOIRON_SEED=9;
+var TUT_SOIRON_TURNS=[
+    {col:1, colDisplay:2, hint:'Column 2 has weak stones.'},
+    {col:4, colDisplay:5, hint:'Column 5 — press the attack!'},
+    {col:3, colDisplay:4, hint:'Column 4 — finish them off!'}
+];
+
 async function tutSoiron(){
     TUT.active=true;
-    CFG.mode='pvp';CFG.gridSize=6;CFG.rotate=true;CFG.stake=0;CFG.numBots=1;
+    _tutOrigRandom=Math.random;
+    Math.random=_tutRng(TUT_SOIRON_SEED);
+    
+    CFG.mode='pvp';CFG.gridSize=6;CFG.rotate=true;CFG.stake=0;CFG.numBots=3;
     startGame();
     await sleep(800);
-    for(var r=0;r<6;r++)for(var c=0;c<6;c++) grid[r][c]=TUT_GRID_SOIRON[r][c];
-    renderGrid();fitGrid();
-    document.getElementById('payout-area').innerHTML='';
 
+    // Step 1: explain
     setColBtnsDisabled(true);
     tutShow(
-        '<div class="tut-step">SOIRON — STEP 1/3</div>'+
-        'Race against opponents!<br>'+
-        'Everyone drops water each turn.<br><br>'+
+        '<div class="tut-step">SOIRON — STEP 1/'+(TUT_SOIRON_TURNS.length+2)+'</div>'+
+        'Race against <b style="color:#f59e0b">3 opponents</b>!<br><br>'+
+        'Each turn, all 4 players drop water.<br>'+
+        'After each turn the grid rotates.<br><br>'+
         'First to carve a channel<br><b style="color:#f59e0b">wins the pool!</b>','middle');
     await tutWaitTap(3000);
     if(!TUT.active)return;
     tutHide();
 
-    var col=1;
-    currentDrop=8;
-    document.getElementById('drop-power').textContent='8';
-    document.getElementById('drop-power').className='drop-power-value dp8';
-    document.getElementById('payout-area').innerHTML='';
-    animating=false;
-    setColBtnsDisabled(false);
-    tutHighlightCol(col);
-    tutShowHint(
-        '<div class="tut-step">STEP 2/3</div>'+
-        'Column 2 has weak stones.<br><b style="color:#f59e0b">Tap it!</b><br>Your opponent drops too.','bottom');
-    await tutWaitDrop(col);
-    setColBtnsDisabled(true);
-    tutUnhighlightCol(col);
-    document.getElementById('tut-text').style.display='none';
-    await sleep(3000);
-    if(!TUT.active)return;
-
-    setColBtnsDisabled(true);
+    // Play turns
+    for(var t=0;t<TUT_SOIRON_TURNS.length;t++){
+        var turn=TUT_SOIRON_TURNS[t];
+        document.getElementById('payout-area').innerHTML='';
+        animating=false;
+        setColBtnsDisabled(false);
+        tutHighlightCol(turn.col);
+        var stepNum=t+2;
+        var totalSteps=TUT_SOIRON_TURNS.length+2;
+        tutShowHint(
+            '<div class="tut-step">STEP '+stepNum+'/'+totalSteps+'</div>'+
+            turn.hint+'<br><b style="color:#f59e0b">Tap column '+turn.colDisplay+'!</b><br>'+
+            '<span style="color:#888;font-size:10px">Your opponents will also drop.</span>','bottom');
+        await tutWaitDrop(turn.col);
+        setColBtnsDisabled(true);
+        tutUnhighlightCol(turn.col);
+        document.getElementById('tut-text').style.display='none';
+        // wait for all 4 players animation + rotation + possible win
+        await sleep(5000);
+        if(!TUT.active)return;
+        // check if game ended (checkWin showed NEXT ROUND button)
+        if(document.querySelector('#payout-area button')){
+            // someone won
+            await sleep(2000);
+            tutShow(
+                '🎉 <b style="color:#f59e0b">RACE OVER!</b><br><br>'+
+                'A channel was carved!<br>'+
+                'The winner takes the pool.<br><br>'+
+                'That\'s SOIRON — multiplayer water racing!','top');
+            await tutWaitTap(4000);
+            TUT.active=false;tutHide();
+            Math.random=_tutOrigRandom;_tutOrigRandom=null;
+            backToLobby();
+            return;
+        }
+    }
+    
+    // no win in 3 turns — explain
     tutShow(
-        '<div class="tut-step">STEP 3/3</div>'+
-        'You both dropped water!<br><br>'+
-        'Your opponent is carving<br><b style="color:#f59e0b">their own</b> channel.<br>'+
-        'First to finish wins!<br><br>🎉 Now you know SOIRON!','middle');
+        '<div class="tut-step">STEP '+(TUT_SOIRON_TURNS.length+2)+'/'+(TUT_SOIRON_TURNS.length+2)+'</div>'+
+        'The race continues until someone<br>carves a full channel top to bottom!<br><br>'+
+        'With 4 players and rotation,<br>every turn changes the board.<br><br>'+
+        '🎉 Now you know SOIRON!','middle');
     await tutWaitTap(3000);
-    TUT.active=false;tutHide();backToLobby();
+    TUT.active=false;tutHide();
+    Math.random=_tutOrigRandom;_tutOrigRandom=null;
+    backToLobby();
 }
 
 // ========== BET&WET ==========

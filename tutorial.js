@@ -127,6 +127,7 @@ async function tutErosion(){
             turn.hint+'<br><b style="color:#f59e0b">Tap column '+turn.colDisplay+'!</b>'+
             '<br><span style="color:#888;font-size:10px">drop power: '+turn.dp+'</span>','bottom');
         await tutWaitDrop(turn.col);
+        setColBtnsDisabled(true);
         tutUnhighlightCol(turn.col);
         document.getElementById('tut-text').style.display='none';
         // wait for animation + possible rotation + possible win
@@ -179,6 +180,7 @@ async function tutSoiron(){
         '<div class="tut-step">STEP 2/3</div>'+
         'Column 2 has weak stones.<br><b style="color:#f59e0b">Tap it!</b><br>Your opponent drops too.','bottom');
     await tutWaitDrop(col);
+    setColBtnsDisabled(true);
     tutUnhighlightCol(col);
     document.getElementById('tut-text').style.display='none';
     await sleep(3000);

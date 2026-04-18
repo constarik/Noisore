@@ -1,72 +1,68 @@
-// tutorial.js — NOISORE onboarding tutorials v9.3
-var TUT={active:false,mode:null,step:0};
+// tutorial.js — NOISORE onboarding v9.4
+var TUT={active:false};
 
-// --- preset grids (6x6) ---
 var TUT_GRID_EROSION=[
-    [5,8,7,1,9,6],
-    [4,7,6,1,8,5],
-    [3,9,5,2,7,4],
-    [6,8,4,1,9,3],
-    [7,5,3,1,8,6],
+    [5,8,7,3,9,6],
+    [4,7,6,2,8,5],
+    [3,9,5,3,7,4],
+    [6,8,4,2,9,3],
+    [7,5,3,3,8,6],
     [8,6,7,2,5,4]
 ];
 var TUT_GRID_SOIRON=[
-    [7,1,8,5,9,6],
-    [6,1,7,4,8,5],
+    [7,2,8,5,9,6],
+    [6,3,7,4,8,5],
     [5,2,6,3,7,4],
-    [8,1,5,6,9,3],
-    [9,1,4,7,8,6],
-    [7,2,3,8,5,4]
+    [8,3,5,6,9,3],
+    [9,2,4,7,8,6],
+    [7,3,3,8,5,4]
 ];
 
-// --- overlay helpers ---
-function tutShow(rect,text,textPos){
-    var hole=document.getElementById('tut-hole');
+function tutShow(text,textPos){
     var txt=document.getElementById('tut-text');
     var overlay=document.getElementById('tut-overlay');
     var skip=document.getElementById('tut-skip');
     overlay.classList.add('show');
+    overlay.style.background='rgba(0,0,0,0.55)';
     skip.style.display='block';
-    if(rect){
-        // highlight mode: transparent overlay, hole does the darkening
-        overlay.style.background='transparent';
-        hole.style.display='block';
-        hole.style.left=(rect.left-6)+'px';
-        hole.style.top=(rect.top-6)+'px';
-        hole.style.width=(rect.width+12)+'px';
-        hole.style.height=(rect.height+12)+'px';
-    }else{
-        // text-only mode: semi-transparent overlay
-        overlay.style.background='rgba(0,0,0,0.55)';
-        hole.style.display='none';
-    }
-    if(text){
-        txt.style.display='block';
-        txt.innerHTML=text;
-        txt.style.top='auto';txt.style.bottom='auto';
-        txt.style.transform='translateX(-50%)';
-        if(textPos==='top'){txt.style.top='8%';}
-        else if(textPos==='bottom'){txt.style.bottom='6%';}
-        else{txt.style.top='40%';}
-    }else{
-        txt.style.display='none';
-    }
+    txt.style.display='block';
+    txt.innerHTML=text;
+    txt.style.top='auto';txt.style.bottom='auto';
+    txt.style.transform='translateX(-50%)';
+    if(textPos==='top'){txt.style.top='5%';}
+    else if(textPos==='bottom'){txt.style.bottom='5%';}
+    else{txt.style.top='35%';}
+}
+
+function tutShowTarget(text,textPos){
+    var txt=document.getElementById('tut-text');
+    var overlay=document.getElementById('tut-overlay');
+    var skip=document.getElementById('tut-skip');
+    // no overlay blocking — target is directly clickable
+    overlay.classList.remove('show');
+    skip.style.display='block';
+    txt.style.display='block';
+    txt.innerHTML=text;
+    txt.style.top='auto';txt.style.bottom='auto';
+    txt.style.transform='translateX(-50%)';
+    if(textPos==='top'){txt.style.top='5%';}
+    else if(textPos==='bottom'){txt.style.bottom='5%';}
+    else{txt.style.top='35%';}
 }
 
 function tutHide(){
     document.getElementById('tut-overlay').classList.remove('show');
     document.getElementById('tut-overlay').style.background='';
-    document.getElementById('tut-hole').style.display='none';
     document.getElementById('tut-text').style.display='none';
     document.getElementById('tut-skip').style.display='none';
+    document.getElementById('tut-hole').style.display='none';
 }
 
-// wait for tap on overlay with minimum delay
-function tutWaitTap(minDelay){
-    var ms=minDelay||3000;
+function tutWaitTap(ms){
+    var delay=ms||3000;
     return new Promise(function(resolve){
         var ready=false;
-        setTimeout(function(){ready=true;},ms);
+        setTimeout(function(){ready=true;},delay);
         var overlay=document.getElementById('tut-overlay');
         var handler=function(){
             if(!ready)return;
@@ -77,14 +73,47 @@ function tutWaitTap(minDelay){
     });
 }
 
-// raise element above overlay for clicking
-function tutRaise(el){
-    el.style.position='relative';
-    el.style.zIndex='160';
+function tutHighlightCol(col){
+    // pulse the cells in this column
+    for(var r=0;r<ROWS;r++){
+        var cell=document.getElementById('cell-'+r+'-'+col);
+        if(cell) cell.style.outline='2px solid #f59e0b';
+    }
+    var btn=document.querySelectorAll('.col-btn')[col];
+    if(btn) btn.style.outline='2px solid #f59e0b';
 }
-function tutLower(el){
-    el.style.position='';
-    el.style.zIndex='';
+function tutUnhighlightCol(col){
+    for(var r=0;r<ROWS;r++){
+        var cell=document.getElementById('cell-'+r+'-'+col);
+        if(cell) cell.style.outline='';
+    }
+    var btn=document.querySelectorAll('.col-btn')[col];
+    if(btn) btn.style.outline='';
+}
+
+function tutWaitCol(col){
+    return new Promise(function(resolve){
+        // disable all columns except target
+        var btns=document.querySelectorAll('.col-btn');
+        for(var i=0;i<btns.length;i++){
+            if(i!==col) btns[i].classList.add('disabled');
+        }
+        // wait for the drop to finish
+        var origOnclick=btns[col].onclick;
+        btns[col].onclick=function(){
+            sndPlay('click');
+            playDrop(col);
+            // wait for animation to finish
+            var check=setInterval(function(){
+                if(!animating){
+                    clearInterval(check);
+                    for(var j=0;j<btns.length;j++) btns[j].classList.remove('disabled');
+                    btns[col].onclick=origOnclick;
+                    resolve();
+                }
+            },200);
+        };
+    });
 }
 
 function tutSkip(){
@@ -93,109 +122,86 @@ function tutSkip(){
     backToLobby();
 }
 
-// --- EROSION tutorial ---
+// ========== EROSION ==========
 async function tutErosion(){
-    TUT.active=true;TUT.mode='solo';
+    TUT.active=true;
     CFG.mode='solo';CFG.gridSize=6;CFG.rotate=false;CFG.stake=0;
     startGame();
     await sleep(600);
 
-    // override grid with easy column 3
     for(var r=0;r<6;r++)for(var c=0;c<6;c++) grid[r][c]=TUT_GRID_EROSION[r][c];
     renderGrid();fitGrid();
 
-    // Step 1: explain the goal
-    tutShow(null,
+    // Step 1: explain goal
+    setColBtnsDisabled(true);
+    tutShow(
         '<div class="tut-step">EROSION — STEP 1/4</div>'+
-        'Your goal: carve a <b style="color:#f59e0b">water channel</b> from top to bottom!<br><br>'+
+        'Your goal: carve a <b style="color:#f59e0b">water channel</b><br>from top to bottom!<br><br>'+
         'Drop water on columns to erode stones.<br>'+
-        'Stones with <b style="color:#f59e0b">smaller numbers</b> break easier.<br><br>'+
-        '<span style="color:#666;font-size:11px">tap to continue</span>','middle');
+        'Weaker stones break easier.','middle');
     await tutWaitTap(3000);
     if(!TUT.active)return;
+    tutHide();
 
-    // Step 2: highlight weakest column (col 3)
+    // Step 2: highlight column 3 (weakest: 3,2,3,2,3,2 = sum 15)
     var col=3;
-    currentDrop=6;
-    document.getElementById('drop-power').textContent='6';
-    document.getElementById('drop-power').className='drop-power-value dp6';
-
-    var btn=document.querySelectorAll('.col-btn')[col];
-    var rect=btn.getBoundingClientRect();
-    tutRaise(btn);
-    // disable other columns
-    document.querySelectorAll('.col-btn').forEach(function(b,i){if(i!==col)b.classList.add('disabled');});
-
-    tutShow(rect,
+    currentDrop=7;
+    document.getElementById('drop-power').textContent='7';
+    document.getElementById('drop-power').className='drop-power-value dp7';
+    document.getElementById('payout-area').innerHTML='';
+    setColBtnsDisabled(false);
+    tutHighlightCol(col);
+    tutShowTarget(
         '<div class="tut-step">STEP 2/4</div>'+
-        'Column 4 has the weakest stones (1,1,2,1,1,2).<br><br>'+
-        '<b style="color:#f59e0b">Tap the 💧 button</b> to drop water!','top');
+        'Column 4 is the weakest path.<br><br>'+
+        '<b style="color:#f59e0b">Tap the 💧 above it!</b>','bottom');
+    await tutWaitCol(col);
+    tutUnhighlightCol(col);
+    await sleep(1500);
+    if(!TUT.active)return;
 
-    // wait for player to click the correct column
-    await new Promise(function(resolve){
-        btn.onclick=function(){
-            sndPlay('click');
-            playDrop(col);
-            resolve();
-        };
-    });
-    tutLower(btn);
-    document.querySelectorAll('.col-btn').forEach(function(b){b.classList.remove('disabled');});
+    // Step 3: explain what happened
+    setColBtnsDisabled(true);
+    tutShow(
+        '<div class="tut-step">STEP 3/4</div>'+
+        'The water carved through!<br><br>'+
+        'Your drop of <b style="color:#f59e0b">power 7</b> eroded<br>'+
+        'multiple stones in a row.<br>'+
+        'Now finish the channel!','middle');
+    await tutWaitTap(3000);
+    if(!TUT.active)return;
+    tutHide();
 
-    // wait for animation
+    // Step 4: finish
+    currentDrop=9;
+    document.getElementById('drop-power').textContent='9';
+    document.getElementById('drop-power').className='drop-power-value dp9';
+    document.getElementById('payout-area').innerHTML='';
+    setColBtnsDisabled(false);
+    tutHighlightCol(col);
+    tutShowTarget(
+        '<div class="tut-step">STEP 4/4</div>'+
+        '<b style="color:#f59e0b">Tap column 4 again</b><br>to complete the channel!','bottom');
+    await tutWaitCol(col);
+    tutUnhighlightCol(col);
     await sleep(2000);
     if(!TUT.active)return;
 
-    // Step 3: show progress
-    tutShow(null,
-        '<div class="tut-step">STEP 3/4</div>'+
-        'The water eroded the stones! 💧<br><br>'+
-        'Your drop of <b style="color:#f59e0b">power 6</b> carved through the weak column.<br>'+
-        'Now finish the channel — clear what remains!<br><br>'+
-        '<span style="color:#666;font-size:11px">tap to continue</span>','middle');
-    await tutWaitTap(3000);
-    if(!TUT.active)return;
-
-    // Step 4: one more drop to finish
-    currentDrop=8;
-    document.getElementById('drop-power').textContent='8';
-    document.getElementById('drop-power').className='drop-power-value dp8';
-
-    var btn2=document.querySelectorAll('.col-btn')[col];
-    var rect2=btn2.getBoundingClientRect();
-    tutRaise(btn2);
-    document.querySelectorAll('.col-btn').forEach(function(b,i){if(i!==col)b.classList.add('disabled');});
-
-    tutShow(rect2,
-        '<div class="tut-step">STEP 4/4</div>'+
-        '<b style="color:#f59e0b">Tap again</b> to finish the channel!','top');
-
-    await new Promise(function(resolve){
-        btn2.onclick=function(){
-            sndPlay('click');
-            playDrop(col);
-            resolve();
-        };
-    });
-    tutLower(btn2);
-    document.querySelectorAll('.col-btn').forEach(function(b){b.classList.remove('disabled');});
-    await sleep(2500);
-    if(!TUT.active)return;
-
     // done
-    tutShow(null,
+    setColBtnsDisabled(true);
+    tutShow(
         '🎉 <b style="color:#f59e0b">CHANNEL COMPLETE!</b><br><br>'+
-        'You carved a path from top to bottom —<br>that\'s how you win EROSION!<br><br>'+
-        '<span style="color:#666;font-size:11px">tap to return to lobby</span>','middle');
+        'You carved water from top to bottom —<br>'+
+        'that\'s how you win EROSION!','middle');
     await tutWaitTap(3000);
     TUT.active=false;
     tutHide();
     backToLobby();
 }
 
-// --- SOIRON tutorial ---
+// ========== SOIRON ==========
 async function tutSoiron(){
-    TUT.active=true;TUT.mode='pvp';
+    TUT.active=true;
     CFG.mode='pvp';CFG.gridSize=6;CFG.rotate=false;CFG.stake=0;CFG.numBots=1;
     startGame();
     await sleep(600);
@@ -203,87 +209,75 @@ async function tutSoiron(){
     for(var r=0;r<6;r++)for(var c=0;c<6;c++) grid[r][c]=TUT_GRID_SOIRON[r][c];
     renderGrid();fitGrid();
 
-    // Step 1: explain
-    tutShow(null,
+    // Step 1
+    setColBtnsDisabled(true);
+    tutShow(
         '<div class="tut-step">SOIRON — STEP 1/3</div>'+
         'Race against opponents!<br>'+
         'Everyone drops water each turn.<br><br>'+
-        'First to carve a channel <b style="color:#f59e0b">wins the pool</b>!<br><br>'+
-        '<span style="color:#666;font-size:11px">tap to continue</span>','middle');
+        'First to carve a channel<br>'+
+        '<b style="color:#f59e0b">wins the pool!</b>','middle');
     await tutWaitTap(3000);
     if(!TUT.active)return;
+    tutHide();
 
-    // Step 2: drop on weak column (col 1 has 1,1,2,1,1,2)
+    // Step 2: drop
     var col=1;
-    currentDrop=7;
-    document.getElementById('drop-power').textContent='7';
-    document.getElementById('drop-power').className='drop-power-value dp7';
-
-    var btn=document.querySelectorAll('.col-btn')[col];
-    var rect=btn.getBoundingClientRect();
-    tutRaise(btn);
-    document.querySelectorAll('.col-btn').forEach(function(b,i){if(i!==col)b.classList.add('disabled');});
-
-    tutShow(rect,
+    currentDrop=8;
+    document.getElementById('drop-power').textContent='8';
+    document.getElementById('drop-power').className='drop-power-value dp8';
+    document.getElementById('payout-area').innerHTML='';
+    setColBtnsDisabled(false);
+    tutHighlightCol(col);
+    tutShowTarget(
         '<div class="tut-step">STEP 2/3</div>'+
-        'Column 2 is weak (1,1,2,1,1,2).<br><br>'+
+        'Column 2 looks weak.<br><br>'+
         '<b style="color:#f59e0b">Tap it!</b><br>'+
-        'Your opponent will also drop water.','top');
-
-    await new Promise(function(resolve){
-        btn.onclick=function(){
-            sndPlay('click');
-            playDrop(col);
-            resolve();
-        };
-    });
-    tutLower(btn);
-    document.querySelectorAll('.col-btn').forEach(function(b){b.classList.remove('disabled');});
-    await sleep(2500);
+        'Your opponent will also drop.','bottom');
+    await tutWaitCol(col);
+    tutUnhighlightCol(col);
+    await sleep(2000);
     if(!TUT.active)return;
 
-    // Step 3: explain
-    tutShow(null,
+    // Step 3
+    setColBtnsDisabled(true);
+    tutShow(
         '<div class="tut-step">STEP 3/3</div>'+
         'You both dropped water!<br><br>'+
-        'Your opponent is carving <b style="color:#f59e0b">their own</b> channel.<br>'+
-        'First to complete a top-to-bottom path wins!<br><br>'+
-        '🎉 Now you know SOIRON!<br>'+
-        '<span style="color:#666;font-size:11px">tap to return</span>','middle');
+        'Your opponent is carving<br>'+
+        '<b style="color:#f59e0b">their own</b> channel.<br>'+
+        'First to finish wins!<br><br>'+
+        '🎉 Now you know SOIRON!','middle');
     await tutWaitTap(3000);
     TUT.active=false;
     tutHide();
     backToLobby();
 }
 
-// --- BET&WET tutorial ---
+// ========== BET&WET ==========
 async function tutBetwet(){
-    TUT.active=true;TUT.mode='bet';
+    TUT.active=true;
     CFG.mode='bet';CFG.gridSize=6;CFG.rotate=false;CFG.stake=1;CFG.bets={};
     setMode('bet');
     randomizeFighterNames();
     await sleep(300);
 
-    // Step 1: explain
-    tutShow(null,
+    // Step 1
+    tutShow(
         '<div class="tut-step">BET & WET — STEP 1/3</div>'+
         'Six fighters race to carve a channel.<br><br>'+
         'Pick a fighter, place your bet,<br>'+
-        'watch the race!<br><br>'+
-        '<span style="color:#666;font-size:11px">tap to continue</span>','middle');
+        'watch the race!','middle');
     await tutWaitTap(3000);
     if(!TUT.active)return;
+    tutHide();
 
-    // Step 2: highlight fighter buttons
+    // Step 2: pick fighter
     var fBtns=document.getElementById('fighter-btns');
-    var rect=fBtns.getBoundingClientRect();
-    tutRaise(fBtns);
-
-    tutShow(rect,
+    tutShowTarget(
         '<div class="tut-step">STEP 2/3</div>'+
         '<b style="color:#f59e0b">Pick a fighter!</b><br><br>'+
-        'Higher odds = bigger payout but lower chance.','bottom');
-
+        'Higher odds = bigger payout<br>but lower chance to win.','top');
     await new Promise(function(resolve){
         var buttons=fBtns.querySelectorAll('button');
         var handler=function(){
@@ -292,29 +286,27 @@ async function tutBetwet(){
         };
         for(var i=0;i<buttons.length;i++) buttons[i].addEventListener('click',handler);
     });
-    tutLower(fBtns);
     await sleep(500);
     if(!TUT.active)return;
 
-    // Step 3: explain play
-    tutShow(null,
+    // Step 3
+    tutShow(
         '<div class="tut-step">STEP 3/3</div>'+
-        'Bet placed! Now hit <b style="color:#f59e0b">▶ PLAY</b> to start the race.<br><br>'+
+        'Bet placed!<br><br>'+
+        'Hit <b style="color:#f59e0b">▶ PLAY</b> to start the race.<br>'+
         'Fighters compete automatically.<br>'+
         'If yours wins — you get the payout!<br><br>'+
-        '🎉 Now you know Bet&Wet!<br>'+
-        '<span style="color:#666;font-size:11px">tap to return</span>','middle');
+        '🎉 Now you know Bet&Wet!','middle');
     await tutWaitTap(3000);
     TUT.active=false;
     tutHide();
     CFG.bets={};
 }
 
-// --- entry point ---
+// --- entry ---
 function startTutorial(){
     sndPlay('click');
-    var mode=CFG.mode;
-    if(mode==='solo') tutErosion();
-    else if(mode==='pvp') tutSoiron();
-    else if(mode==='bet') tutBetwet();
+    if(CFG.mode==='solo') tutErosion();
+    else if(CFG.mode==='pvp') tutSoiron();
+    else if(CFG.mode==='bet') tutBetwet();
 }

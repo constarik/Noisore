@@ -78,7 +78,8 @@ function tutWaitDrop(col){
 }
 function tutSkip(){
     TUT.active=false;tutHide();
-    tutResetFighters();
+    try{tutResetFighters();}catch(e){}
+    try{tutUnlockLobby();}catch(e){}
     var pb=document.querySelector('.play-btn');if(pb)pb.style.display='';
     if(_tutOrigRandom){Math.random=_tutOrigRandom;_tutOrigRandom=null;}
     CFG.bets={};try{betClear();}catch(e){}
@@ -235,60 +236,59 @@ async function tutSoiron(){
 // ========== BET&WET ==========
 var TUT_BET_SEED=42;
 
-function tutFighterBtn(idx){
-    return document.getElementById('fighter-btns').children[idx];
+function tutFighterBtn(idx){return document.getElementById('fighter-btns').children[idx];}
+
+function tutLockLobby(){
+    document.querySelectorAll('#lobby .lobby-section').forEach(function(s){s.dataset.tutOrig=s.style.display;s.style.display='none';});
+    var pb=document.querySelector('.play-btn');pb.dataset.tutOrig=pb.style.display;pb.style.display='none';
+    var hw=document.querySelector('#lobby [onclick="startTutorial()"]');
+    if(hw&&hw.parentElement){hw.parentElement.dataset.tutOrig=hw.parentElement.style.display;hw.parentElement.style.display='none';}
+    document.querySelectorAll('#lobby .lobby-hint').forEach(function(h){h.dataset.tutOrig=h.style.display;h.style.display='none';});
+}
+function tutUnlockLobby(){
+    document.querySelectorAll('#lobby .lobby-section').forEach(function(s){s.style.display=s.dataset.tutOrig||'';});
+    var pb=document.querySelector('.play-btn');pb.style.display=pb.dataset.tutOrig||'';
+    var hw=document.querySelector('#lobby [onclick="startTutorial()"]');
+    if(hw&&hw.parentElement)hw.parentElement.style.display=hw.parentElement.dataset.tutOrig||'';
+    document.querySelectorAll('#lobby .lobby-hint').forEach(function(h){h.style.display=h.dataset.tutOrig||'';});
+    setMode(CFG.mode);
 }
 function tutDisableAllFighters(){
     var btns=document.getElementById('fighter-btns').children;
-    for(var i=0;i<btns.length;i++){btns[i].style.opacity='0.3';btns[i].style.pointerEvents='none';}
+    for(var i=0;i<btns.length;i++){btns[i].style.opacity='0.3';btns[i].style.pointerEvents='none';btns[i].style.outline='';}
 }
 function tutEnableFighter(idx){
     var btn=tutFighterBtn(idx);
     btn.style.opacity='1';btn.style.pointerEvents='auto';btn.style.outline='2px solid #f59e0b';
 }
 function tutResetFighters(){
-    var btns=document.getElementById('fighter-btns').children;
-    for(var i=0;i<btns.length;i++){btns[i].style.opacity='';btns[i].style.pointerEvents='';btns[i].style.outline='';}
+    var el=document.getElementById('fighter-btns');if(!el)return;
+    for(var i=0;i<el.children.length;i++){el.children[i].style.opacity='';el.children[i].style.pointerEvents='';el.children[i].style.outline='';}
 }
-function tutWaitFighter(idx){
+function tutWaitFighterClick(idx){
     return new Promise(function(resolve){
         var btn=tutFighterBtn(idx);
         var orig=btn.onclick;
-        btn.onclick=function(){
-            if(orig)orig.call(btn);
-            btn.onclick=orig;
-            btn.style.outline='';
-            resolve();
-        };
+        btn.onclick=function(){if(orig)orig.call(btn);btn.onclick=orig;btn.style.outline='';resolve();};
     });
 }
-function tutWaitRightClick(idx){
+function tutWaitFighterRightClick(idx){
     return new Promise(function(resolve){
         var btn=tutFighterBtn(idx);
+        // disable left click, enable only right click
+        var origClick=btn.onclick;
+        btn.onclick=function(e){e.preventDefault();e.stopPropagation();return false;};
         btn.style.opacity='1';btn.style.pointerEvents='auto';btn.style.outline='2px solid #f66';
         var handler=function(e){
-            e.preventDefault();
+            e.preventDefault();e.stopPropagation();
             btn.removeEventListener('contextmenu',handler);
+            btn.onclick=origClick;
             btn.style.outline='';
-            // betRemove fires from original oncontextmenu
+            betRemove(BET_FIGHTERS[idx].name);
             resolve();
             return false;
         };
         btn.addEventListener('contextmenu',handler);
-    });
-}
-function tutWaitPlayBtn(){
-    return new Promise(function(resolve){
-        var btn=document.querySelector('.play-btn');
-        btn.style.outline='3px solid #f59e0b';
-        btn.style.position='relative';btn.style.zIndex='160';
-        var orig=btn.onclick;
-        btn.onclick=function(){
-            btn.style.outline='';btn.style.position='';btn.style.zIndex='';
-            btn.onclick=orig;
-            if(orig)orig.call(btn);
-            resolve();
-        };
     });
 }
 
@@ -296,20 +296,20 @@ async function tutBetwet(){
     TUT.active=true;
     _tutOrigRandom=Math.random;
     Math.random=_tutRng(TUT_BET_SEED);
-    
+
     CFG.mode='bet';CFG.gridSize=6;CFG.rotate=true;CFG.stake=1;CFG.bets={};
     setMode('bet');
     randomizeFighterNames();
     await sleep(400);
-    
-    var f0=BET_FIGHTERS[0]; // usually favorite (lowest odds)
+
+    var f0=BET_FIGHTERS[0];
     var f2=BET_FIGHTERS[2];
     var f4=BET_FIGHTERS[4];
 
-    var playBtn=document.querySelector('.play-btn');
+    // Lock everything
+    tutLockLobby();
 
     // Step 1: explain
-    playBtn.style.display='none';
     tutShow(
         '<div class="tut-step">BET & WET — STEP 1/6</div>'+
         '<b style="color:#f59e0b">6 fighters</b> race to carve a channel.<br><br>'+
@@ -319,14 +319,18 @@ async function tutBetwet(){
     if(!TUT.active)return;
     tutHide();
 
+    // Show only fighters + stake
+    document.getElementById('fighter-section').style.display='';
+    document.getElementById('stake-section').style.display='';
+
     // Step 2: bet on favorite
     tutDisableAllFighters();
     tutEnableFighter(0);
     tutShowHint(
         '<div class="tut-step">STEP 2/6</div>'+
         'Tap <b style="color:'+f0.color+'">'+f0.name+'</b> — the favorite!<br>'+
-        '<span style="color:#888">odds ×'+f0.odds+' (safe but low payout)</span>','top');
-    await tutWaitFighter(0);
+        '<span style="color:#888">odds ×'+f0.odds+'</span>','top');
+    await tutWaitFighterClick(0);
     document.getElementById('tut-text').style.display='none';
     await sleep(800);
     if(!TUT.active)return;
@@ -336,20 +340,20 @@ async function tutBetwet(){
     tutEnableFighter(4);
     tutShowHint(
         '<div class="tut-step">STEP 3/6</div>'+
-        'Now also bet on <b style="color:'+f4.color+'">'+f4.name+'</b>!<br>'+
+        'Also bet on <b style="color:'+f4.color+'">'+f4.name+'</b>!<br>'+
         '<span style="color:#888">odds ×'+f4.odds+' (risky but big payout)</span>','top');
-    await tutWaitFighter(4);
+    await tutWaitFighterClick(4);
     document.getElementById('tut-text').style.display='none';
     await sleep(800);
     if(!TUT.active)return;
 
-    // Step 4: remove first bet — RIGHT CLICK
+    // Step 4: remove first bet — RIGHT CLICK ONLY
     tutDisableAllFighters();
     tutShowHint(
         '<div class="tut-step">STEP 4/6</div>'+
         '<b style="color:'+f0.color+'">'+f0.name+'</b> has low payout (×'+f0.odds+').<br><br>'+
-        '<b style="color:#f66">Right-click</b> on '+f0.name+' to remove the bet!','top');
-    await tutWaitRightClick(0);
+        '<b style="color:#f66">Right-click</b> on '+f0.name+' to remove!','top');
+    await tutWaitFighterRightClick(0);
     document.getElementById('tut-text').style.display='none';
     await sleep(800);
     if(!TUT.active)return;
@@ -360,41 +364,53 @@ async function tutBetwet(){
     tutShowHint(
         '<div class="tut-step">STEP 5/6</div>'+
         'Pick <b style="color:'+f2.color+'">'+f2.name+'</b> instead!<br>'+
-        '<span style="color:#888">odds ×'+f2.odds+' (balanced risk/reward)</span>','top');
-    await tutWaitFighter(2);
+        '<span style="color:#888">odds ×'+f2.odds+'</span>','top');
+    await tutWaitFighterClick(2);
     document.getElementById('tut-text').style.display='none';
     await sleep(600);
     if(!TUT.active)return;
 
-    // Step 6: hit PLAY
+    // Step 6: PLAY — hide fighters, show only PLAY
     tutDisableAllFighters();
+    document.getElementById('fighter-section').style.display='none';
+    document.getElementById('stake-section').style.display='none';
+    var playBtn=document.querySelector('.play-btn');
     playBtn.style.display='';
+    playBtn.style.outline='3px solid #f59e0b';
     tutShowHint(
         '<div class="tut-step">STEP 6/6</div>'+
         'Two fighters backed.<br>'+
-        'Hit <b style="color:#f59e0b">▶ PLAY</b> to start the race!','bottom');
-    await tutWaitPlayBtn();
+        'Hit <b style="color:#f59e0b">▶ PLAY</b> to start the race!','top');
+    await new Promise(function(resolve){
+        var orig=playBtn.onclick;
+        playBtn.onclick=function(){
+            playBtn.style.outline='';
+            playBtn.onclick=orig;
+            if(orig)orig.call(playBtn);
+            resolve();
+        };
+    });
     document.getElementById('tut-text').style.display='none';
-    
-    // race is now running (startGame→betRound fired by PLAY click)
+
+    // race running
     await sleep(2000);
     var maxWait=60;
     while(animating && maxWait>0){await sleep(1000);maxWait--;}
     await sleep(3000);
-    if(!TUT.active){Math.random=_tutOrigRandom;_tutOrigRandom=null;return;}
+    if(!TUT.active){Math.random=_tutOrigRandom;_tutOrigRandom=null;tutUnlockLobby();return;}
 
     // Conclusion
     tutShow(
         '🎉 <b style="color:#f59e0b">RACE OVER!</b><br><br>'+
         'The winner carved a channel first.<br>'+
-        'If your fighter won — bet × odds = payout!<br><br>'+
-        'That\'s <b style="color:#f59e0b">Bet&Wet</b> — virtual water racing!','top');
+        'Your bet × odds = payout!<br><br>'+
+        'That\'s <b style="color:#f59e0b">Bet&Wet</b>!','top');
     await tutWaitTap(4000);
     TUT.active=false;tutHide();
     Math.random=_tutOrigRandom;_tutOrigRandom=null;
-    CFG.bets={};
-    betClear();
+    CFG.bets={};try{betClear();}catch(e){}
     tutResetFighters();
+    tutUnlockLobby();
     backToLobby();
 }
 
@@ -403,4 +419,3 @@ function startTutorial(){
     if(CFG.mode==='solo') tutErosion();
     else if(CFG.mode==='pvp') tutSoiron();
     else if(CFG.mode==='bet') tutBetwet();
-}

@@ -1,4 +1,4 @@
-// game.js — NOISORE v10.7 shared game logic
+// game.js — NOISORE v10.8 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -410,6 +410,8 @@ async function betRound(){
     for(var cycle=0;cycle<100;cycle++){
         var order=[];for(var i=0;i<fighters.length;i++)order.push(i);
         for(var i2=order.length-1;i2>0;i2--){var j=Math.floor(Math.random()*(i2+1));var tmp=order[i2];order[i2]=order[j];order[j]=tmp;}
+        var shuffled=order.map(function(idx){return fighters[idx];});
+        renderPlayersList(shuffled);
         clearPowerTags();
         for(var t=0;t<order.length;t++){
             var idx=order[t];
@@ -417,7 +419,7 @@ async function betRound(){
             var dp=randDrop();
             var col=betPickCol(f,dp);
             dropNum++;updateUI();
-            await animateDrop(col,dp,f.name,f.color,idx);
+            await animateDrop(col,dp,f.name,f.color,t);
             var ch=findChannelCells();var keys=Object.keys(ch);
             if(keys.length>0){
                 for(var ci=0;ci<keys.length;ci++){var parts=keys[ci].split('-');var cell=document.getElementById('cell-'+parts[0]+'-'+parts[1]);cell.style.background=f.color;cell.style.border='3px solid '+f.color;cell.style.boxShadow='0 0 16px '+f.color;var tags=cell.querySelectorAll('.power-tag');for(var tt=0;tt<tags.length;tt++){tags[tt].style.color='#000';tags[tt].style.textShadow='0 0 3px #fff, 0 0 6px #fff';}}

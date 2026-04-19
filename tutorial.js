@@ -239,6 +239,8 @@ var TUT_BET_SEED=42;
 function tutFighterBtn(idx){return document.getElementById('fighter-btns').children[idx];}
 
 function tutLockLobby(){
+    var h1=document.querySelector('h1');if(h1)h1.style.display='none';
+    var ver=document.querySelector('.version');if(ver)ver.style.display='none';
     document.querySelectorAll('#lobby .lobby-section').forEach(function(s){s.dataset.tutOrig=s.style.display;s.style.display='none';});
     var pb=document.querySelector('.play-btn');pb.dataset.tutOrig=pb.style.display;pb.style.display='none';
     var hw=document.querySelector('#lobby [onclick="startTutorial()"]');
@@ -246,6 +248,8 @@ function tutLockLobby(){
     document.querySelectorAll('#lobby .lobby-hint').forEach(function(h){h.dataset.tutOrig=h.style.display;h.style.display='none';});
 }
 function tutUnlockLobby(){
+    var h1=document.querySelector('h1');if(h1)h1.style.display='';
+    var ver=document.querySelector('.version');if(ver)ver.style.display='';
     document.querySelectorAll('#lobby .lobby-section').forEach(function(s){s.style.display=s.dataset.tutOrig||'';});
     var pb=document.querySelector('.play-btn');pb.style.display=pb.dataset.tutOrig||'';
     var hw=document.querySelector('#lobby [onclick="startTutorial()"]');

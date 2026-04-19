@@ -1,4 +1,4 @@
-// game.js — NOISORE v10.8 shared game logic
+// game.js — NOISORE v10.9 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -107,6 +107,8 @@ function setMode(m){
     if(freeBtn)freeBtn.style.display=m==='bet'?'none':'';
     if(m==='bet'&&CFG.stake===0){setStake(1);}
     if(m==='bet'){randomizeFighterNames();}
+    var pb=document.querySelector('.play-btn');
+    if(pb){if(m!=='bet'){pb.style.opacity='1';pb.style.pointerEvents='auto';}else{var t=0;for(var k in CFG.bets)t+=CFG.bets[k];pb.style.opacity=t>0?'1':'0.3';pb.style.pointerEvents=t>0?'auto':'none';}}
 }
 function setGrid(s){sndPlay('click');CFG.gridSize=s;document.getElementById('grid-6').classList.toggle('active',s===6);document.getElementById('grid-8').classList.toggle('active',s===8);if(CFG.mode==='bet')randomizeFighterNames();else{calcOdds();updateBetDisplay();}}
 function setRotation(on){sndPlay('click');CFG.rotate=on;document.getElementById('rot-off').classList.toggle('active',!on);document.getElementById('rot-on').classList.toggle('active',on);if(CFG.mode==='bet')randomizeFighterNames();else{calcOdds();updateBetDisplay();}}
@@ -131,6 +133,8 @@ function updateBetDisplay(){
     var el2=document.getElementById('fighter-odds');
     var isMobile='ontouchstart' in window;
     if(el2)el2.textContent='Total: '+total.toFixed(2)+' USDT'+(isMobile?'  (tap to add)':'  (click +1, right-click -1)');
+    var pb=document.querySelector('.play-btn');
+    if(pb&&CFG.mode==='bet'){pb.style.opacity=total>0?'1':'0.3';pb.style.pointerEvents=total>0?'auto':'none';}
 }
 function fitGrid(){
     var h1=document.querySelector('h1');var ver=document.querySelector('.version');

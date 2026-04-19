@@ -1,6 +1,6 @@
 // tutorial.js — NOISORE onboarding v9.8
 // Uses seeded RNG + real game engine. Zero faking.
-var TUT={active:false};
+var TUT={active:false,origMode:null};
 var _tutOrigRandom=null;
 function _tutRng(seed){var s=seed;return function(){s=(s*1103515245+12345)&0x7FFFFFFF;return s/0x7FFFFFFF;};}
 
@@ -88,7 +88,7 @@ function tutSkip(){
 
 // ========== EROSION ==========
 async function tutErosion(){
-    TUT.active=true;
+    TUT.active=true;TUT.origMode=CFG.mode;
     // seed Math.random
     _tutOrigRandom=Math.random;
     Math.random=_tutRng(TUT_SEED);
@@ -162,7 +162,7 @@ var TUT_SOIRON_TURNS=[
 ];
 
 async function tutSoiron(){
-    TUT.active=true;
+    TUT.active=true;TUT.origMode=CFG.mode;
     _tutOrigRandom=Math.random;
     Math.random=_tutRng(TUT_SOIRON_SEED);
     
@@ -255,7 +255,7 @@ function tutUnlockLobby(){
     var hw=document.querySelector('#lobby [onclick="startTutorial()"]');
     if(hw&&hw.parentElement)hw.parentElement.style.display=hw.parentElement.dataset.tutOrig||'';
     document.querySelectorAll('#lobby .lobby-hint').forEach(function(h){h.style.display=h.dataset.tutOrig||'';});
-    setMode(CFG.mode);
+    setMode(TUT.origMode||'solo');
 }
 function tutDisableAllFighters(){
     var btns=document.getElementById('fighter-btns').children;
@@ -297,7 +297,7 @@ function tutWaitFighterRightClick(idx){
 }
 
 async function tutBetwet(){
-    TUT.active=true;
+    TUT.active=true;TUT.origMode=CFG.mode;
     _tutOrigRandom=Math.random;
     Math.random=_tutRng(TUT_BET_SEED);
 
@@ -419,11 +419,11 @@ async function tutBetwet(){
 }
 function startTutorial(){
     sndPlay('click');
-    try{tutUnlockLobby();}catch(e){}
-    try{tutResetFighters();}catch(e){}
+    var mode=CFG.mode;
     try{tutHide();}catch(e){}
+    try{tutResetFighters();}catch(e){}
     if(_tutOrigRandom){Math.random=_tutOrigRandom;_tutOrigRandom=null;}
-    if(CFG.mode==='solo') tutErosion();
-    else if(CFG.mode==='pvp') tutSoiron();
-    else if(CFG.mode==='bet') tutBetwet();
+    if(mode==='solo') tutErosion();
+    else if(mode==='pvp') tutSoiron();
+    else if(mode==='bet') tutBetwet();
 }

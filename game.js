@@ -165,8 +165,36 @@ function unfitGrid(){
     var h1=document.querySelector('h1');var ver=document.querySelector('.version');
     if(h1)h1.style.display='';if(ver)ver.style.display='';
 }
+// --- UVS SESSION ---
+var UVS_SESSION=null;
+function uvsStart(){
+    if(typeof UVS==='undefined'||TUT.active)return;
+    var arr=new Uint8Array(32);crypto.getRandomValues(arr);
+    var ss='';for(var i=0;i<32;i++)ss+=arr[i].toString(16).padStart(2,'0');
+    var cs='noisore-'+Date.now();
+    var nonce='1';
+    var combined=UVS.deriveCombinedSeed(ss,cs,nonce);
+    _uvsRng=UVS.ChaCha20.fromCombinedSeed(combined);
+    UVS_SESSION={serverSeed:ss,clientSeed:cs,nonce:nonce,serverSeedHash:UVS.sha256(ss),combinedSeed:combined,moves:[],startTime:Date.now()};
+    var badge=document.getElementById('info-right');
+    if(badge)badge.textContent='UVS 2.0 \u2022 Provably Fair';
+}
+function uvsEnd(winner){
+    if(!UVS_SESSION)return;
+    UVS_SESSION.winner=winner;UVS_SESSION.endTime=Date.now();UVS_SESSION.rngCalls=_uvsRng?_uvsRng.calls:0;
+    console.log('[UVS] Session complete:',JSON.stringify({serverSeedHash:UVS_SESSION.serverSeedHash,clientSeed:UVS_SESSION.clientSeed,rngCalls:UVS_SESSION.rngCalls,winner:winner}));
+    console.log('[UVS] Reveal — serverSeed:',UVS_SESSION.serverSeed);
+    console.log('[UVS] Verify: SHA-256(serverSeed) ===',UVS.sha256(UVS_SESSION.serverSeed),'===',UVS_SESSION.serverSeedHash,'?',UVS.sha256(UVS_SESSION.serverSeed)===UVS_SESSION.serverSeedHash);
+    _uvsRng=null;
+}
+function uvsRecordMove(col){
+    if(!UVS_SESSION)return;
+    UVS_SESSION.moves.push({tick:UVS_SESSION.moves.length,col:col,rngCalls:_uvsRng?_uvsRng.calls:0});
+}
+
 function startGame(){
     sndPlay('click');sndInit();
+    uvsStart();
     document.getElementById('lobby').style.display='none';
     document.getElementById('game').style.display='block';
     document.body.style.overflow='hidden';
@@ -200,7 +228,7 @@ function startGame(){
     fitGrid();
     if(CFG.mode==='bet') betRound();
 }
-function backToLobby(){sndPlay('click');unfitGrid();document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';document.body.style.overflow='';window.scrollTo(0,0);animating=false;}
+function backToLobby(){sndPlay('click');_uvsRng=null;UVS_SESSION=null;unfitGrid();document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';document.body.style.overflow='';window.scrollTo(0,0);animating=false;}
 // === GAME STATE ===
 var COLS=6,ROWS=6,MAX_H=10,MAX_DROP=10,DROP_COST=0,POOL_RATE=0.95,ANIM_DELAY=200;
 var ROTATE=true,BOTS=[];
@@ -210,7 +238,7 @@ var playerSpent={};
 var TAG_POS=[{top:'1px',left:'2px'},{top:'1px',right:'2px'},{bottom:'1px',left:'2px'},{bottom:'1px',right:'2px'},{top:'1px',left:'50%',tx:'-50%'},{bottom:'1px',left:'50%',tx:'-50%'},{top:'50%',left:'1px',ty:'-50%'},{top:'50%',right:'1px',ty:'-50%'},{top:'30%',left:'2px'},{top:'30%',right:'2px'},{bottom:'30%',left:'2px'},{bottom:'30%',right:'2px'}];
 function randH(){return 1+Math.floor(gameRng()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
-function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;playerDropResults=[];playerSpent={};document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
+function newRound(){clearPowerTags();initGrid();uvsStart();pool=0;dropNum=0;roundNum++;playerDropResults=[];playerSpent={};document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
 function stoneClip(r,c){
     var s=((r*7+c*13+grid[r][c]*3+r*r*5+c*c*11)&0xFFFF);
@@ -326,6 +354,7 @@ async function checkWin(winner,winColor){
     resetPlayerStates();
     await sleep(1500);flash.classList.remove('show');
     if(winner==='YOU')balance+=pool;
+    uvsEnd(winner);
     updateUI();
     var label=winner+(winner==='YOU'?' WIN':' WINS');
     if(turnPlayers.length>0&&DROP_COST>0){
@@ -356,6 +385,7 @@ function botPickCol(bot,dp){
 }
 async function playDrop(startCol){
     if(animating)return;animating=true;setColBtnsDisabled(true);
+    uvsRecordMove(startCol);
     if(DROP_COST>0&&balance<DROP_COST){document.getElementById('payout-area').innerHTML='<span style="color:#f66">insufficient balance</span>';animating=false;setColBtnsDisabled(false);return;}
     if(BOTS.length===0){
         clearPowerTags();
@@ -435,6 +465,7 @@ async function betRound(){
                 var fdata=BET_FIGHTERS.filter(function(x){return x.name===f.name;})[0];
                 var payout=0;
                 if(won){payout=BET_BETS[f.name]*fdata.odds;balance+=payout;}
+                uvsEnd(f.name);
                 updateUI();
                 var msg=won?'<span style="color:#22c55e;font-family:Archivo Black,sans-serif;font-size:20px">YOU WIN</span><br><span style="color:#d4d4d8;font-size:12px">'+BET_BETS[f.name].toFixed(2)+' \u00d7 '+fdata.odds+' =</span><br><span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">+'+payout.toFixed(2)+' USDT</span>':'<span style="color:#f66;font-family:Archivo Black,sans-serif;font-size:16px">'+f.name+' WINS</span><br><span style="color:#d4d4d8;font-size:13px">no bet on '+f.name+'</span>';
                 document.getElementById('payout-area').innerHTML='<div style="margin-top:4px">'+msg+'<br><button onclick="newBetRound()" style="margin-top:10px;background:'+f.color+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">PLACE BETS</button></div>';

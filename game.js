@@ -176,8 +176,6 @@ function uvsStart(){
     var combined=UVS.deriveCombinedSeed(ss,cs,nonce);
     _uvsRng=UVS.ChaCha20.fromCombinedSeed(combined);
     UVS_SESSION={serverSeed:ss,clientSeed:cs,nonce:nonce,serverSeedHash:UVS.sha256(ss),combinedSeed:combined,moves:[],startTime:Date.now()};
-    var badge=document.getElementById('info-right');
-    if(badge)badge.textContent='UVS 2.0 \u2022 Provably Fair';
 }
 function uvsEnd(winner){
     if(!UVS_SESSION)return;
@@ -221,7 +219,7 @@ function startGame(){
         document.getElementById('col-btns').style.display='grid';
     }
     document.getElementById('info-left').textContent=COLS+'\u00d7'+ROWS+(ROTATE?' rotate':'')+' - stone 1-'+MAX_H;
-    document.getElementById('info-right').textContent=DROP_COST>0?(DROP_COST.toFixed(2)+' USDT/drop'):'free play';
+    document.getElementById('info-right').textContent=DROP_COST>0?(DROP_COST.toFixed(2)+' USDT/drop'):(UVS_SESSION?'\uD83D\uDD12 UVS 2.0':'free play');
     document.getElementById('grid').style.gridTemplateColumns='repeat('+COLS+',1fr)';
     document.getElementById('col-btns').style.gridTemplateColumns='repeat('+COLS+',1fr)';
     initGame();

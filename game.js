@@ -1,4 +1,4 @@
-// game.js — NOISORE v10.9 shared game logic
+// game.js — NOISORE v11.0 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -32,13 +32,13 @@ var SKIN_PACKS=[
     ['Analyst','Mole','Hitman','Hoarder','Commando','Decoy']
 ];
 function randomizeFighterNames(){
-    var pack=SKIN_PACKS[Math.floor(Math.random()*SKIN_PACKS.length)];
+    var pack=SKIN_PACKS[Math.floor(gameRng()*SKIN_PACKS.length)];
     for(var i=0;i<BET_FIGHTERS.length;i++){
         BET_FIGHTERS[i].name=pack[i];
         if(BET_FIGHTERS[i].strat==='RANDOM'){
-            BET_FIGHTERS[i].noise=20+Math.floor(Math.random()*31);// 20-50
+            BET_FIGHTERS[i].noise=20+Math.floor(gameRng()*31);// 20-50
         }else{
-            BET_FIGHTERS[i].noise=5+Math.floor(Math.random()*41);// 5-45
+            BET_FIGHTERS[i].noise=5+Math.floor(gameRng()*41);// 5-45
         }
     }
     updateFighterButtons();
@@ -187,7 +187,7 @@ function startGame(){
         document.getElementById('col-btns').style.display='none';
         DROP_COST=CFG.stake>0?CFG.stake:1;
     }else{
-        BOTS=BOT_POOL.slice().sort(function(){return Math.random()-0.5;}).slice(0,CFG.numBots);
+        BOTS=BOT_POOL.slice().sort(function(){return gameRng()-0.5;}).slice(0,CFG.numBots);
         document.getElementById('pool-area-wrap').style.display='flex';
         document.getElementById('game-mode-label').textContent='SOIRON';
         document.getElementById('col-btns').style.display='grid';
@@ -208,7 +208,7 @@ var grid=[],pool=0,balance=100,dropNum=0,roundNum=1,animating=false,currentDrop=
 var playerDropResults=[];
 var playerSpent={};
 var TAG_POS=[{top:'1px',left:'2px'},{top:'1px',right:'2px'},{bottom:'1px',left:'2px'},{bottom:'1px',right:'2px'},{top:'1px',left:'50%',tx:'-50%'},{bottom:'1px',left:'50%',tx:'-50%'},{top:'50%',left:'1px',ty:'-50%'},{top:'50%',right:'1px',ty:'-50%'},{top:'30%',left:'2px'},{top:'30%',right:'2px'},{bottom:'30%',left:'2px'},{bottom:'30%',right:'2px'}];
-function randH(){return 1+Math.floor(Math.random()*MAX_H);}
+function randH(){return 1+Math.floor(gameRng()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
 function newRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;playerDropResults=[];playerSpent={};document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
@@ -348,10 +348,10 @@ function botPickCol(bot,dp){
     var n=(bot.noise||0)/100;
     var strat=bot.strat||'RANDOM';
     if(strat==='RANDOM'){
-        if(Math.random()<n){var alts=['DEEP','LIGHT','SNIPER','GREEDY','POWER'];return STRATEGY_PICK[alts[Math.floor(Math.random()*alts.length)]](dp);}
+        if(gameRng()<n){var alts=['DEEP','LIGHT','SNIPER','GREEDY','POWER'];return STRATEGY_PICK[alts[Math.floor(gameRng()*alts.length)]](dp);}
         return STRATEGY_PICK['RANDOM'](dp);
     }
-    if(Math.random()<n)return STRATEGY_PICK['RANDOM'](dp);
+    if(gameRng()<n)return STRATEGY_PICK['RANDOM'](dp);
     return STRATEGY_PICK[strat](dp);
 }
 async function playDrop(startCol){
@@ -369,7 +369,7 @@ async function playDrop(startCol){
     }
     var players=[{name:'YOU',color:'#f59e0b',col:startCol,dp:currentDrop,isPlayer:true}];
     for(var b=0;b<BOTS.length;b++){var botDp=randDrop();var botCol=botPickCol(BOTS[b],botDp);players.push({name:BOTS[b].name,color:BOTS[b].color,col:botCol,dp:botDp,isPlayer:false});}
-    for(var i=players.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=players[i];players[i]=players[j];players[j]=tmp;}
+    for(var i=players.length-1;i>0;i--){var j=Math.floor(gameRng()*(i+1));var tmp=players[i];players[i]=players[j];players[j]=tmp;}
     renderPlayersList(players);clearPowerTags();playerDropResults=[];
     for(var t=0;t<players.length;t++){
         var p=players[t];
@@ -392,10 +392,10 @@ function betPickCol(fighter,dp){
     var n=(fighter.noise||0)/100;
     var strat=fighter.strat||fighter.strategy;
     if(strat==='RANDOM'){
-        if(Math.random()<n)return STRATEGY_PICK['DEEP'](dp);
+        if(gameRng()<n)return STRATEGY_PICK['DEEP'](dp);
         return STRATEGY_PICK['RANDOM'](dp);
     }
-    if(Math.random()<n)return STRATEGY_PICK['RANDOM'](dp);
+    if(gameRng()<n)return STRATEGY_PICK['RANDOM'](dp);
     return STRATEGY_PICK[strat](dp);
 }
 async function betRound(){
@@ -413,7 +413,7 @@ async function betRound(){
     animating=true;
     for(var cycle=0;cycle<100;cycle++){
         var order=[];for(var i=0;i<fighters.length;i++)order.push(i);
-        for(var i2=order.length-1;i2>0;i2--){var j=Math.floor(Math.random()*(i2+1));var tmp=order[i2];order[i2]=order[j];order[j]=tmp;}
+        for(var i2=order.length-1;i2>0;i2--){var j=Math.floor(gameRng()*(i2+1));var tmp=order[i2];order[i2]=order[j];order[j]=tmp;}
         var shuffled=order.map(function(idx){return fighters[idx];});
         renderPlayersList(shuffled);
         clearPowerTags();

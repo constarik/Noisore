@@ -1,6 +1,9 @@
-// EROSION ENGINE v1.0 — shared core for Erosion/Noisore/WetBet
+// EROSION ENGINE v1.1 — shared core for Erosion/Noisore/WetBet
 // Requires globals: ROWS, COLS, MAX_DROP, grid
 var ENGINE_VERSION = 1;
+// --- PLUGGABLE RNG ---
+var _uvsRng = null; // set by UVS session
+function gameRng() { return _uvsRng ? _uvsRng.nextFloat() : Math.random(); }
 
 function requireEngine(minVersion) {
     if (ENGINE_VERSION < minVersion) {
@@ -16,10 +19,10 @@ function chooseNext(row, col) {
         if (nc >= 0 && nc < COLS) cands.push({ c: nc, h: grid[row + 1][nc] });
     }
     var nz = cands.filter(function(x) { return x.h > 0; });
-    if (nz.length === 0) return cands[Math.floor(Math.random() * cands.length)].c;
+    if (nz.length === 0) return cands[Math.floor(gameRng() * cands.length)].c;
     var w = nz.map(function(x) { return 1 / x.h; });
     var tw = w.reduce(function(a, b) { return a + b; }, 0);
-    var r = Math.random() * tw;
+    var r = gameRng() * tw;
     for (var i = 0; i < nz.length; i++) {
         r -= w[i];
         if (r <= 0) return nz[i].c;
@@ -88,7 +91,7 @@ function _dfsCheck(row, col, vis) {
 
 // --- RANDOM ---
 function randDrop() {
-    return 1 + Math.floor(Math.random() * MAX_DROP);
+    return 1 + Math.floor(gameRng() * MAX_DROP);
 }
 
 // --- STRATEGIES ---
@@ -119,8 +122,8 @@ function rotateGridCW() {
 function fillRowIfChannel() {
     var fills = 0;
     while (hasChannel()) {
-        var row = Math.floor(Math.random() * ROWS);
-        for (var c = 0; c < COLS; c++) grid[row][c] = 1 + Math.floor(Math.random() * MAX_H);
+        var row = Math.floor(gameRng() * ROWS);
+        for (var c = 0; c < COLS; c++) grid[row][c] = 1 + Math.floor(gameRng() * MAX_H);
         fills++;
         if (fills > 10) break;
     }
@@ -160,8 +163,8 @@ function pickDeep(dropPower) {
                     var cands = [];
                     for (var dc = -1; dc <= 1; dc++) { var nc = col + dc; if (nc >= 0 && nc < COLS) cands.push({c:nc, h:g2[row+1][nc]}); }
                     var nz = cands.filter(function(x){return x.h>0;});
-                    if (nz.length === 0) col = cands[Math.floor(Math.random()*cands.length)].c;
-                    else { var w=nz.map(function(x){return 1/x.h;}); var tw=w.reduce(function(a,b){return a+b;},0); var r2=Math.random()*tw; for(var i=0;i<nz.length;i++){r2-=w[i];if(r2<=0){col=nz[i].c;break;}} }
+                    if (nz.length === 0) col = cands[Math.floor(gameRng()*cands.length)].c;
+                    else { var w=nz.map(function(x){return 1/x.h;}); var tw=w.reduce(function(a,b){return a+b;},0); var r2=gameRng()*tw; for(var i=0;i<nz.length;i++){r2-=w[i];if(r2<=0){col=nz[i].c;break;}} }
                 }
                 continue;
             }
@@ -172,8 +175,8 @@ function pickDeep(dropPower) {
                 var cands2 = [];
                 for (var dc2 = -1; dc2 <= 1; dc2++) { var nc2 = col + dc2; if (nc2 >= 0 && nc2 < COLS) cands2.push({c:nc2, h:g2[row+1][nc2]}); }
                 var nz2 = cands2.filter(function(x){return x.h>0;});
-                if (nz2.length === 0) col = cands2[Math.floor(Math.random()*cands2.length)].c;
-                else { var w2=nz2.map(function(x){return 1/x.h;}); var tw2=w2.reduce(function(a,b){return a+b;},0); var r3=Math.random()*tw2; for(var j=0;j<nz2.length;j++){r3-=w2[j];if(r3<=0){col=nz2[j].c;break;}} }
+                if (nz2.length === 0) col = cands2[Math.floor(gameRng()*cands2.length)].c;
+                else { var w2=nz2.map(function(x){return 1/x.h;}); var tw2=w2.reduce(function(a,b){return a+b;},0); var r3=gameRng()*tw2; for(var j=0;j<nz2.length;j++){r3-=w2[j];if(r3<=0){col=nz2[j].c;break;}} }
             }
         }
         if (depth > bestDepth) { bestDepth = depth; bestCol = c; }
@@ -187,7 +190,7 @@ function pickPower(dropPower) {
 }
 
 function pickRandom() {
-    return Math.floor(Math.random() * COLS);
+    return Math.floor(gameRng() * COLS);
 }
 
 var STRATEGY_PICK = {

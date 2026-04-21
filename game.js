@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.1 shared game logic
+// game.js — NOISORE v11.2 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -178,8 +178,8 @@ function uvsStart(){
     UVS_SESSION={serverSeed:ss,clientSeed:cs,nonce:nonce,serverSeedHash:UVS.sha256(ss),combinedSeed:combined,moves:[],startTime:Date.now()};
 }
 function uvsEnd(winner){
-    if(!UVS_SESSION)return;
-    UVS_SESSION.winner=winner;UVS_SESSION.endTime=Date.now();UVS_SESSION.rngCalls=_uvsRng?_uvsRng.calls:0;
+    if(!UVS_SESSION||UVS_SESSION.revealed)return;
+    UVS_SESSION.revealed=true;UVS_SESSION.winner=winner;UVS_SESSION.endTime=Date.now();UVS_SESSION.rngCalls=_uvsRng?_uvsRng.calls:0;
     console.log('[UVS] Session complete:',JSON.stringify({serverSeedHash:UVS_SESSION.serverSeedHash,clientSeed:UVS_SESSION.clientSeed,rngCalls:UVS_SESSION.rngCalls,winner:winner}));
     console.log('[UVS] Reveal — serverSeed:',UVS_SESSION.serverSeed);
     console.log('[UVS] Verify: SHA-256(serverSeed) ===',UVS.sha256(UVS_SESSION.serverSeed),'===',UVS_SESSION.serverSeedHash,'?',UVS.sha256(UVS_SESSION.serverSeed)===UVS_SESSION.serverSeedHash);
@@ -236,7 +236,7 @@ function startGame(){
         document.getElementById('col-btns').style.display='grid';
     }
     document.getElementById('info-left').textContent=COLS+'\u00d7'+ROWS+(ROTATE?' rotate':'')+' - stone 1-'+MAX_H;
-    document.getElementById('info-right').textContent=DROP_COST>0?(DROP_COST.toFixed(2)+' USDT/drop'):(UVS_SESSION?'\uD83D\uDD12 UVS 2.0':'free play');
+    document.getElementById('info-right').textContent=(DROP_COST>0?DROP_COST.toFixed(2)+' USDT/drop':'free play')+(UVS_SESSION?' \u2022 \uD83D\uDD12 UVS':'');
     document.getElementById('grid').style.gridTemplateColumns='repeat('+COLS+',1fr)';
     document.getElementById('col-btns').style.gridTemplateColumns='repeat('+COLS+',1fr)';
     initGame();

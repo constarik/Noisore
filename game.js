@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.0 shared game logic
+// game.js — NOISORE v11.1 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -189,6 +189,23 @@ function uvsRecordMove(col){
     if(!UVS_SESSION)return;
     UVS_SESSION.moves.push({tick:UVS_SESSION.moves.length,col:col,rngCalls:_uvsRng?_uvsRng.calls:0});
 }
+function uvsShowVerify(){
+    if(!UVS_SESSION)return;
+    var s=UVS_SESSION;
+    var el=document.getElementById('payout-area');
+    var verified=UVS.sha256(s.serverSeed)===s.serverSeedHash;
+    el.innerHTML='<div style="text-align:left;font-size:10px;line-height:1.6;padding:8px;background:#0a0a14;border:1px solid #1e1e2e;border-radius:8px;max-height:200px;overflow-y:auto">'+
+        '<div style="color:#f59e0b;font-size:12px;font-weight:700;margin-bottom:4px">\uD83D\uDD12 UVS 2.0 — Provably Fair</div>'+
+        '<div><span style="color:#888">Server Seed Hash:</span><br><span style="color:#d4d4d8;word-break:break-all;font-size:9px">'+s.serverSeedHash+'</span></div>'+
+        '<div style="margin-top:4px"><span style="color:#888">Server Seed (revealed):</span><br><span style="color:#d4d4d8;word-break:break-all;font-size:9px">'+s.serverSeed+'</span></div>'+
+        '<div style="margin-top:4px"><span style="color:#888">Client Seed:</span> <span style="color:#d4d4d8">'+s.clientSeed+'</span></div>'+
+        '<div style="margin-top:4px"><span style="color:#888">RNG:</span> <span style="color:#d4d4d8">ChaCha20 RFC 8439, '+s.rngCalls+' calls</span></div>'+
+        '<div style="margin-top:4px"><span style="color:#888">Moves:</span> <span style="color:#d4d4d8">'+s.moves.length+'</span></div>'+
+        '<div style="margin-top:4px"><span style="color:#888">SHA-256 check:</span> <span style="color:'+(verified?'#22c55e':'#f66')+'">'+
+        (verified?'\u2713 VERIFIED':'\u2717 MISMATCH')+'</span></div>'+
+        '<div style="margin-top:6px;text-align:center"><button onclick="'+(CFG.mode==='bet'?'newBetRound()':'newRound()')+'" style="background:#f59e0b;color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:11px;padding:6px 20px;border:none;border-radius:6px;cursor:pointer">'+(CFG.mode==='bet'?'PLACE BETS':'NEXT ROUND')+'</button></div>'+
+        '</div>';
+}
 
 function startGame(){
     sndPlay('click');sndInit();
@@ -367,7 +384,7 @@ async function checkWin(winner,winColor){
             }
         }
     }
-    document.getElementById('payout-area').innerHTML='<div style="margin-top:4px"><span style="font-family:Archivo Black,sans-serif;font-size:18px;color:'+winColor+'">'+label+'</span><br>'+(pool>0?'<span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">'+pool.toFixed(2)+' USDT</span><br>':'')+'<button onclick="newRound()" style="margin-top:10px;background:'+winColor+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT ROUND</button></div>';
+    document.getElementById('payout-area').innerHTML='<div style="margin-top:4px"><span style="font-family:Archivo Black,sans-serif;font-size:18px;color:'+winColor+'">'+label+'</span><br>'+(pool>0?'<span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">'+pool.toFixed(2)+' USDT</span><br>':'')+'<button onclick="newRound()" style="margin-top:10px;background:'+winColor+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">NEXT ROUND</button>'+(UVS_SESSION?' <button onclick="uvsShowVerify()" style="margin-top:10px;background:none;border:1px solid #f59e0b;color:#f59e0b;font-family:Archivo Black,sans-serif;font-size:11px;padding:8px 16px;border-radius:8px;cursor:pointer">\uD83D\uDD12 Verify</button>':'')+'</div>';
     animating=false;setColBtnsDisabled(true);return true;
 }
 // === SOLO & PVP ===
@@ -466,7 +483,7 @@ async function betRound(){
                 uvsEnd(f.name);
                 updateUI();
                 var msg=won?'<span style="color:#22c55e;font-family:Archivo Black,sans-serif;font-size:20px">YOU WIN</span><br><span style="color:#d4d4d8;font-size:12px">'+BET_BETS[f.name].toFixed(2)+' \u00d7 '+fdata.odds+' =</span><br><span style="font-family:Archivo Black,sans-serif;font-size:28px;color:#fff">+'+payout.toFixed(2)+' USDT</span>':'<span style="color:#f66;font-family:Archivo Black,sans-serif;font-size:16px">'+f.name+' WINS</span><br><span style="color:#d4d4d8;font-size:13px">no bet on '+f.name+'</span>';
-                document.getElementById('payout-area').innerHTML='<div style="margin-top:4px">'+msg+'<br><button onclick="newBetRound()" style="margin-top:10px;background:'+f.color+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">PLACE BETS</button></div>';
+                document.getElementById('payout-area').innerHTML='<div style="margin-top:4px">'+msg+'<br><button onclick="newBetRound()" style="margin-top:10px;background:'+f.color+';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">PLACE BETS</button>'+(UVS_SESSION?' <button onclick="uvsShowVerify()" style="margin-top:10px;background:none;border:1px solid #f59e0b;color:#f59e0b;font-family:Archivo Black,sans-serif;font-size:11px;padding:8px 16px;border-radius:8px;cursor:pointer">\uD83D\uDD12 Verify</button>':'')+'</div>';
                 animating=false;return;
             }
             if(t<order.length-1)await sleep(150);

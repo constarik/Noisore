@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.3 shared game logic
+// game.js — NOISORE v11.4 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -194,17 +194,21 @@ function uvsShowVerify(){
     var s=UVS_SESSION;
     var el=document.getElementById('payout-area');
     var verified=UVS.sha256(s.serverSeed)===s.serverSeedHash;
-    el.innerHTML='<div style="text-align:left;font-size:10px;line-height:1.6;padding:8px;background:#0a0a14;border:1px solid #1e1e2e;border-radius:8px;max-height:200px;overflow-y:auto">'+
+    var moveCols=s.moves.map(function(m){return m.col;});
+    var verifyUrl='verify.html?ss='+s.serverSeed+'&cs='+encodeURIComponent(s.clientSeed)+'&n='+s.nonce+'&g='+COLS+'&m='+encodeURIComponent(JSON.stringify(moveCols));
+    el.innerHTML='<div style="text-align:left;font-size:10px;line-height:1.6;padding:8px;background:#0a0a14;border:1px solid #1e1e2e;border-radius:8px;max-height:240px;overflow-y:auto">'+
         '<div style="color:#f59e0b;font-size:12px;font-weight:700;margin-bottom:4px">\uD83D\uDD12 UVS 2.0 — Provably Fair</div>'+
         '<div><span style="color:#888">Server Seed Hash:</span><br><span style="color:#d4d4d8;word-break:break-all;font-size:9px">'+s.serverSeedHash+'</span></div>'+
         '<div style="margin-top:4px"><span style="color:#888">Server Seed (revealed):</span><br><span style="color:#d4d4d8;word-break:break-all;font-size:9px">'+s.serverSeed+'</span></div>'+
         '<div style="margin-top:4px"><span style="color:#888">Client Seed:</span> <span style="color:#d4d4d8">'+s.clientSeed+'</span></div>'+
         '<div style="margin-top:4px"><span style="color:#888">RNG:</span> <span style="color:#d4d4d8">ChaCha20 RFC 8439, '+s.rngCalls+' calls</span></div>'+
-        '<div style="margin-top:4px"><span style="color:#888">Moves:</span> <span style="color:#d4d4d8">'+s.moves.length+'</span></div>'+
+        '<div style="margin-top:4px"><span style="color:#888">Moves:</span> <span style="color:#d4d4d8">'+s.moves.length+' ['+moveCols.join(',')+']</span></div>'+
         '<div style="margin-top:4px"><span style="color:#888">SHA-256 check:</span> <span style="color:'+(verified?'#22c55e':'#f66')+'">'+
         (verified?'\u2713 VERIFIED':'\u2717 MISMATCH')+'</span></div>'+
-        '<div style="margin-top:6px;text-align:center"><button onclick="'+(CFG.mode==='bet'?'newBetRound()':'newRound()')+'" style="background:#f59e0b;color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:11px;padding:6px 20px;border:none;border-radius:6px;cursor:pointer">'+(CFG.mode==='bet'?'PLACE BETS':'NEXT ROUND')+'</button></div>'+
-        '</div>';
+        '<div style="margin-top:6px;text-align:center">'+
+        '<button onclick="'+(CFG.mode==='bet'?'newBetRound()':'newRound()')+'" style="background:#f59e0b;color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:11px;padding:6px 20px;border:none;border-radius:6px;cursor:pointer">'+(CFG.mode==='bet'?'PLACE BETS':'NEXT ROUND')+'</button> '+
+        '<a href="'+verifyUrl+'" target="_blank" style="color:#f59e0b;font-size:10px;margin-left:8px">Replay \u2192</a>'+
+        '</div></div>';
 }
 
 function startGame(){

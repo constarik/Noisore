@@ -3,211 +3,206 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOISORE — UVS Verifier</title>
+<title>NOISORE — UVS Verify</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Archivo+Black&display=swap" rel="stylesheet">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TRP1QX4878"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-TRP1QX4878');</script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Archivo+Black&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#0a0a14;color:#e4e4e7;font-family:'JetBrains Mono',monospace;display:flex;justify-content:center;padding:20px;min-height:100vh;}
-.wrap{max-width:680px;width:100%;}
-h1{font-family:'Archivo Black',sans-serif;color:#f59e0b;font-size:24px;text-align:center;margin-bottom:4px;}
-.sub{text-align:center;color:#888;font-size:11px;letter-spacing:2px;margin-bottom:24px;}
-.section{margin-bottom:16px;}
-.label{font-size:10px;color:#f59e0b;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
-input,textarea{width:100%;background:#12121a;border:1px solid #2a2a4a;border-radius:6px;color:#d4d4d8;font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 12px;outline:none;}
-input:focus,textarea:focus{border-color:#f59e0b;}
-textarea{resize:vertical;min-height:60px;}
-.row{display:flex;gap:8px;}
-.row>*{flex:1;}
-.btn{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0a0f;font-family:'Archivo Black',sans-serif;font-size:14px;padding:12px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px;width:100%;margin-top:8px;}
-.btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(245,158,11,0.3);}
-.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
-#result{margin-top:20px;display:none;}
-.result-header{font-family:'Archivo Black',sans-serif;font-size:16px;margin-bottom:12px;text-align:center;}
-.ok{color:#22c55e;}.fail{color:#f66;}
-.proof{background:#12121a;border:1px solid #1e1e2e;border-radius:8px;padding:12px;font-size:10px;line-height:1.8;}
-.proof .k{color:#888;}.proof .v{color:#d4d4d8;word-break:break-all;}
-.proof .match{color:#22c55e;font-weight:700;}
-.proof .nomatch{color:#f66;font-weight:700;}
-.grid-preview{margin-top:12px;display:grid;gap:2px;max-width:360px;}
-.grid-preview .cell{background:#6b5b3a;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;aspect-ratio:1;font-family:'Archivo Black',sans-serif;}
-.grid-preview .cell.h0{background:#1a1a2e;color:#f59e0b;}
-.step-log{margin-top:12px;max-height:200px;overflow-y:auto;font-size:9px;line-height:1.6;color:#888;background:#0a0a14;border:1px solid #1e1e2e;border-radius:6px;padding:8px;}
-.step-log .wash{color:#22c55e;}.step-log .hit{color:#f59e0b;}.step-log .flow{color:#4ad;}
-a{color:#f59e0b;text-decoration:none;}a:hover{text-decoration:underline;}
-.footer{text-align:center;margin-top:24px;font-size:10px;color:#555;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#d4d4d8;font-family:'JetBrains Mono',monospace;min-height:100vh;padding:20px}
+h1{font-family:'Archivo Black',sans-serif;font-size:22px;color:#f59e0b;text-align:center;margin-bottom:4px}
+.sub{text-align:center;font-size:10px;color:#666;margin-bottom:20px;letter-spacing:2px}
+.card{background:#111118;border:1px solid #1e1e2e;border-radius:10px;padding:16px;margin-bottom:12px;max-width:700px;margin-left:auto;margin-right:auto}
+label{font-size:10px;color:#888;letter-spacing:1px;display:block;margin-bottom:4px}
+input,textarea{width:100%;background:#0a0a0f;border:1px solid #2a2a3a;border-radius:6px;color:#d4d4d8;font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 10px;margin-bottom:10px;outline:none}
+input:focus,textarea:focus{border-color:#f59e0b}
+textarea{resize:vertical;min-height:40px}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.btn{background:#f59e0b;color:#0a0a0f;font-family:'Archivo Black',sans-serif;font-size:13px;padding:10px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px;width:100%;margin-top:4px}
+.btn:hover{background:#fbbf24}
+.btn:disabled{opacity:0.4;cursor:default}
+.proof{margin-top:8px;padding:10px;background:#060610;border:1px solid #1a1a2a;border-radius:6px;font-size:11px;line-height:1.7}
+.proof .ok{color:#22c55e}.proof .fail{color:#f66}
+.proof .lbl{color:#666;font-size:10px}
+.proof .val{color:#d4d4d8;word-break:break-all;font-size:10px}
+#grid-display{display:inline-grid;gap:2px;margin:8px 0}
+#grid-display .c{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border-radius:4px;border:1px solid #1e1e2e}
+.c.h0{background:#111;color:#333;border-color:#222}
+.c.w{background:#0e3a1e;color:#22c55e;border-color:#22c55e;animation:flash .4s}
+@keyframes flash{0%{background:#22c55e}100%{background:#0e3a1e}}
+#log{background:#060610;border:1px solid #1a1a2a;border-radius:6px;padding:10px;font-size:10px;line-height:1.8;max-height:400px;overflow-y:auto;margin-top:8px;white-space:pre-wrap}
+.log-move{color:#f59e0b;font-weight:700}.log-wash{color:#f66}.log-flow{color:#38bdf8}.log-hit{color:#a78bfa}
+.log-rot{color:#fb923c}.log-ch{color:#22c55e;font-weight:700}.log-grid{color:#555}
+.back{display:inline-block;color:#f59e0b;text-decoration:none;font-size:11px;margin-bottom:12px}
+.back:hover{text-decoration:underline}
 </style>
 </head>
 <body>
-<div class="wrap">
-<h1>🔒 NOISORE VERIFIER</h1>
-<div class="sub">UVS 2.0 — INDEPENDENT REPLAY</div>
-
-<div class="section">
-<div class="label">Server Seed (hex)</div>
-<input type="text" id="serverSeed" placeholder="e.g. 335d709b708b18348aefed8b...">
-</div>
-<div class="section">
-<div class="label">Client Seed</div>
-<input type="text" id="clientSeed" placeholder="e.g. noisore-1776847181215">
-</div>
+<a class="back" href="index.html">← NOISORE</a>
+<h1>🔒 UVS VERIFY</h1>
+<div class="sub">INDEPENDENT REPLAY — PROVABLY FAIR</div>
+<div class="card">
+<label>SERVER SEED</label>
+<input id="ss" placeholder="64+ hex chars">
+<label>CLIENT SEED</label>
+<input id="cs" placeholder="noisore-...">
 <div class="row">
-<div class="section">
-<div class="label">Nonce</div>
-<input type="text" id="nonce" value="1">
+<div><label>NONCE</label><input id="nn" value="1"></div>
+<div><label>GRID SIZE</label><input id="gs" value="6" type="number" min="4" max="10"></div>
+<div><label>ROTATE</label><select id="rot" style="width:100%;background:#0a0a0f;border:1px solid #2a2a3a;border-radius:6px;color:#d4d4d8;font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 10px;margin-bottom:10px"><option value="1" selected>Yes</option><option value="0">No</option></select></div>
 </div>
-<div class="section">
-<div class="label">Grid Size</div>
-<input type="number" id="gridSize" value="6" min="4" max="8">
-</div>
-</div>
-<div class="section">
-<div class="label">Moves (JSON array of column indices)</div>
-<textarea id="moves" placeholder='e.g. [2, 5, 3, 0, 4, 1, 2, 5]'></textarea>
+<label>MOVES (JSON array of column indices, e.g. [2,4,0,3])</label>
+<textarea id="mv" placeholder="[2,4,0,3]"></textarea>
+<button class="btn" id="go" onclick="doReplay()">▶ REPLAY &amp; VERIFY</button>
 </div>
 
-<button class="btn" id="verifyBtn" onclick="runVerify()">▶ VERIFY & REPLAY</button>
-
-<div id="result"></div>
-
-<div class="footer">
-<a href="https://noisore.uncloned.work">NOISORE</a> ·
-<a href="https://uvs.uncloned.work">UVS 2.0</a> ·
-<a href="https://github.com/constarik/uvs-sdk">SDK</a> ·
-<a href="https://uncloned.work">Uncloned Math</a>
+<div class="card" id="result" style="display:none">
+<div id="proof" class="proof"></div>
+<div style="text-align:center;margin-top:8px">
+<div style="color:#888;font-size:10px;margin-bottom:4px">INITIAL GRID</div>
+<div id="grid-init" style="display:inline-block"></div>
+</div>
+<div id="log"></div>
+<div style="text-align:center;margin-top:8px">
+<div style="color:#888;font-size:10px;margin-bottom:4px">FINAL GRID</div>
+<div id="grid-final" style="display:inline-block"></div>
 </div>
 </div>
-
-<script src="uvs.browser.js"></script>
-<script src="engine.js"></script>
+<script src="uvs.browser.js?v=114"></script>
 <script>
-// auto-fill from URL params
-(function(){
-    var p=new URLSearchParams(location.search);
-    if(p.get('ss'))document.getElementById('serverSeed').value=p.get('ss');
-    if(p.get('cs'))document.getElementById('clientSeed').value=p.get('cs');
-    if(p.get('n'))document.getElementById('nonce').value=p.get('n');
-    if(p.get('g'))document.getElementById('gridSize').value=p.get('g');
-    if(p.get('m'))document.getElementById('moves').value=p.get('m');
-    if(p.get('ss')&&p.get('cs'))setTimeout(runVerify,300);
-})();
-
-var ROWS,COLS,MAX_H=10,MAX_DROP=10,grid;
-
-function runVerify(){
-    var ss=document.getElementById('serverSeed').value.trim();
-    var cs=document.getElementById('clientSeed').value.trim();
-    var nonce=document.getElementById('nonce').value.trim();
-    var gs=parseInt(document.getElementById('gridSize').value)||6;
-    var movesRaw=document.getElementById('moves').value.trim();
-    var moves=[];
-    try{if(movesRaw)moves=JSON.parse(movesRaw);}catch(e){alert('Invalid moves JSON');return;}
-
-    if(!ss||ss.length<64){alert('Server seed must be at least 64 hex chars');return;}
-    if(!cs){alert('Client seed required');return;}
-
-    ROWS=gs;COLS=gs;
-    var res=document.getElementById('result');
-    res.style.display='block';
-
-    // Step 1: verify commitment
-    var hash=UVS.sha256(ss);
-    var combined=UVS.deriveCombinedSeed(ss,cs,nonce);
-
-    // Step 2: create RNG
-    _uvsRng=UVS.ChaCha20.fromCombinedSeed(combined);
-
-    // Step 3: generate grid
-    grid=[];
-    for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=1+Math.floor(gameRng()*MAX_H);}
-
-    var initGrid=grid.map(function(r){return r.slice();});
-    var log=[];
-    log.push('Grid generated: '+ROWS+'×'+COLS+' ('+_uvsRng.calls+' RNG calls)');
-
-    // Step 4: replay moves
-    var winner=null;
-    for(var m=0;m<moves.length;m++){
-        var col=moves[m];
-        var dp=1+Math.floor(gameRng()*MAX_DROP);
-        log.push('--- Move '+(m+1)+': col '+(col+1)+', drop power '+dp+' ---');
-        // simulate drop
-        var c=col,power=dp;
-        for(var row=0;row<ROWS&&power>0;row++){
-            if(grid[row][c]===0){
-                log.push('  <span class="flow">('+row+','+c+') flow</span>');
-                if(row<ROWS-1)c=chooseNext(row,c);
-                continue;
-            }
-            var h=grid[row][c];
-            if(power>=h){
-                power-=h;grid[row][c]=0;
-                log.push('  <span class="wash">('+row+','+c+') WASH h='+h+' rem='+power+'</span>');
-            }else{
-                grid[row][c]-=power;
-                log.push('  <span class="hit">('+row+','+c+') hit h='+h+'→'+grid[row][c]+'</span>');
-                power=0;
-            }
-            if(power>0&&row<ROWS-1)c=chooseNext(row,c);
-        }
-        // check channel
-        if(hasChannel()){
-            winner='Move '+(m+1);
-            log.push('<span class="wash">*** CHANNEL FOUND ***</span>');
-            break;
-        }
-        // rotate
-        rotateGridCW();
-        log.push('  rotated 90° CW');
-        if(hasChannel()){
-            winner='Move '+(m+1)+' (after rotation)';
-            log.push('<span class="wash">*** CHANNEL FOUND after rotation ***</span>');
-            break;
-        }
-    }
-
-    var totalCalls=_uvsRng.calls;
-    _uvsRng=null;
-
-    // Render result
-    var verified=true; // seed matches itself (no external hash to compare in offline mode)
-    var html='';
-    html+='<div class="result-header '+(winner?'ok':'fail')+'">'+(winner?'✓ CHANNEL VERIFIED':'⚠ NO CHANNEL IN '+moves.length+' MOVES')+'</div>';
-    html+='<div class="proof">';
-    html+='<span class="k">Server Seed Hash:</span><br><span class="v">'+hash+'</span><br>';
-    html+='<span class="k">Combined Seed:</span><br><span class="v" style="font-size:8px">'+combined+'</span><br>';
-    html+='<span class="k">RNG:</span> <span class="v">ChaCha20 RFC 8439, '+totalCalls+' calls</span><br>';
-    if(winner) html+='<span class="k">Winner:</span> <span class="v match">'+winner+'</span><br>';
-    html+='<span class="k">SHA-256 check:</span> <span class="match">✓ VERIFIED</span>';
-    html+='</div>';
-
-    // Grid preview
-    html+='<div class="label" style="margin-top:12px">FINAL GRID STATE</div>';
-    html+='<div class="grid-preview" style="grid-template-columns:repeat('+COLS+',1fr)">';
-    for(var r=0;r<ROWS;r++){
-        for(var c2=0;c2<COLS;c2++){
-            html+='<div class="cell'+(grid[r][c2]===0?' h0':'')+'">'+grid[r][c2]+'</div>';
-        }
-    }
-    html+='</div>';
-
-    // Initial grid
-    html+='<div class="label" style="margin-top:12px">INITIAL GRID</div>';
-    html+='<div class="grid-preview" style="grid-template-columns:repeat('+COLS+',1fr)">';
-    for(var r2=0;r2<ROWS;r2++){
-        for(var c3=0;c3<COLS;c3++){
-            html+='<div class="cell">'+initGrid[r2][c3]+'</div>';
-        }
-    }
-    html+='</div>';
-
-    // Step log
-    html+='<div class="label" style="margin-top:12px">REPLAY LOG</div>';
-    html+='<div class="step-log">'+log.join('<br>')+'</div>';
-
-    res.innerHTML=html;
+// --- Engine copy (deterministic, no DOM) ---
+var ROWS,COLS,MAX_H=10,grid;
+function gameRng(){return _uvsRng?_uvsRng.nextFloat():Math.random();}
+function chooseNext(row,col){
+  var cands=[];for(var dc=-1;dc<=1;dc++){var nc=col+dc;if(nc>=0&&nc<COLS)cands.push({c:nc,h:grid[row+1][nc]});}
+  var nz=cands.filter(function(x){return x.h>0;});
+  if(nz.length===0)return cands[Math.floor(gameRng()*cands.length)].c;
+  var w=nz.map(function(x){return 1/x.h;});var tw=w.reduce(function(a,b){return a+b;},0);var r=gameRng()*tw;
+  for(var i=0;i<nz.length;i++){r-=w[i];if(r<=0)return nz[i].c;}return nz[nz.length-1].c;
 }
+function hasChannel(){for(var c=0;c<COLS;c++){if(grid[0][c]===0){var vis={};if(dfs(0,c,vis))return true;}}return false;}
+function dfs(row,col,vis){var k=row+'-'+col;if(vis[k])return false;vis[k]=true;if(grid[row][col]!==0)return false;if(row===ROWS-1)return true;for(var dc=-1;dc<=1;dc++){var nc=col+dc;if(nc>=0&&nc<COLS&&dfs(row+1,nc,vis))return true;}return false;}
+function findChannelCells(){var ch={};for(var c=0;c<COLS;c++){if(grid[0][c]===0){var path=[];if(dfsC(0,c,{},path)){for(var i=0;i<path.length;i++)ch[path[i]]=true;}}}return ch;}
+function dfsC(row,col,vis,path){var k=row+'-'+col;if(vis[k])return false;vis[k]=true;if(grid[row][col]!==0)return false;path.push(k);if(row===ROWS-1)return true;var found=false;for(var dc=-1;dc<=1;dc++){var nc=col+dc;if(nc>=0&&nc<COLS){var b=path.length;if(dfsC(row+1,nc,vis,path))found=true;else path.length=b;}}if(!found)path.pop();return found;}
+function rotateGridCW(){var S=ROWS;var ng=[];for(var r=0;r<S;r++){ng[r]=[];for(var c=0;c<S;c++)ng[r][c]=grid[S-1-c][r];}grid=ng;}
+function fillRowIfChannel(){var f=0;while(hasChannel()){var row=Math.floor(gameRng()*ROWS);for(var c=0;c<COLS;c++)grid[row][c]=1+Math.floor(gameRng()*MAX_H);f++;if(f>10)break;}return f;}
+function randDrop(){return 1+Math.floor(gameRng()*MAX_H);}
+function gridHTML(g,sz,highlight){
+  var s='<div style="display:inline-grid;grid-template-columns:repeat('+sz+',32px);gap:2px">';
+  for(var r=0;r<sz;r++)for(var c=0;c<sz;c++){
+    var v=g[r][c],k=r+'-'+c,hl=highlight&&highlight[k];
+    s+='<div class="c'+(v===0?' h0':'')+(hl?' w':'')+'" style="'+(v>0?'background:hsl('+(v*25+200)+',30%,'+(15+v*3)+'%);color:hsl('+(v*25+200)+',40%,'+(45+v*2)+'%)':'')+'">'+
+      (v>0?v:'·')+'</div>';
+  }
+  return s+'</div>';
+}
+function copyGrid(g){var c=[];for(var r=0;r<g.length;r++)c[r]=g[r].slice();return c;}
+
+function simDrop(col,dp,log,moveIdx){
+  var power=dp,c=col,path=[];
+  log.push('<span class="log-move">Move '+(moveIdx+1)+': col='+col+' dp='+dp+'</span>');
+  for(var row=0;row<ROWS&&power>0;row++){
+    if(grid[row][c]===0){
+      path.push(row+'-'+c);
+      log.push('  <span class="log-flow">row '+row+' col '+c+': flow (empty) power='+power+'</span>');
+      if(row<ROWS-1)c=chooseNext(row,c);
+      continue;
+    }
+    var h=grid[row][c];
+    if(power>=h){
+      power-=h;grid[row][c]=0;
+      path.push(row+'-'+c);
+      log.push('  <span class="log-wash">row '+row+' col '+c+': WASH h='+h+' → 0, power='+power+'</span>');
+    }else{
+      grid[row][c]-=power;
+      log.push('  <span class="log-hit">row '+row+' col '+c+': hit h='+h+' → '+(h-power)+', power=0</span>');
+      power=0;
+    }
+    if(power>0&&row<ROWS-1)c=chooseNext(row,c);
+  }
+  return power;
+}
+function doReplay(){
+  var ss=document.getElementById('ss').value.trim();
+  var cs=document.getElementById('cs').value.trim();
+  var nn=document.getElementById('nn').value.trim();
+  var gs=parseInt(document.getElementById('gs').value)||6;
+  var rot=document.getElementById('rot').value==='1';
+  var mvRaw=document.getElementById('mv').value.trim();
+  var moves;
+  try{moves=JSON.parse(mvRaw);}catch(e){alert('Invalid moves JSON');return;}
+  if(!ss||ss.length<64){alert('Server seed must be 64+ hex chars');return;}
+  if(!cs){alert('Client seed required');return;}
+
+  ROWS=gs;COLS=gs;
+  // SHA-256 proof
+  var hash=UVS.sha256(ss);
+  var combined=UVS.deriveCombinedSeed(ss,cs,nn);
+  _uvsRng=UVS.ChaCha20.fromCombinedSeed(combined);
+
+  // Generate initial grid
+  grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=1+Math.floor(gameRng()*MAX_H);}
+  var initGrid=copyGrid(grid);
+  // Generate initial drop power (rollDrop at start)
+  var currentDp=randDrop();
+
+  // Proof header
+  var proof='<div class="lbl">Server Seed Hash:</div><div class="val">'+hash+'</div>'+
+    '<div class="lbl" style="margin-top:6px">Combined Seed:</div><div class="val">'+combined.substring(0,32)+'...</div>'+
+    '<div class="lbl" style="margin-top:6px">RNG:</div><div class="val">ChaCha20 RFC 8439</div>';
+
+  var log=[];
+  log.push('<span class="log-grid">Grid '+gs+'×'+gs+(rot?' + rotation':'')+'</span>');
+  log.push('<span class="log-grid">Initial drop power: '+currentDp+'</span>');
+  log.push('');
+
+  var winner=null;
+  for(var m=0;m<moves.length;m++){
+    var col=moves[m];
+    simDrop(col,currentDp,log,m);
+    // Check channel
+    if(hasChannel()){
+      var ch=findChannelCells();
+      winner='CHANNEL at move '+(m+1);
+      log.push('<span class="log-ch">★ CHANNEL FOUND after move '+(m+1)+'!</span>');
+      break;
+    }
+    // Rotation
+    if(rot){
+      rotateGridCW();fillRowIfChannel();
+      log.push('  <span class="log-rot">↻ rotate CW</span>');
+    }
+    // Next drop
+    currentDp=randDrop();
+    log.push('  <span class="log-grid">next dp='+currentDp+'</span>');
+    log.push('');
+  }
+  if(!winner)log.push('<span style="color:#888">No channel after '+moves.length+' moves</span>');
+
+  var finalCh=winner?findChannelCells():{};
+  proof+='<div class="lbl" style="margin-top:6px">Moves:</div><div class="val">'+moves.length+'</div>'+
+    '<div class="lbl" style="margin-top:6px">RNG calls:</div><div class="val">'+_uvsRng.calls+'</div>'+
+    '<div class="lbl" style="margin-top:6px">Result:</div><div class="val">'+(winner||'no channel')+'</div>';
+
+  document.getElementById('proof').innerHTML=proof;
+  document.getElementById('grid-init').innerHTML=gridHTML(initGrid,gs,{});
+  document.getElementById('grid-final').innerHTML=gridHTML(grid,gs,finalCh);
+  document.getElementById('log').innerHTML=log.join('\n');
+  document.getElementById('result').style.display='block';
+  _uvsRng=null;
+}
+// Auto-fill from URL params
+(function(){
+  var p=new URLSearchParams(location.search);
+  if(p.get('ss'))document.getElementById('ss').value=p.get('ss');
+  if(p.get('cs'))document.getElementById('cs').value=p.get('cs');
+  if(p.get('n'))document.getElementById('nn').value=p.get('n');
+  if(p.get('g'))document.getElementById('gs').value=p.get('g');
+  if(p.get('m'))document.getElementById('mv').value=p.get('m');
+  if(p.get('rot'))document.getElementById('rot').value=p.get('rot');
+  if(p.get('ss')&&p.get('cs')&&p.get('m'))setTimeout(doReplay,300);
+})();
 </script>
 </body>
 </html>

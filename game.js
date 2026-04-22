@@ -195,7 +195,7 @@ function uvsShowVerify(){
     var el=document.getElementById('payout-area');
     var verified=UVS.sha256(s.serverSeed)===s.serverSeedHash;
     var moveCols=s.moves.map(function(m){return m.col;});
-    var verifyUrl='verify.html?ss='+s.serverSeed+'&cs='+encodeURIComponent(s.clientSeed)+'&n='+s.nonce+'&g='+COLS+'&m='+encodeURIComponent(JSON.stringify(moveCols));
+    var verifyUrl='verify.html?ss='+s.serverSeed+'&cs='+encodeURIComponent(s.clientSeed)+'&n='+s.nonce+'&g='+COLS+'&rot='+(ROTATE?1:0)+'&m='+encodeURIComponent(JSON.stringify(moveCols));
     el.innerHTML='<div style="text-align:left;font-size:10px;line-height:1.6;padding:8px;background:#0a0a14;border:1px solid #1e1e2e;border-radius:8px;max-height:240px;overflow-y:auto">'+
         '<div style="color:#f59e0b;font-size:12px;font-weight:700;margin-bottom:4px">\uD83D\uDD12 UVS 2.0 — Provably Fair</div>'+
         '<div><span style="color:#888">Server Seed Hash:</span><br><span style="color:#d4d4d8;word-break:break-all;font-size:9px">'+s.serverSeedHash+'</span></div>'+

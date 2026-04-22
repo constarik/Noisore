@@ -169,7 +169,7 @@ function doReplay(){
       col=moves[m][0];dp=moves[m][1];var rngPos=moves[m][2];
       // Fast-forward RNG to match game state
       while(_uvsRng.calls<rngPos)_uvsRng.nextUint32();
-      log.push('<span class="log-grid">[rngPos sync: '+_uvsRng.calls+'/'+rngPos+']</span>');
+      if(col===-1){rotateGridCW();fillRowIfChannel();log.push('<span class="log-rot">rotate CW [rng:'+rngPos+']</span>');continue;}
     }else{
       col=moves[m];dp=currentDp;
     }
@@ -179,7 +179,7 @@ function doReplay(){
       log.push('<span class="log-ch">★ CHANNEL FOUND after move '+(m+1)+'!</span>');
       break;
     }
-    if(rot){
+    if(!isRich&&rot){
       rotateGridCW();fillRowIfChannel();
       log.push('  <span class="log-rot">↻ rotate CW</span>');
     }

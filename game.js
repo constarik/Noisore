@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.6 shared game logic
+// game.js — NOISORE v11.7 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -195,7 +195,7 @@ function uvsShowVerify(){
     var el=document.getElementById('payout-area');
     var verified=UVS.sha256(s.serverSeed)===s.serverSeedHash;
     var moveCols=s.moves.map(function(m){return m.col;});
-    var moveFull=s.moves.map(function(m){return[m.col,m.dp,m.rngPos];});
+    var moveFull=s.moves.map(function(m){return m.type==='rotate'?[-1,0,m.rngPos]:[m.col,m.dp,m.rngPos];});
     var verifyUrl='verify.html?ss='+s.serverSeed+'&cs='+encodeURIComponent(s.clientSeed)+'&n='+s.nonce+'&g='+COLS+'&rot='+(ROTATE?1:0)+'&m='+encodeURIComponent(JSON.stringify(moveFull));
     el.innerHTML='<div style="text-align:left;font-size:10px;line-height:1.6;padding:8px;background:#0a0a14;border:1px solid #1e1e2e;border-radius:8px;max-height:240px;overflow-y:auto">'+
         '<div style="color:#f59e0b;font-size:12px;font-weight:700;margin-bottom:4px">\uD83D\uDD12 UVS 2.0 — Provably Fair</div>'+
@@ -335,6 +335,7 @@ async function doRotation(){
     await sleep(1200);
     g.style.transition='none';g.style.transform='';
     rotateGridCW();if(hasChannel()){fillRowIfChannel();}
+    if(UVS_SESSION)UVS_SESSION.moves.push({type:'rotate',rngPos:_uvsRng?_uvsRng.calls:0});
     clearPowerTags();renderGrid();
     document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';
     await sleep(400);
@@ -346,6 +347,7 @@ async function doRotationAuto(){
     await sleep(1200);
     g.style.transition='none';g.style.transform='';
     rotateGridCW();if(hasChannel()){fillRowIfChannel();}
+    if(UVS_SESSION)UVS_SESSION.moves.push({type:'rotate',rngPos:_uvsRng?_uvsRng.calls:0});
     clearPowerTags();renderGrid();
     document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';
     document.getElementById('rotate-ind').classList.add('show');

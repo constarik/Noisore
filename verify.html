@@ -144,38 +144,49 @@ function doReplay(){
   // Generate initial grid
   grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=1+Math.floor(gameRng()*MAX_H);}
   var initGrid=copyGrid(grid);
-  // Generate initial drop power (rollDrop at start)
-  var currentDp=randDrop();
 
-  // Proof header
+  // Detect move format: [col] or [[col,dp,rngPos]]
+  var isRich=moves.length>0&&Array.isArray(moves[0]);
+
   var proof='<div class="lbl">Server Seed Hash:</div><div class="val">'+hash+'</div>'+
     '<div class="lbl" style="margin-top:6px">Combined Seed:</div><div class="val">'+combined.substring(0,32)+'...</div>'+
     '<div class="lbl" style="margin-top:6px">RNG:</div><div class="val">ChaCha20 RFC 8439</div>';
 
   var log=[];
-  log.push('<span class="log-grid">Grid '+gs+'×'+gs+(rot?' + rotation':'')+'</span>');
-  log.push('<span class="log-grid">Initial drop power: '+currentDp+'</span>');
+  log.push('<span class="log-grid">Grid '+gs+'×'+gs+(rot?' + rotation':'')+(isRich?' (rich moves — rngPos sync)':' (simple moves)')+'</span>');
+
+  if(!isRich){
+    // Simple format: generate first dp
+    var currentDp=randDrop();
+    log.push('<span class="log-grid">Initial drop power: '+currentDp+'</span>');
+  }
   log.push('');
 
   var winner=null;
   for(var m=0;m<moves.length;m++){
-    var col=moves[m];
-    simDrop(col,currentDp,log,m);
-    // Check channel
+    var col,dp;
+    if(isRich){
+      col=moves[m][0];dp=moves[m][1];var rngPos=moves[m][2];
+      // Fast-forward RNG to match game state
+      while(_uvsRng.calls<rngPos)_uvsRng.nextUint32();
+      log.push('<span class="log-grid">[rngPos sync: '+_uvsRng.calls+'/'+rngPos+']</span>');
+    }else{
+      col=moves[m];dp=currentDp;
+    }
+    simDrop(col,dp,log,m);
     if(hasChannel()){
-      var ch=findChannelCells();
       winner='CHANNEL at move '+(m+1);
       log.push('<span class="log-ch">★ CHANNEL FOUND after move '+(m+1)+'!</span>');
       break;
     }
-    // Rotation
     if(rot){
       rotateGridCW();fillRowIfChannel();
       log.push('  <span class="log-rot">↻ rotate CW</span>');
     }
-    // Next drop
-    currentDp=randDrop();
-    log.push('  <span class="log-grid">next dp='+currentDp+'</span>');
+    if(!isRich){
+      currentDp=randDrop();
+      log.push('  <span class="log-grid">next dp='+currentDp+'</span>');
+    }
     log.push('');
   }
   if(!winner)log.push('<span style="color:#888">No channel after '+moves.length+' moves</span>');

@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.4 shared game logic
+// game.js — NOISORE v11.5 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -187,7 +187,7 @@ function uvsEnd(winner){
 }
 function uvsRecordMove(col){
     if(!UVS_SESSION)return;
-    UVS_SESSION.moves.push({tick:UVS_SESSION.moves.length,col:col,rngCalls:_uvsRng?_uvsRng.calls:0});
+    UVS_SESSION.moves.push({tick:UVS_SESSION.moves.length,col:col,dp:currentDrop,rngPos:_uvsRng?_uvsRng.calls:0});
 }
 function uvsShowVerify(){
     if(!UVS_SESSION)return;
@@ -195,7 +195,8 @@ function uvsShowVerify(){
     var el=document.getElementById('payout-area');
     var verified=UVS.sha256(s.serverSeed)===s.serverSeedHash;
     var moveCols=s.moves.map(function(m){return m.col;});
-    var verifyUrl='verify.html?ss='+s.serverSeed+'&cs='+encodeURIComponent(s.clientSeed)+'&n='+s.nonce+'&g='+COLS+'&rot='+(ROTATE?1:0)+'&m='+encodeURIComponent(JSON.stringify(moveCols));
+    var moveFull=s.moves.map(function(m){return[m.col,m.dp,m.rngPos];});
+    var verifyUrl='verify.html?ss='+s.serverSeed+'&cs='+encodeURIComponent(s.clientSeed)+'&n='+s.nonce+'&g='+COLS+'&rot='+(ROTATE?1:0)+'&m='+encodeURIComponent(JSON.stringify(moveFull));
     el.innerHTML='<div style="text-align:left;font-size:10px;line-height:1.6;padding:8px;background:#0a0a14;border:1px solid #1e1e2e;border-radius:8px;max-height:240px;overflow-y:auto">'+
         '<div style="color:#f59e0b;font-size:12px;font-weight:700;margin-bottom:4px">\uD83D\uDD12 UVS 2.0 — Provably Fair</div>'+
         '<div><span style="color:#888">Server Seed Hash:</span><br><span style="color:#d4d4d8;word-break:break-all;font-size:9px">'+s.serverSeedHash+'</span></div>'+
@@ -472,7 +473,7 @@ async function betRound(){
             var dp=randDrop();
             var col=betPickCol(f,dp);
             dropNum++;updateUI();
-            if(UVS_SESSION)UVS_SESSION.moves.push({tick:dropNum,fighter:f.name,col:col,dp:dp});
+            if(UVS_SESSION)UVS_SESSION.moves.push({tick:dropNum,fighter:f.name,col:col,dp:dp,rngPos:_uvsRng?_uvsRng.calls:0});
             await animateDrop(col,dp,f.name,f.color,t);
             var ch=findChannelCells();var keys=Object.keys(ch);
             if(keys.length>0){

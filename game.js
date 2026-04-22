@@ -468,6 +468,7 @@ async function betRound(){
             var dp=randDrop();
             var col=betPickCol(f,dp);
             dropNum++;updateUI();
+            if(UVS_SESSION)UVS_SESSION.moves.push({tick:dropNum,fighter:f.name,col:col,dp:dp});
             await animateDrop(col,dp,f.name,f.color,t);
             var ch=findChannelCells();var keys=Object.keys(ch);
             if(keys.length>0){

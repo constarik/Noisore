@@ -497,7 +497,7 @@ async function betRound(){
         resetPlayerStates();
     }
 }
-function newBetRound(){clearPowerTags();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();
+function newBetRound(){clearPowerTags();initGrid();uvsStart();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();
     document.getElementById('game').style.display='none';
     document.getElementById('lobby').style.display='block';
     unfitGrid();

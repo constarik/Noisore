@@ -1,286 +1,173 @@
-# EROSION UNIVERSE — Project Document
-*Last updated: 2026-04-09*
+# NOISORE — Project Document
+
+**Version:** 11.7
+**Updated:** April 2026
+**Author:** Constantin Razinsky / Uncloned Math
+**Repository:** [github.com/constarik/Noisore](https://github.com/constarik/Noisore)
+**Live:** [noisore.uncloned.work](https://noisore.uncloned.work)
 
 ---
 
-## NAMING
+## 1. Product Universe
 
-| Product | EN | RU | Tagline EN | Tagline RU |
-|---|---|---|---|---|
-| Single-player | EROSION | КАПЕЛЬКА | Water beats stone. Skill beats luck. | Вода камень точит. Мастерство не прольёшь. |
-| Multiplayer PvP | NOISORE | РУССЛО | Water beats stone. Skill beats luck. | Вода камень точит. Мастерство не прольёшь. |
-| Spectator betting | Bet&Wet | МОКРИЦА | Pick your fighter. Watch the race. | Выбери бойца. Смотри гонку. |
+NOISORE is a water-erosion arcade game universe with three products sharing one engine:
 
-NOISORE = EROSION наоборот
-РУССЛО = РУСЛО + СЛОТ + РУССКИЙ
+| Product | EN Name | RU Name | Mode | UVS Granularity |
+|---------|---------|---------|------|-----------------|
+| EROSION | Erosion | КАПЕЛЬКА | Solo — player vs grid | Move Batch (G=ALL) |
+| SOIRON | Soiron | РУССЛО | PvP — player vs bots | Move Batch (G=ALL) |
+| BET&WET | Bet & Wet | МОКРИЦА | Bot racing — player bets | Stateless-like |
 
----
-
-## FOUR PRODUCTS — ONE ENGINE
-
-### 1. EROSION / КАПЕЛЬКА
-Single-player скоринг. Бесплатно. Тренировка, знакомство с механикой.
-
-### 2. NOISORE / РУССЛО Free
-PvP с ботами. Бесплатно. Обучение перед игрой на реальные.
-
-### 3. NOISORE / РУССЛО Real
-PvP живые игроки. Ставки USDT. Только живые — ботов нет. 5% рейк.
-
-### 4. Bet&Wet / МОКРИЦА
-Ставки зрителей на ботов-стратегов. 6 бойцов играют автоматически. Зритель выбирает на кого ставить. Бот-скачки. 5% overround.
+**Core mechanic:** Drop water on a grid of stones. Water erodes stones (reduces height). Create a continuous channel from top to bottom = win.
 
 ---
 
-## ARCHITECTURE (v5.8)
+## 2. Architecture
 
 ```
-engine.js   — физика грида, стратегии, вращение (STRATEGY_PICK dict)
-game.js     — лобби, анимация, Bet&Wet, все режимы (shared)
-index.html  — десктоп CSS + HTML shell
-mobile.html — мобильный CSS + HTML shell (touch, fullscreen)
+engine.js  v1.1  — grid physics, strategies, rotation, channel detection, gameRng() pluggable
+game.js    v11.7 — lobby, animation, UVS session, all 3 modes, noise model, sound
+beach.js         — Canvas2D tropical beach background scene
+tutorial.js      — onboarding tutorials for all 3 modes (seeded LCG RNG)
+uvs.browser.js   — UVS v2 browser bundle (SHA-256/512, ChaCha20, seed protocol)
+verify.html      — independent replay/verification page
+index.html       — desktop CSS + HTML shell
+mobile.html      — mobile CSS + HTML shell (Telegram Mini App ready)
 ```
 
-Один `game.js` — две платформы. Изменил game.js → оба обновились.
+### Engine (engine.js v1.1)
+
+- `gameRng()` — pluggable RNG: `_uvsRng.nextFloat()` when UVS active, `Math.random()` fallback
+- `chooseNext(row, col)` — water flow: weighted random by inverse stone height
+- `rotateGridCW()` — 90° clockwise grid rotation (Rule E)
+- `fillRowIfChannel()` — anti-premature-channel: fills random row if channel exists after rotation
+- `hasChannel() / findChannelCells()` — DFS channel detection top→bottom
+- `pickDeep/pickLight/pickSniper/pickGreedy/pickPower/pickRandom` — bot strategies
+
+### Game Modes
+
+**EROSION (solo):** Player picks column, drops water. No bots. Rotation after each drop (optional). Win = channel.
+
+**SOIRON (PvP):** Player + N bots. Each round: all players drop simultaneously (shuffled order). Rotation after all drops. First to create channel wins pool.
+
+**BET&WET (racing):** 6 bot fighters with strategies + noise. Player places bets on fighters. ▶ START RACE button shows grid before race begins. Fighters drop in shuffled order each cycle. Winner's bettor gets payout × odds.
 
 ---
 
-## CORE MECHANIC
+## 3. UVS Integration (v11.0–v11.7)
 
-- Общий грид из камней. Каждая ячейка = прочность 1–10.
-- Капля со случайной силой 1–10 (игрок видит силу ДО выбора колонки).
-- Капля пробивает камни сверху вниз, теряя силу на каждом.
-- При прохождении через пустые ячейки — диагональный поток к слабым соседям (вес 1/hardness).
-- Пробил русло сверху донизу = победа.
+**Protocol:** UVS v2 — Uncloned Verification Standard
+**SDK:** [@constarik/uvs-sdk v2.0.0](https://github.com/constarik/uvs-sdk) (GitHub Packages)
+**Spec:** [uvs.uncloned.work](https://uvs.uncloned.work)
 
----
+### How it works
 
-## ROTATION (Rule E)
+1. **`uvsStart()`** — on game/round start: generates serverSeed (32 bytes, crypto.getRandomValues), clientSeed (`noisore-{timestamp}`), derives combinedSeed via SHA-512, creates ChaCha20 PRNG
+2. **`gameRng()`** — all game-logic randomness goes through ChaCha20 (grid init, drops, strategies, rotation fills, shuffles). Sound stays on Math.random()
+3. **`uvsRecordMove()`** — EROSION: records `{tick, col, dp, rngPos}`. BET&WET: records `{tick, fighter, col, dp, rngPos}`. Rotations: records `{type:'rotate', rngPos}`
+4. **`uvsEnd(winner)`** — logs serverSeed reveal + SHA-256 verification to console. Guard prevents duplicate calls
+5. **🔒 Verify button** — appears in payout area after win. Shows: serverSeedHash, serverSeed (revealed), clientSeed, RNG calls, moves count, SHA-256 check (✓ VERIFIED)
+6. **Replay → link** — opens verify.html with pre-filled URL params
 
-- Квадратный грид (6×6 или 8×8).
-- После каждого цикла — поворот 90° CW (предсказуемый, не случайный).
-- **Rule E**: если после поворота возникло русло — случайный ряд засыпается свежими камнями (1–10).
-- Вращение УСИЛИВАЕТ скилл: 8×8 с вращением = 77% побед vs random.
+### verify.html — Independent Replay
 
----
+Standalone page at `noisore.uncloned.work/verify.html`. Input: serverSeed, clientSeed, nonce, gridSize, rotate, moves (JSON). Auto-fills from URL params. Auto-replays if all params present.
 
-## BOT STRATEGIES
+**Move formats:**
+- Simple: `[2, 4, 0]` — column indices only (EROSION solo, no bots)
+- Rich: `[[col, dp, rngPos], [-1, 0, rngPos], ...]` — col/dp/rngPos per drop, `col=-1` = rotation event
 
-6 стратегий, реализованы в engine.js (STRATEGY_PICK):
+**Replay process:**
+1. Derive combinedSeed → create ChaCha20
+2. Generate initial grid (same RNG)
+3. For each move: fast-forward RNG to rngPos → simDrop(col, dp) or rotateGridCW()
+4. Check channel after each drop
+5. Display: initial grid, step-by-step log (wash/flow/hit/rotate), final grid with channel highlighted
 
-| Стратегия | Логика |
-|---|---|
-| DEEP | Симулирует каплю по каждой колонке, бьёт где глубже |
-| LIGHT | Слабейшая колонка по сумме |
-| SNIPER | Бьёт где больше нулей (ворует каньоны) |
-| GREEDY | Минимум блокеров на пути |
-| POWER | Сильная→глубоко, слабая→добивать |
-| RANDOM | Случайная колонка |
+### Tutorial Safety
 
----
+`TUT.active` → `uvsStart()` skips UVS. Tutorial uses its own seeded LCG RNG for deterministic demos.
 
-## 500K SIMULATION DATA (% побед, сумма = 100%)
+### Info Badge
 
-### 1v1 Duels (каждая стратегия vs RANDOM)
-
-| Стратегия | Побед | RANDOM |
-|---|---|---|
-| DEEP | 75.8% | 24.2% |
-| LIGHT | 72.9% | 27.1% |
-| SNIPER | 72.7% | 27.3% |
-| GREEDY | 72.1% | 27.9% |
-| POWER | 64.8% | 35.2% |
-
-### 6-Player Tournament (500K раундов)
-
-Order: [DEEP, LIGHT, SNIPER, GREEDY, POWER, RANDOM]
-
-| Config | DEEP | LIGHT | SNIPER | GREEDY | POWER | RANDOM |
-|---|---|---|---|---|---|---|
-| 6×6 OFF | 19.9 | 17.0 | 18.7 | 18.8 | 19.8 | 5.9 |
-| 6×6 ON | 18.8 | **19.2** | 17.9 | 17.8 | 18.1 | 8.2 |
-| 8×8 OFF | 19.8 | 17.5 | 18.8 | 18.8 | 19.7 | 5.5 |
-| 8×8 ON | 19.4 | 18.7 | 18.5 | 18.4 | 18.9 | 6.1 |
-
-**Key finding:** С вращением LIGHT (Scout) становится лучшим на 6×6 (19.2% vs DEEP 18.8%). RANDOM улучшается с ~5.9% до ~8.2%.
+`info-right` shows: `"free play • 🔒 UVS"` or `"1.00 USDT/drop • 🔒 UVS"` depending on mode.
 
 ---
 
-## BET&WET — SPECTATOR BETTING
+## 4. Lobby System (v3.x)
 
-### Fighters (EN/RU)
-
-| EN | RU | Strategy | Noise | Character |
-|---|---|---|---|---|
-| Professor | Профессор | DEEP | 10% | Всё просчитал |
-| Scout | Разведчик | LIGHT | 20% | Ищет слабое место |
-| Crow | Ворона | SNIPER | 25% | Ворует чужое |
-| Mole | Крот | GREEDY | 25% | Роет где тоньше |
-| Colonel | Полковник | POWER | 15% | Сильным — в глубь |
-| Daisy | Фрося | RANDOM | 40% | Куда бог пошлёт |
-
-### Noise Model
-
-Каждый боец имеет индивидуальный noise (0–50):
-- **Для всех кроме Daisy:** noise% ходов играет как RANDOM (Daisy)
-- **Для Daisy:** noise% ходов играет как случайная умная стратегия (DEEP)
-- Professor (10%) почти чистый гений. Daisy (40%) — 40% ходов играет как Professor.
-
-### Odds Calculation
-
-1. Из чистых 500K данных (BET_DATA) берём % побед для текущего грида/вращения
-2. Вычисляем effective%: `eff = pure × (1 - noise/100) + daisyPure × (noise/100)` (для Daisy — наоборот: `avgOthers × noise`)
-3. Нормируем до 100%
-4. Odds = 100 / eff% / OVERROUND
-5. OVERROUND = 1.05 (5% маржа)
-
-Коэффициенты пересчитываются динамически при смене грида или вращения.
-
-### Multi-Bet System
-
-- Десктоп: click = +1 ставка, right-click = −1 ставка
-- Мобиль: tap = +1 ставка, CLEAR BETS для сброса
-- Ставки хранятся как абсолютные суммы в USDT (не количество кликов)
-- Множественные ставки на одного/нескольких бойцов
-- Выплата: ставка на победителя × odds
-
-### Production Model: Пари-мутюэль (тотализатор)
-
-Демо использует фиксированные коэффициенты из симуляций. В production:
-- Все зрители ставят на бойцов
-- Общий пул формируется из всех ставок
-- Коэффициенты = пул / сумма ставок на победителя
-- Коэффициенты меняются в реальном времени
-
-### Totalizator Verification
-
-`betwet_verify.py` — скрипт верификации прибыльности:
-- 15 тестов: 6 стратегий ставок × разные noise × разные overround
-- **Результат: ВСЕ PROFITABLE при 5% overround**
-- House edge: 0.5–10% в зависимости от стратегии ставок
-- Запуск: `verify_all.bat`
+Configurable via UI:
+- **Mode:** EROSION / SOIRON / BET&WET
+- **Grid size:** 4–10 (square)
+- **Rotation:** on/off
+- **Stake:** 0 (free) / 0.5 / 1 / 2 / 5 USDT per drop
+- **Bots:** 0–5 (SOIRON)
+- **Hints:** strategy names shown
 
 ---
 
-## PAYMENT MODEL
+## 5. Tutorial System (v10.x)
 
-### Per Drop (покер):
-- 1 drop = X USDT (0.10 / 0.50 / 1.00 / 5.00)
-- 95% → в пул, 5% → рейк
-- Баланс = депозит (пополняется заранее)
+Three tutorials, one per mode. Uses real engine with seeded LCG RNG for deterministic playthrough.
 
-### Per Round (турнир):
-- Buy-in фиксированный, капли бесплатные
+**EROSION tutorial** (seed 17, 3 turns): preset grid → col2 → rotate → col6 → rotate → col5 → channel!
 
-### Bet&Wet:
-- Bet size: 0.10 / 0.50 / 1.00 / 5.00 USDT
-- 5% overround (маржа в коэффициентах)
+**SOIRON tutorial** (seed 9, 4 players, 3 turns): YOU + 3 bots, real PvP round mechanics.
+
+**BET&WET tutorial** (seed 42, 6 steps): hides all lobby controls, guides through bet placement (tap/right-click-remove), then PLAY with real race.
 
 ---
 
-## LOBBY SETTINGS
+## 6. Fighter System (BET&WET)
 
-- **Mode:** EROSION / NOISORE / Bet&Wet
-- **Grid:** 6×6 / 8×8
-- **Rotation:** ON / OFF (Rule E)
-- **Stake:** FREE / 0.10 / 0.50 / 1.00 / 5.00
-- **Opponents:** 1–11 ботов (NOISORE)
-- **Fighters:** Professor / Scout / Crow / Mole / Colonel / Daisy (Bet&Wet)
+6 fighters per session, randomly selected skin pack. Each fighter has:
+- **Strategy:** DEEP, LIGHT, SNIPER, GREEDY, POWER, RANDOM
+- **Noise:** 20–50% (strategy switch probability)
+- **Odds:** calculated from strategy strength
+
+Strategies ordered by strength: DEEP > LIGHT > SNIPER > GREEDY > POWER > RANDOM.
 
 ---
 
-## LIVE ASSETS
+## 7. Files & Deployment
 
 | Asset | URL |
-|---|---|
-| Demo desktop | https://noisore.uncloned.work |
-| Demo mobile | https://noisore.uncloned.work/mobile.html |
-| Erosion | https://noisore.uncloned.work/erosion.html |
-| Pitch EN | https://noisore.uncloned.work/pitch.html |
-| Pitch RU | https://noisore.uncloned.work/russlo_pitch.html |
-| GitHub | https://github.com/constarik/Noisore |
-| Medium | https://medium.com/@constr |
-| LinkedIn | https://www.linkedin.com/in/constarik |
-| Uncloned Math | https://uncloned.work |
+|-------|-----|
+| Demo desktop | noisore.uncloned.work |
+| Demo mobile | noisore.uncloned.work/mobile.html |
+| Verifier | noisore.uncloned.work/verify.html |
+| UVS landing | uvs.uncloned.work |
+| UVS SDK | github.com/constarik/uvs-sdk |
+| GitHub | github.com/constarik/Noisore |
+
+**Deployment:** GitHub Pages (auto-deploy on push). No server required for current version.
 
 ---
 
-## TOOLS
+## 8. Version History
 
-| File | Purpose |
-|---|---|
-| `engine.js` | Grid physics, strategies, rotation |
-| `game.js` | All game logic (lobby, play, bet) |
-| `noisore_sim.py` | Tournament/duel simulator, 500K+ rounds |
-| `betwet_verify.py` | Totalizator profitability verifier |
-| `verify_all.bat` | Full verification batch (15 tests) |
-
-### Fighter Skins (max 9 chars per name)
-
-**RU packs:**
-
-| Strategy | Классика | Двор | Школа | Зона | Офис | Армия |
-|---|---|---|---|---|---|---|
-| DEEP | Профессор | Мозг | Отличник | Адвокат | Аналитик | Штабной |
-| LIGHT | Разведчик | Шустрый | Подлиза | Шестёрка | Стажёр | Дозорный |
-| SNIPER | Ворона | Щипач | Хулиган | Домушник | Ревизор | Снайпер |
-| GREEDY | Крот | Крыса | Жадина | Барыга | Бухгалтер | Сапёр |
-| POWER | Полковник | Бык | Физрук | Смотрящий | Директор | Сержант |
-| RANDOM | Фрося | Шалопай | Двоечник | Первоход | Новичок | Салага |
-
-**EN packs:**
-
-| Strategy | Classic | Street | Casino | Pirate | Sport | Spy |
-|---|---|---|---|---|---|---|
-| DEEP | Professor | Brains | Counter | Navigator | Coach | Analyst |
-| LIGHT | Scout | Quickie | Dealer | Lookout | Sprinter | Mole |
-| SNIPER | Crow | Thief | Hustler | Gunner | Striker | Hitman |
-| GREEDY | Mole | Rat | Shark | Digger | Keeper | Hoarder |
-| POWER | Colonel | Bull | Bouncer | Captain | Enforcer | Commando |
-| RANDOM | Daisy | Rookie | Lucky | Parrot | Benchman | Decoy |
+| Version | What |
+|---------|------|
+| v1–v8 | Core engine, lobby, modes, beach scene, mobile, sound |
+| v9.2 | fitGrid viewport fix |
+| v9.3–v10.9 | Tutorial system (3 modes), PLAY disabled without bets, player order in BET&WET |
+| v11.0 | UVS integration: gameRng() → ChaCha20, uvs.browser.js |
+| v11.1 | 🔒 Verify button with seed reveal + SHA-256 check |
+| v11.2 | Badge in all modes, uvsEnd guard |
+| v11.3 | BET&WET moves recording |
+| v11.4 | verify.html — independent replay page |
+| v11.5 | rngPos sync — fast-forward RNG for bot strategies |
+| v11.6 | ▶ START RACE button in BET&WET |
+| v11.7 | Rotation events in moves log — final grid matches |
 
 ---
 
-## CURRENT VERSION: v5.8
+## 9. Roadmap
 
-- engine.js: all 6 strategies (STRATEGY_PICK dict)
-- game.js: shared logic, all 3 modes, multi-bet, noise model, overround
-- index.html v5.8: desktop, Bet&Wet with fighters and dynamic odds
-- mobile.html v5.8m: touch, fullscreen, CLEAR BETS, two-column players
-- 500K simulation data for all 4 grid configs confirmed
-- 5% overround, per-fighter noise, weighted odds
-- Totalizator verified profitable across all bet strategies
-
----
-
-## COMPLETED
-
-- [x] engine.js shared core with versioning + all 6 strategies
-- [x] game.js extracted — zero JS duplication
-- [x] Lobby v5.8 (mode/grid/rotation/stake/opponents/fighters)
-- [x] Rotation (Rule E, 90° CW, 5s or click)
-- [x] Bet&Wet: spectator mode, multi-bet, overround, fighter names, noise model
-- [x] mobile.html: touch bets, fullscreen, CLEAR BETS, two-column players
-- [x] 500K simulations for all 4 configs
-- [x] Python simulator (noisore_sim.py) with noise support
-- [x] Totalizator verifier (betwet_verify.py + verify_all.bat)
-- [x] Both pitches updated (EN + RU)
-- [x] All contrast fixes
-- [x] Power tags: visible on channel (black+white glow)
-
-## PENDING
-
-- [ ] Telegram Mini App интеграция
-- [ ] Pari-mutuel (тотализатор) production model — live odds from all bets
-- [ ] Medium статья 7 (Erosion → Noisore story)
-- [ ] Reddit r/WebGames, Itch.io
-- [ ] DM Martin Zakovec (GAMEE CEO) — when demo is polished
-- [ ] Wizard of Vegas registration
-- [ ] Fighter skins (alternative name packs: Street, School, Prison)
-- [ ] Update PROJECT.md with latest simulation data periodically
-
----
-
-## CONTACT
-
-constr@gmail.com · @constrik (Telegram) · Uncloned Math
+- [ ] Multiplayer SOIRON — server on Render (Move Sync G=1)
+- [ ] Audit Trail stateHash per move
+- [ ] Medium article #7 — UVS 2.0
+- [ ] npm publish @uncloned/uvs (pending 2FA)
+- [ ] RU skin packs
+- [ ] Ambient surf sound from beach.js
+- [ ] Mobile testing

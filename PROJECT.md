@@ -170,4 +170,3 @@ Strategies ordered by strength: DEEP > LIGHT > SNIPER > GREEDY > POWER > RANDOM.
 - [ ] npm publish @uncloned/uvs (pending 2FA)
 - [ ] RU skin packs
 - [ ] Ambient surf sound from beach.js
-- [ ] Mobile testing

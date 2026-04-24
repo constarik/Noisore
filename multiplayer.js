@@ -378,7 +378,13 @@ function mpGameEnd(msg) {
     (msg.uvs.verified ? '\u2713 VERIFIED' : '\u2717 MISMATCH') + '</span></div>' +
     '</div>' +
     '<button onclick="mpBackToLobby()" style="margin-top:10px;background:' + winColor + ';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">LOBBY</button>' +
+    ' <button onclick="mpRematch()" style="margin-top:10px;background:none;border:1px solid #f59e0b;color:#f59e0b;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border-radius:8px;cursor:pointer;letter-spacing:2px">REMATCH</button>' +
     '</div>';
+}
+
+function mpRematch() {
+  mpSend({ type: 'rematch' });
+  document.getElementById('payout-area').innerHTML = '<span style="color:#f59e0b">Starting rematch...</span>';
 }
 
 function mpBackToLobby() {

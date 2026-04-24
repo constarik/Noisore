@@ -325,6 +325,7 @@ function mpGameEnd(msg) {
 function mpBackToLobby() {
   MP.active = false;
   if (MP.ws) { MP.ws.close(); MP.ws = null; }
+  MP.connected = false;
   MP.roomId = null; MP.playerId = null; MP.isHost = false; MP.players = [];
   _uvsRng = null; UVS_SESSION = null;
   sndPlay('click'); unfitGrid();
@@ -332,6 +333,9 @@ function mpBackToLobby() {
   document.getElementById('lobby').style.display = 'block';
   document.body.style.overflow = '';
   window.scrollTo(0, 0); animating = false;
+  // Reset MP lobby UI
+  var mpEl = document.getElementById('mp-lobby');
+  if (mpEl) mpShowMultiplayerLobby();
   // Restore normal column button handlers
   renderColBtns();
 }

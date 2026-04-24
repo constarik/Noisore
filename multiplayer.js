@@ -198,13 +198,22 @@ function mpGameStart(msg) {
   document.getElementById('game').style.display = 'block';
   document.body.style.overflow = 'hidden';
   document.getElementById('game-mode-label').textContent = 'SOIRON MP';
-  document.getElementById('grid').style.gridTemplateColumns = 'repeat(' + COLS + ',1fr)';
-  document.getElementById('col-btns').style.gridTemplateColumns = 'repeat(' + COLS + ',1fr)';
+  document.getElementById('col-btns').style.display = 'grid';
+  document.getElementById('pool-area-wrap').style.display = 'flex';
+  // Fixed cell size for multiplayer (fitGrid skips on desktop)
+  var cellSize = Math.min(Math.floor((window.innerWidth * 0.7) / COLS), 60);
+  document.getElementById('grid').style.gridTemplateColumns = 'repeat(' + COLS + ',' + cellSize + 'px)';
+  document.getElementById('col-btns').style.gridTemplateColumns = 'repeat(' + COLS + ',' + cellSize + 'px)';
   balance = 100; pool = 0; dropNum = 0; roundNum = 1; animating = false;
   document.getElementById('info-left').textContent = COLS + '\u00d7' + ROWS + (ROTATE ? ' rotate' : '');
   document.getElementById('info-right').textContent = '\uD83D\uDD12 UVS 2.0 MP';
   updateUI(); renderGrid(); renderColBtns();
-  setTimeout(fitGrid, 50); setTimeout(fitGrid, 300);
+  // Apply cell sizing
+  var cells = document.querySelectorAll('.cell');
+  for (var i = 0; i < cells.length; i++) { cells[i].style.width = cellSize + 'px'; cells[i].style.height = cellSize + 'px'; }
+  var colBtns = document.querySelectorAll('.col-btn');
+  for (var j = 0; j < colBtns.length; j++) { colBtns[j].style.width = cellSize + 'px'; }
+  setTimeout(fitGrid, 100);
   setColBtnsDisabled(true);
   document.getElementById('payout-area').innerHTML = '<span style="color:#888">waiting for first tick...</span>';
   // Show players

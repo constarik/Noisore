@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.11 shared game logic
+// game.js — NOISORE v11.12 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -156,7 +156,7 @@ function fitGrid(){
         var cellW=Math.floor((gridW-(COLS-1)*gap)/COLS);
         var cell=Math.min(cellH,cellW);
         if(cell<20)cell=20;
-        if(cell>80)cell=80;
+        if(cell>80)return;
         var cells=document.querySelectorAll('.cell');
         for(var i=0;i<cells.length;i++){cells[i].style.height=cell+'px';cells[i].style.width=cell+'px';}
         document.getElementById('grid').style.gridTemplateColumns='repeat('+COLS+','+cell+'px)';

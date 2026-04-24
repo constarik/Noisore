@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.7 shared game logic
+// game.js — NOISORE v11.8 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -107,6 +107,8 @@ function setMode(m){
     if(freeBtn)freeBtn.style.display=m==='bet'?'none':'';
     if(m==='bet'&&CFG.stake===0){setStake(1);}
     if(m==='bet'){randomizeFighterNames();}
+    var mpEl=document.getElementById('mp-lobby');
+    if(mpEl){if(m==='pvp'){mpEl.style.display='block';mpShowMultiplayerLobby();}else{mpEl.style.display='none';}}
     var pb=document.querySelector('.play-btn');
     if(pb){if(m!=='bet'){pb.style.opacity='1';pb.style.pointerEvents='auto';}else{var t=0;for(var k in CFG.bets)t+=CFG.bets[k];pb.style.opacity=t>0?'1':'0.3';pb.style.pointerEvents=t>0?'auto':'none';}}
 }

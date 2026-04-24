@@ -48,8 +48,8 @@ function mpSend(msg) {
 
 // --- Message Handler ---
 function mpHandleMessage(msg) {
-  // Queue tick messages during animation
-  if (MP.processing && (msg.type === 'tick_start' || msg.type === 'tick_result')) {
+  // Queue tick and game_end messages during animation
+  if (MP.processing && (msg.type === 'tick_start' || msg.type === 'tick_result' || msg.type === 'game_end')) {
     MP.msgQueue.push(msg);
     return;
   }
@@ -351,6 +351,7 @@ async function mpTickResult(msg) {
       }
     });
     sndPlay('channel');
+    await sleep(2000);
   }
   animating = false;
 }

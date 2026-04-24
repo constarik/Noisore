@@ -15,7 +15,11 @@ var MP = {
   dropPower: 0,
   moveSent: false,
   SERVER: 'wss://registrar-server.onrender.com',
-  active: false
+  active: false,
+  countdown: 0,
+  countdownTimer: null,
+  processing: false,
+  msgQueue: []
 };
 
 // --- WebSocket ---
@@ -44,6 +48,22 @@ function mpSend(msg) {
 
 // --- Message Handler ---
 function mpHandleMessage(msg) {
+  // Queue tick messages during animation
+  if (MP.processing && (msg.type === 'tick_start' || msg.type === 'tick_result')) {
+    MP.msgQueue.push(msg);
+    return;
+  }
+  mpProcessMessage(msg);
+}
+
+async function mpProcessQueue() {
+  while (MP.msgQueue.length > 0) {
+    var next = MP.msgQueue.shift();
+    await mpProcessMessage(next);
+  }
+}
+
+async function mpProcessMessage(msg) {
   console.log('[MP]', msg.type, msg);
   switch (msg.type) {
     case 'room_created':
@@ -73,7 +93,10 @@ function mpHandleMessage(msg) {
       mpMoveLocked(msg);
       break;
     case 'tick_result':
-      mpTickResult(msg);
+      MP.processing = true;
+      await mpTickResult(msg);
+      MP.processing = false;
+      mpProcessQueue();
       break;
     case 'game_end':
       mpGameEnd(msg);

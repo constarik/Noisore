@@ -118,7 +118,7 @@ function mpShowMultiplayerLobby() {
   el.innerHTML =
     '<div style="text-align:center;margin:10px 0">' +
     '<div style="color:#f59e0b;font-family:Archivo Black,sans-serif;font-size:14px;margin-bottom:10px">MULTIPLAYER</div>' +
-    '<input id="mp-name" placeholder="Your name" value="Player" style="background:#0a0a14;border:1px solid #2a2a3a;color:#d4d4d8;padding:6px 10px;border-radius:6px;font-size:12px;width:120px;text-align:center;margin-bottom:8px"><br>' +
+    '<input id="mp-name" placeholder="Your name" style="background:#0a0a14;border:1px solid #2a2a3a;color:#d4d4d8;padding:6px 10px;border-radius:6px;font-size:12px;width:120px;text-align:center;margin-bottom:8px"><br>' +
     '<button onclick="mpCreateRoom()" style="background:#f59e0b;color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:11px;padding:8px 20px;border:none;border-radius:6px;cursor:pointer;margin:4px">CREATE ROOM</button>' +
     '<button onclick="mpListRooms()" style="background:none;border:1px solid #f59e0b;color:#f59e0b;font-family:Archivo Black,sans-serif;font-size:11px;padding:8px 20px;border-radius:6px;cursor:pointer;margin:4px">FIND ROOMS</button><br>' +
     '<div style="margin-top:8px"><input id="mp-room-code" placeholder="Room code" style="background:#0a0a14;border:1px solid #2a2a3a;color:#d4d4d8;padding:6px 10px;border-radius:6px;font-size:12px;width:80px;text-align:center">' +
@@ -305,15 +305,16 @@ async function mpTickResult(msg) {
     if (!r.skip && r.path) {
       for (var p = 0; p < r.path.length; p++) {
         var step = r.path[p];
-        var cellEl = document.querySelector('.cell[data-row="' + step.row + '"][data-col="' + step.col + '"]');
+        var cellEl = document.getElementById('cell-' + step.row + '-' + step.col);
         if (cellEl) {
           if (step.action === 'wash') {
             cellEl.style.background = r.color || '#38bdf8';
-            cellEl.style.color = '#000';
+            cellEl.style.color = '#fff';
+            cellEl.style.filter = 'none';
+            cellEl.style.clipPath = 'none';
             cellEl.textContent = '0';
           } else if (step.action === 'flow') {
-            cellEl.style.background = r.color || '#38bdf8';
-            cellEl.style.opacity = '0.5';
+            cellEl.style.boxShadow = '0 0 8px ' + (r.color || '#38bdf8');
           } else if (step.action === 'hit') {
             cellEl.style.border = '2px solid ' + (r.color || '#f66');
             cellEl.textContent = step.now;
@@ -339,17 +340,19 @@ async function mpTickResult(msg) {
   renderGrid();
 
   if (msg.winner) {
-    // Highlight channel
+    // Highlight channel cells
     var ch = msg.winner.channel;
-    var cells = document.querySelectorAll('#grid .cell');
-    cells.forEach(function(cell) {
-      var r2 = cell.dataset.row, c2 = cell.dataset.col;
-      if (ch[r2 + '-' + c2]) {
-        cell.style.background = '#22c55e';
-        cell.style.color = '#000';
-        cell.style.border = '2px solid #22c55e';
+    for (var key in ch) {
+      var parts = key.split('-');
+      var cellEl = document.getElementById('cell-' + parts[0] + '-' + parts[1]);
+      if (cellEl) {
+        cellEl.style.background = '#22c55e';
+        cellEl.style.color = '#000';
+        cellEl.style.border = '2px solid #22c55e';
+        cellEl.style.filter = 'none';
+        cellEl.style.clipPath = 'none';
       }
-    });
+    }
     sndPlay('channel');
     await sleep(2000);
   }

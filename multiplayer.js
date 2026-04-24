@@ -160,8 +160,10 @@ function mpShowWaiting() {
 
 function mpUpdateLobby() {
   var plEl = document.getElementById('mp-players');
-  if (!plEl) { if (MP.roomId) mpShowWaiting(); plEl = document.getElementById('mp-players'); }
-  if (!plEl) return;
+  if (!plEl) {
+    if (MP.roomId) mpShowWaiting();
+    return; // mpShowWaiting calls mpUpdateLobby itself
+  }
   var html = '';
   MP.players.forEach(function(p) {
     html += '<div style="color:' + (p.color || '#d4d4d8') + ';font-size:12px;margin:2px 0">' +

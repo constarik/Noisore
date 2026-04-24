@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.13 shared game logic
+// game.js — NOISORE v11.14 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -252,7 +252,7 @@ function startGame(){
         document.getElementById('payout-area').innerHTML='<div style="text-align:center;margin-top:8px"><button onclick="betRound()" style="background:#f59e0b;color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:16px;padding:12px 40px;border:none;border-radius:8px;cursor:pointer;letter-spacing:3px;animation:pulse 1.5s infinite">\u25B6 START RACE</button></div>';
     }
 }
-function backToLobby(){sndPlay('click');_uvsRng=null;UVS_SESSION=null;if(MP&&MP.ws){MP.ws.close();MP.ws=null;MP.connected=false;MP.roomId=null;MP.playerId=null;MP.isHost=false;MP.players=[];MP.active=false;}unfitGrid();document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';document.body.style.overflow='';window.scrollTo(0,0);animating=false;}
+function backToLobby(){sndPlay('click');_uvsRng=null;UVS_SESSION=null;if(typeof MP!=='undefined'&&MP.ws){MP.ws.close();MP.ws=null;MP.connected=false;MP.roomId=null;MP.playerId=null;MP.isHost=false;MP.players=[];MP.active=false;}unfitGrid();document.getElementById('game').style.display='none';document.getElementById('lobby').style.display='block';document.body.style.overflow='';window.scrollTo(0,0);animating=false;if(typeof mpShowMultiplayerLobby==='function'&&CFG.mode==='pvp'){var mpEl=document.getElementById('mp-lobby');if(mpEl){mpEl.style.display='block';mpShowMultiplayerLobby();}}}
 // === GAME STATE ===
 var COLS=6,ROWS=6,MAX_H=10,MAX_DROP=10,DROP_COST=0,POOL_RATE=0.95,ANIM_DELAY=200;
 var ROTATE=true,BOTS=[];

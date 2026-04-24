@@ -197,13 +197,14 @@ function mpGameStart(msg) {
   document.getElementById('lobby').style.display = 'none';
   document.getElementById('game').style.display = 'block';
   document.body.style.overflow = 'hidden';
-  document.getElementById('game-title').textContent = 'SOIRON MP';
+  document.getElementById('game-mode-label').textContent = 'SOIRON MP';
   document.getElementById('grid').style.gridTemplateColumns = 'repeat(' + COLS + ',1fr)';
   document.getElementById('col-btns').style.gridTemplateColumns = 'repeat(' + COLS + ',1fr)';
   balance = 100; pool = 0; dropNum = 0; roundNum = 1; animating = false;
   document.getElementById('info-left').textContent = COLS + '\u00d7' + ROWS + (ROTATE ? ' rotate' : '');
   document.getElementById('info-right').textContent = '\uD83D\uDD12 UVS 2.0 MP';
-  updateUI(); renderGrid(); renderColBtns(); fitGrid();
+  updateUI(); renderGrid(); renderColBtns();
+  setTimeout(fitGrid, 50); setTimeout(fitGrid, 300);
   setColBtnsDisabled(true);
   document.getElementById('payout-area').innerHTML = '<span style="color:#888">waiting for first tick...</span>';
   // Show players

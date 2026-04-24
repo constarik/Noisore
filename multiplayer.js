@@ -370,6 +370,18 @@ function mpGameEnd(msg) {
   var winColor = isWinner ? '#22c55e' : '#f66';
   var label = isWinner ? 'YOU WIN!' : msg.winner.name + ' WINS';
 
+  // Build verify.html link from UVS data
+  var moveFull = msg.uvs.moves.map(function(m) {
+    if (m.type === 'rotate') return [-1, 0, m.rngPos];
+    return [m.col, m.dp, m.rngPos];
+  });
+  var verifyUrl = 'verify.html?ss=' + msg.uvs.serverSeed +
+    '&cs=' + encodeURIComponent(msg.uvs.clientSeed) +
+    '&n=' + msg.uvs.nonce +
+    '&g=' + COLS +
+    '&rot=' + (ROTATE ? 1 : 0) +
+    '&m=' + encodeURIComponent(JSON.stringify(moveFull));
+
   document.getElementById('payout-area').innerHTML =
     '<div style="margin-top:4px">' +
     '<span style="font-family:Archivo Black,sans-serif;font-size:18px;color:' + winColor + '">' + label + '</span><br>' +
@@ -381,6 +393,7 @@ function mpGameEnd(msg) {
     '<div style="margin-top:4px"><span style="color:#888">RNG calls:</span> <span style="color:#d4d4d8">' + msg.uvs.rngCalls + '</span></div>' +
     '<div style="margin-top:4px"><span style="color:#888">SHA-256:</span> <span style="color:' + (msg.uvs.verified ? '#22c55e' : '#f66') + '">' +
     (msg.uvs.verified ? '\u2713 VERIFIED' : '\u2717 MISMATCH') + '</span></div>' +
+    '<div style="margin-top:6px;text-align:center"><a href="' + verifyUrl + '" target="_blank" style="color:#38bdf8;font-size:10px">Replay \u2192 verify.html</a></div>' +
     '</div>' +
     '<button onclick="mpBackToLobby()" style="margin-top:10px;background:' + winColor + ';color:#0a0a0f;font-family:Archivo Black,sans-serif;font-size:13px;padding:8px 28px;border:none;border-radius:8px;cursor:pointer;letter-spacing:2px">LOBBY</button>' +
     mpRematchUI() +

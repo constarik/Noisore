@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.21 shared game logic
+// game.js — NOISORE v11.22 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[

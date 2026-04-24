@@ -52,9 +52,11 @@ function mpHandleMessage(msg) {
       break;
     case 'room_joined':
       MP.roomId = msg.roomId; MP.playerId = msg.playerId;
+      mpShowWaiting();
       break;
     case 'lobby':
       MP.players = msg.players;
+      if (msg.roomId && !MP.roomId) MP.roomId = msg.roomId;
       MP.isHost = msg.players.some(function(p) { return p.id === MP.playerId && p.isHost; });
       mpUpdateLobby();
       break;
@@ -158,6 +160,7 @@ function mpShowWaiting() {
 
 function mpUpdateLobby() {
   var plEl = document.getElementById('mp-players');
+  if (!plEl) { if (MP.roomId) mpShowWaiting(); plEl = document.getElementById('mp-players'); }
   if (!plEl) return;
   var html = '';
   MP.players.forEach(function(p) {

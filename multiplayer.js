@@ -228,9 +228,15 @@ function mpTickStart(msg) {
   currentDrop = msg.dropPower;
   rollDropDisplay();
   setColBtnsDisabled(false);
-  document.getElementById('payout-area').innerHTML =
-    '<span style="color:#f59e0b">Tick ' + msg.tick + '</span> — <span style="color:#d4d4d8">pick your column!</span>' +
-    '<div style="color:#555;font-size:10px;margin-top:4px">10s timeout</div>';
+  // Countdown timer
+  MP.countdown = 10;
+  if (MP.countdownTimer) clearInterval(MP.countdownTimer);
+  mpUpdateCountdown();
+  MP.countdownTimer = setInterval(function() {
+    MP.countdown--;
+    if (MP.countdown <= 0) { clearInterval(MP.countdownTimer); MP.countdownTimer = null; }
+    mpUpdateCountdown();
+  }, 1000);
   // Override column button handlers for MP
   for (var c = 0; c < COLS; c++) {
     (function(col) {
@@ -242,14 +248,24 @@ function mpTickStart(msg) {
   }
 }
 
+function mpUpdateCountdown() {
+  if (MP.moveSent) return;
+  var color = MP.countdown <= 3 ? '#f66' : '#f59e0b';
+  document.getElementById('payout-area').innerHTML =
+    '<span style="color:' + color + ';font-family:Archivo Black,sans-serif;font-size:16px">Tick ' + MP.tick + '</span>' +
+    '<span style="color:#d4d4d8;font-size:13px"> \u2014 pick your column!</span>' +
+    '<div style="color:' + color + ';font-size:24px;font-family:Archivo Black,sans-serif;margin-top:4px">' + MP.countdown + '</div>';
+}
+
 function mpPickColumn(col) {
   if (MP.moveSent) return;
   MP.moveSent = true;
+  if (MP.countdownTimer) { clearInterval(MP.countdownTimer); MP.countdownTimer = null; }
   mpSend({ type: 'move', col: col });
   setColBtnsDisabled(true);
   document.getElementById('payout-area').innerHTML =
-    '<span style="color:#22c55e">\u2713 Column ' + (col + 1) + ' locked</span>' +
-    '<div style="color:#555;font-size:10px;margin-top:4px">waiting for others...</div>';
+    '<span style="color:#22c55e;font-family:Archivo Black,sans-serif;font-size:16px">\u2713 Column ' + (col + 1) + '</span>' +
+    '<div style="color:#555;font-size:11px;margin-top:4px">waiting for others...</div>';
 }
 
 function mpMoveLocked(msg) {
@@ -259,28 +275,52 @@ function mpMoveLocked(msg) {
 }
 
 async function mpTickResult(msg) {
-  // Update grid from server (authoritative)
-  grid = msg.grid;
+  if (MP.countdownTimer) { clearInterval(MP.countdownTimer); MP.countdownTimer = null; }
   animating = true;
   setColBtnsDisabled(true);
 
-  // Animate each player's drop
+  // Show each player's drop sequentially
   for (var i = 0; i < msg.results.length; i++) {
     var r = msg.results[i];
     var label = r.name + (r.skip ? ' (skip)' : '');
     document.getElementById('payout-area').innerHTML =
-      '<span style="color:' + r.color + '">' + label + '</span> \u2192 col ' + (r.col + 1) + ' dp=' + r.dp;
-    // Brief pause to show each drop
+      '<span style="color:' + r.color + ';font-family:Archivo Black,sans-serif;font-size:14px">' + label + '</span>' +
+      '<span style="color:#d4d4d8;font-size:12px"> \u2192 col ' + (r.col + 1) + ' dp=' + r.dp + '</span>';
+
+    // Animate the drop on the current grid
+    if (!r.skip && r.path) {
+      for (var p = 0; p < r.path.length; p++) {
+        var step = r.path[p];
+        var cellEl = document.querySelector('.cell[data-row="' + step.row + '"][data-col="' + step.col + '"]');
+        if (cellEl) {
+          if (step.action === 'wash') {
+            cellEl.style.background = r.color || '#38bdf8';
+            cellEl.style.color = '#000';
+            cellEl.textContent = '0';
+          } else if (step.action === 'flow') {
+            cellEl.style.background = r.color || '#38bdf8';
+            cellEl.style.opacity = '0.5';
+          } else if (step.action === 'hit') {
+            cellEl.style.border = '2px solid ' + (r.color || '#f66');
+            cellEl.textContent = step.now;
+          }
+        }
+        await sleep(150);
+      }
+    }
+    await sleep(800);
+  }
+
+  // Update grid from server (authoritative state)
+  grid = msg.grid;
+  dropNum += msg.results.filter(function(r) { return !r.skip; }).length;
+
+  if (msg.rotated) {
+    document.getElementById('payout-area').innerHTML = '<span style="color:#fb923c;font-family:Archivo Black,sans-serif;font-size:14px">\u21bb Rotation</span>';
     await sleep(600);
   }
 
-  if (msg.rotated) {
-    document.getElementById('payout-area').innerHTML = '<span style="color:#fb923c">\u21bb rotated</span>';
-    await sleep(400);
-  }
-
   // Render final grid state from server
-  dropNum += msg.results.length;
   updateUI();
   renderGrid();
 
@@ -289,13 +329,14 @@ async function mpTickResult(msg) {
     var ch = msg.winner.channel;
     var cells = document.querySelectorAll('#grid .cell');
     cells.forEach(function(cell) {
-      var r = cell.dataset.row, c = cell.dataset.col;
-      if (ch[r + '-' + c]) {
+      var r2 = cell.dataset.row, c2 = cell.dataset.col;
+      if (ch[r2 + '-' + c2]) {
         cell.style.background = '#22c55e';
         cell.style.color = '#000';
         cell.style.border = '2px solid #22c55e';
       }
     });
+    sndPlay('channel');
   }
   animating = false;
 }

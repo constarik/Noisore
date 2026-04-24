@@ -260,15 +260,6 @@ function mpTickStart(msg) {
     if (MP.countdown <= 0) { clearInterval(MP.countdownTimer); MP.countdownTimer = null; }
     mpUpdateCountdown();
   }, 1000);
-  // Override column button handlers for MP
-  for (var c = 0; c < COLS; c++) {
-    (function(col) {
-      var btn = document.getElementById('col-btn-' + col);
-      if (btn) {
-        btn.onclick = function() { mpPickColumn(col); };
-      }
-    })(c);
-  }
 }
 
 function mpUpdateCountdown() {

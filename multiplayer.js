@@ -341,8 +341,11 @@ function mpBackToLobby() {
 }
 
 function rollDropDisplay() {
-  var el = document.getElementById('drop-display');
+  var el = document.getElementById('drop-power');
   if (el) {
-    el.querySelector('.drop-val').textContent = currentDrop;
+    el.textContent = currentDrop;
+    el.className = 'drop-power-value dp' + currentDrop;
   }
+  var who = document.getElementById('drop-who');
+  if (who) { who.innerHTML = 'YOUR<br>DROP'; who.style.color = '#d4d4d8'; }
 }

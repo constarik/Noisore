@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.24 shared game logic
+// game.js — NOISORE v11.25 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -187,11 +187,12 @@ function uvsEnd(winner){
     console.log('[UVS] Verify: SHA-256(serverSeed) ===',UVS.sha256(UVS_SESSION.serverSeed),'===',UVS_SESSION.serverSeedHash,'?',UVS.sha256(UVS_SESSION.serverSeed)===UVS_SESSION.serverSeedHash);
     _uvsRng=null;
 }
-function uvsRecordMove(col){
+function uvsRecordMove(col,dp){
     if(!UVS_SESSION)return;
+    if(typeof dp==='undefined')dp=currentDrop;
     var gh='';for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++)gh+=grid[r][c]+',';
-    UVS_SESSION.moves.push({tick:UVS_SESSION.moves.length,col:col,dp:currentDrop,rngPos:_uvsRng?_uvsRng.calls:0});
-    console.log('[UVS] move col='+col+' dp='+currentDrop+' rngPos='+(_uvsRng?_uvsRng.calls:0)+' grid='+gh.substring(0,20)+'..');
+    UVS_SESSION.moves.push({tick:UVS_SESSION.moves.length,col:col,dp:dp,rngPos:_uvsRng?_uvsRng.calls:0});
+    console.log('[UVS] move col='+col+' dp='+dp+' rngPos='+(_uvsRng?_uvsRng.calls:0)+' grid='+gh.substring(0,20)+'..');
 }
 function uvsShowVerify(){
     if(!UVS_SESSION)return;
@@ -415,9 +416,9 @@ function botPickCol(bot,dp){
 }
 async function playDrop(startCol){
     if(animating)return;animating=true;setColBtnsDisabled(true);
-    uvsRecordMove(startCol);
     if(DROP_COST>0&&balance<DROP_COST){document.getElementById('payout-area').innerHTML='<span style="color:#f66">insufficient balance</span>';animating=false;setColBtnsDisabled(false);return;}
     if(BOTS.length===0){
+        uvsRecordMove(startCol);
         clearPowerTags();
         if(DROP_COST>0)balance-=DROP_COST;
         pool+=DROP_COST*POOL_RATE;dropNum++;updateUI();
@@ -437,6 +438,7 @@ async function playDrop(startCol){
         playerSpent[p.name]+=DROP_COST;
         if(p.isPlayer&&DROP_COST>0)balance-=DROP_COST;
         pool+=DROP_COST*POOL_RATE;dropNum++;updateUI();
+        uvsRecordMove(p.col,p.dp);
         var rem=await animateDrop(p.col,p.dp,p.name,p.color,t);
         playerDropResults.push({name:p.name,color:p.color,dp:p.dp,remaining:rem});
         if(await checkWin(p.name,p.color))return;

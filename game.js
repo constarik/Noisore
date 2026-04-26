@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.23 shared game logic
+// game.js — NOISORE v11.24 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -189,7 +189,9 @@ function uvsEnd(winner){
 }
 function uvsRecordMove(col){
     if(!UVS_SESSION)return;
+    var gh='';for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++)gh+=grid[r][c]+',';
     UVS_SESSION.moves.push({tick:UVS_SESSION.moves.length,col:col,dp:currentDrop,rngPos:_uvsRng?_uvsRng.calls:0});
+    console.log('[UVS] move col='+col+' dp='+currentDrop+' rngPos='+(_uvsRng?_uvsRng.calls:0)+' grid='+gh.substring(0,20)+'..');
 }
 function uvsShowVerify(){
     if(!UVS_SESSION)return;
@@ -336,8 +338,9 @@ async function doRotation(){
     var g=document.getElementById('grid');g.style.transition='transform 1.2s ease-in-out';g.style.transform='rotate(90deg)';
     await sleep(1200);
     g.style.transition='none';g.style.transform='';
+    var _rotRng=_uvsRng?_uvsRng.calls:0;
     rotateGridCW();if(hasChannel()){fillRowIfChannel();}
-    if(UVS_SESSION)UVS_SESSION.moves.push({type:'rotate',rngPos:_uvsRng?_uvsRng.calls:0});
+    if(UVS_SESSION)UVS_SESSION.moves.push({type:'rotate',rngPos:_rotRng});
     clearPowerTags();renderGrid();
     document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';
     await sleep(400);
@@ -348,8 +351,9 @@ async function doRotationAuto(){
     var g=document.getElementById('grid');g.style.transition='transform 1.2s ease-in-out';g.style.transform='rotate(90deg)';
     await sleep(1200);
     g.style.transition='none';g.style.transform='';
+    var _rotRng=_uvsRng?_uvsRng.calls:0;
     rotateGridCW();if(hasChannel()){fillRowIfChannel();}
-    if(UVS_SESSION)UVS_SESSION.moves.push({type:'rotate',rngPos:_uvsRng?_uvsRng.calls:0});
+    if(UVS_SESSION)UVS_SESSION.moves.push({type:'rotate',rngPos:_rotRng});
     clearPowerTags();renderGrid();
     document.getElementById('rotate-ind').textContent='\u21bb rotated 90\u00b0';
     document.getElementById('rotate-ind').classList.add('show');

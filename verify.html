@@ -98,6 +98,7 @@ function gridHTML(g,sz,highlight){
   return s+'</div>';
 }
 function copyGrid(g){var c=[];for(var r=0;r<g.length;r++)c[r]=g[r].slice();return c;}
+function gridHash(g){var s='';for(var r=0;r<g.length;r++)for(var c=0;c<g[r].length;c++)s+=g[r][c]+',';return s.substring(0,20)+'..';}
 
 function simDrop(col,dp,log,moveIdx){
   var power=dp,c=col,path=[];
@@ -168,12 +169,15 @@ function doReplay(){
     if(isRich){
       col=moves[m][0];dp=moves[m][1];var rngPos=moves[m][2];
       // Fast-forward RNG to match game state
+      var before=_uvsRng.calls;
       while(_uvsRng.calls<rngPos)_uvsRng.nextUint32();
-      if(col===-1){rotateGridCW();fillRowIfChannel();log.push('<span class="log-rot">rotate CW [rng:'+rngPos+']</span>');continue;}
+      if(col===-1){rotateGridCW();fillRowIfChannel();log.push('<span class="log-rot">rotate CW [rng:'+rngPos+' grid='+gridHash(grid)+']</span>');continue;}
+      log.push('<span class="log-grid">[rng:'+before+'\u2192'+rngPos+' ff:'+(rngPos-before)+']</span>');
     }else{
       col=moves[m];dp=currentDp;
     }
     simDrop(col,dp,log,m);
+    log.push('<span class="log-grid">[after drop: rng='+_uvsRng.calls+' grid='+gridHash(grid)+']</span>');
     if(hasChannel()){
       winner='CHANNEL at move '+(m+1);
       log.push('<span class="log-ch">★ CHANNEL FOUND after move '+(m+1)+'!</span>');

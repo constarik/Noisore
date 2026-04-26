@@ -1,4 +1,4 @@
-// game.js — NOISORE v11.25 shared game logic
+// game.js — NOISORE v11.26 shared game logic
 requireEngine(1);
 var CFG={mode:'solo',gridSize:6,rotate:true,stake:0,numBots:2,fighter:'DEEP',bets:{}};
 var BOT_POOL=[
@@ -240,7 +240,7 @@ function startGame(){
         document.getElementById('col-btns').style.display='none';
         DROP_COST=CFG.stake>0?CFG.stake:1;
     }else{
-        BOTS=BOT_POOL.slice().sort(function(){return gameRng()-0.5;}).slice(0,CFG.numBots);
+        BOTS=BOT_POOL.slice().sort(function(){return Math.random()-0.5;}).slice(0,CFG.numBots);
         document.getElementById('pool-area-wrap').style.display='flex';
         document.getElementById('game-mode-label').textContent='SOIRON';
         document.getElementById('col-btns').style.display='grid';
@@ -265,7 +265,7 @@ var playerSpent={};
 var TAG_POS=[{top:'1px',left:'2px'},{top:'1px',right:'2px'},{bottom:'1px',left:'2px'},{bottom:'1px',right:'2px'},{top:'1px',left:'50%',tx:'-50%'},{bottom:'1px',left:'50%',tx:'-50%'},{top:'50%',left:'1px',ty:'-50%'},{top:'50%',right:'1px',ty:'-50%'},{top:'30%',left:'2px'},{top:'30%',right:'2px'},{bottom:'30%',left:'2px'},{bottom:'30%',right:'2px'}];
 function randH(){return 1+Math.floor(gameRng()*MAX_H);}
 function initGrid(){grid=[];for(var r=0;r<ROWS;r++){grid[r]=[];for(var c=0;c<COLS;c++)grid[r][c]=randH();}}
-function newRound(){clearPowerTags();initGrid();uvsStart();pool=0;dropNum=0;roundNum++;playerDropResults=[];playerSpent={};document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
+function newRound(){clearPowerTags();uvsStart();initGrid();pool=0;dropNum=0;roundNum++;playerDropResults=[];playerSpent={};document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();rollDrop();setColBtnsDisabled(false);}
 function initGame(){initGrid();pool=0;balance=100;dropNum=0;roundNum=1;animating=false;updateUI();renderGrid();renderColBtns();rollDrop();}
 function stoneClip(r,c){
     var s=((r*7+c*13+grid[r][c]*3+r*r*5+c*c*11)&0xFFFF);
@@ -510,7 +510,7 @@ async function betRound(){
         resetPlayerStates();
     }
 }
-function newBetRound(){clearPowerTags();initGrid();uvsStart();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();
+function newBetRound(){clearPowerTags();uvsStart();initGrid();pool=0;dropNum=0;roundNum++;document.getElementById('players-list').innerHTML='';updateUI();renderGrid();fitGrid();
     document.getElementById('game').style.display='none';
     document.getElementById('lobby').style.display='block';
     unfitGrid();

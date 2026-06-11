@@ -14,7 +14,7 @@ var MP = {
   tick: 0,
   dropPower: 0,
   moveSent: false,
-  SERVER: 'wss://registrar-server.onrender.com',
+  SERVER: 'wss://registrar.uncloned.work',
   active: false,
   countdown: 0,
   countdownTimer: null,
